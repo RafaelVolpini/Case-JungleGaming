@@ -1,10 +1,11 @@
-import axios, { isAxiosError } from 'axios'
+import axios, { isAxiosError, type AxiosResponse } from 'axios'
 
 import { notifySessionExpired } from '@/lib/auth/expiry'
 import { readToken } from '@/lib/auth/token'
 import { getVisitorId } from '@/lib/auth/visitor'
 
-import { toApiRequestError } from './errors'
+import { ApiRequestError, NETWORK_MESSAGE, toApiRequestError } from './errors'
+import { notifyApiUnreachable } from './unreachable'
 
 const REQUEST_TIMEOUT_MS = 8000
 const CREDENTIAL_ROUTES = ['/auth/login', '/auth/register']
@@ -27,17 +28,21 @@ function isCredentialRoute(error: unknown): boolean {
   return CREDENTIAL_ROUTES.some((route) => url.startsWith(route))
 }
 
-http.interceptors.response.use(
-  (response) => response,
-  (error: unknown) => {
-    const failure = toApiRequestError(error)
-    if (
-      failure.code === 'UNAUTHENTICATED' &&
-      carriedCredentials(error) &&
-      !isCredentialRoute(error)
-    ) {
-      notifySessionExpired()
-    }
-    return Promise.reject(failure)
-  },
-)
+function rejectHtml(response: AxiosResponse): AxiosResponse {
+  const type = String(response.headers['content-type'] ?? '')
+  if (!type.includes('text/html')) return response
+  notifyApiUnreachable()
+  throw new ApiRequestError({ kind: 'network', message: NETWORK_MESSAGE })
+}
+
+http.interceptors.response.use(rejectHtml, (error: unknown) => {
+  const failure = toApiRequestError(error)
+  if (
+    failure.code === 'UNAUTHENTICATED' &&
+    carriedCredentials(error) &&
+    !isCredentialRoute(error)
+  ) {
+    notifySessionExpired()
+  }
+  return Promise.reject(failure)
+})

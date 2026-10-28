@@ -30,7 +30,7 @@ export class ApiRequestError extends Error {
   }
 }
 
-const NETWORK_MESSAGE = 'Não foi possível conectar. Verifique sua conexão e tente novamente.'
+export const NETWORK_MESSAGE = 'Não foi possível conectar. Verifique sua conexão e tente novamente.'
 const TIMEOUT_MESSAGE = 'A solicitação demorou demais para responder. Tente novamente.'
 const GENERIC_MESSAGE = 'Algo deu errado. Tente novamente.'
 

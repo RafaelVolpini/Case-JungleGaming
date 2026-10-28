@@ -7,6 +7,7 @@ import { cartHandlers } from './handlers/cart'
 import { devHandlers } from './handlers/dev'
 import { devNftHandlers } from './handlers/dev-nft'
 import { favoriteHandlers } from './handlers/favorites'
+import { healthHandlers } from './handlers/health'
 import { nftHandlers } from './handlers/nfts'
 import { orderHandlers } from './handlers/orders'
 import { profileHandlers } from './handlers/profile'
@@ -15,6 +16,7 @@ import { walletConnectionHandlers } from './handlers/wallet-connection'
 import { walletHandlers } from './handlers/wallets'
 import { loadScenario } from './scenarios/state'
 import { createSocketGateway, type SocketGatewayOptions } from './socket/gateway'
+import { guardMockWorker } from './worker-guard'
 
 export async function startMockWorker(options: SocketGatewayOptions = {}) {
   await prepareSeed()
@@ -24,6 +26,7 @@ export async function startMockWorker(options: SocketGatewayOptions = {}) {
   const worker = setupWorker(
     ...devHandlers,
     ...devNftHandlers,
+    ...healthHandlers,
     ...authHandlers,
     ...nftHandlers,
     ...favoriteHandlers,
@@ -37,6 +40,7 @@ export async function startMockWorker(options: SocketGatewayOptions = {}) {
   )
 
   await worker.start({ onUnhandledRequest: 'bypass', quiet: true })
+  guardMockWorker()
 
   return { seeded, scenario }
 }
