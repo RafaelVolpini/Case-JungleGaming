@@ -1,12 +1,18 @@
-import { createRouter } from '@tanstack/react-router'
+import type { QueryClient } from '@tanstack/react-query'
+import { createRouter, parseSearchWith, stringifySearchWith } from '@tanstack/react-router'
 
+import { NotFoundScreen } from '@/components/feedback/not-found-screen'
 import { routeTree } from '@/routeTree.gen'
 
-export function createAppRouter() {
+export function createAppRouter(queryClient: QueryClient) {
   return createRouter({
     routeTree,
+    context: { queryClient },
     defaultPreload: 'intent',
     scrollRestoration: true,
+    parseSearch: parseSearchWith((value) => value),
+    stringifySearch: stringifySearchWith((value) => String(value)),
+    defaultNotFoundComponent: NotFoundScreen,
   })
 }
 

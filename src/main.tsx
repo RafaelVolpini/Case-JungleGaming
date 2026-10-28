@@ -1,8 +1,8 @@
-import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
+import { AppProviders } from '@/app/providers'
 import { createAppRouter } from '@/app/router'
 import '@/app/styles/globals.css'
 import { createQueryClient } from '@/lib/query/client'
@@ -18,11 +18,14 @@ function render() {
   const rootElement = document.getElementById('root')
   if (!rootElement) throw new Error('Root element #root not found')
 
+  const queryClient = createQueryClient()
+  const router = createAppRouter(queryClient)
+
   createRoot(rootElement).render(
     <StrictMode>
-      <QueryClientProvider client={createQueryClient()}>
-        <RouterProvider router={createAppRouter()} />
-      </QueryClientProvider>
+      <AppProviders queryClient={queryClient}>
+        <RouterProvider router={router} />
+      </AppProviders>
     </StrictMode>,
   )
 }

@@ -122,6 +122,8 @@ ping timeout. Serve de base para os testes E2E de tempo real.
 | Cor de sucesso | Adicionado `#5C9E6B` | Necessária para pedido confirmado; ausente no Figma |
 | Hover de botão | Adicionado `#C07A3C` | Ausente no Figma |
 | Surface elevada | Adicionado `#2F1D17` | Para estados de hover/accent do shadcn |
+| Fonte | Roboto Mono em vez de Space Mono | A spec gerada a partir dos screenshots indica Space Mono, mas os glifos do Figma (`r` sem pé, `M` com vértice na metade da altura, `c` de terminais retos) correspondem a Roboto Mono; confirmado renderizando as candidatas ao lado do recorte em resolução original |
+| Container | 1200 px centralizado | A spec fala em padding lateral de 80 px; a medição dos screenshots (2880 px) mostra o conteúdo começando em x=120 em um viewport de 1440 |
 | Separador decimal | Ponto em todos os valores | O Figma alterna entre `1.19 ETH` nos cards e `0,02 - 12,30 ETH` no filtro. ETH é escrito com ponto mundialmente; usar vírgula só no filtro seria inconsistência replicada |
 
 Todos mantêm a família de matiz da paleta e estão marcados em comentário no

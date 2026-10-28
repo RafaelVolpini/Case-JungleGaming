@@ -9,54 +9,230 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShellRouteImport } from './routes/_shell'
+import { Route as ShellIndexRouteImport } from './routes/_shell/index'
+import { Route as ShellAuthedRouteImport } from './routes/_shell/_authed'
+import { Route as ShellCarrinhoRouteImport } from './routes/_shell/carrinho'
+import { Route as ShellCriarContaRouteImport } from './routes/_shell/criar-conta'
+import { Route as ShellEntrarRouteImport } from './routes/_shell/entrar'
 import { Route as SpikeRealtimeRouteImport } from './routes/spike.realtime'
+import { Route as ShellAuthedFavoritosRouteImport } from './routes/_shell/_authed/favoritos'
+import { Route as ShellAuthedPagamentoRouteImport } from './routes/_shell/_authed/pagamento'
+import { Route as ShellAuthedPerfilRouteImport } from './routes/_shell/_authed/perfil'
+import { Route as ShellNftSlugRouteImport } from './routes/_shell/nft.$slug'
+import { Route as ShellAuthedPedidoOrderIdRouteImport } from './routes/_shell/_authed/pedido.$orderId'
+import { Route as ShellAuthedPerfilIndexRouteImport } from './routes/_shell/_authed/perfil.index'
+import { Route as ShellAuthedPerfilCarteirasRouteImport } from './routes/_shell/_authed/perfil.carteiras'
 
-const IndexRoute = IndexRouteImport.update({
+const ShellRoute = ShellRouteImport.update({
+  id: '/_shell',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShellIndexRoute = ShellIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellAuthedRoute = ShellAuthedRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellCarrinhoRoute = ShellCarrinhoRouteImport.update({
+  id: '/carrinho',
+  path: '/carrinho',
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellCriarContaRoute = ShellCriarContaRouteImport.update({
+  id: '/criar-conta',
+  path: '/criar-conta',
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellEntrarRoute = ShellEntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => ShellRoute,
 } as any)
 const SpikeRealtimeRoute = SpikeRealtimeRouteImport.update({
   id: '/spike/realtime',
   path: '/spike/realtime',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShellAuthedFavoritosRoute = ShellAuthedFavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => ShellAuthedRoute,
+} as any)
+const ShellAuthedPagamentoRoute = ShellAuthedPagamentoRouteImport.update({
+  id: '/pagamento',
+  path: '/pagamento',
+  getParentRoute: () => ShellAuthedRoute,
+} as any)
+const ShellAuthedPerfilRoute = ShellAuthedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => ShellAuthedRoute,
+} as any)
+const ShellNftSlugRoute = ShellNftSlugRouteImport.update({
+  id: '/nft/$slug',
+  path: '/nft/$slug',
+  getParentRoute: () => ShellRoute,
+} as any)
+const ShellAuthedPedidoOrderIdRoute =
+  ShellAuthedPedidoOrderIdRouteImport.update({
+    id: '/pedido/$orderId',
+    path: '/pedido/$orderId',
+    getParentRoute: () => ShellAuthedRoute,
+  } as any)
+const ShellAuthedPerfilIndexRoute = ShellAuthedPerfilIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ShellAuthedPerfilRoute,
+} as any)
+const ShellAuthedPerfilCarteirasRoute =
+  ShellAuthedPerfilCarteirasRouteImport.update({
+    id: '/carteiras',
+    path: '/carteiras',
+    getParentRoute: () => ShellAuthedPerfilRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof ShellIndexRoute
+  '/carrinho': typeof ShellCarrinhoRoute
+  '/criar-conta': typeof ShellCriarContaRoute
+  '/entrar': typeof ShellEntrarRoute
   '/spike/realtime': typeof SpikeRealtimeRoute
+  '/favoritos': typeof ShellAuthedFavoritosRoute
+  '/pagamento': typeof ShellAuthedPagamentoRoute
+  '/perfil': typeof ShellAuthedPerfilRouteWithChildren
+  '/nft/$slug': typeof ShellNftSlugRoute
+  '/pedido/$orderId': typeof ShellAuthedPedidoOrderIdRoute
+  '/perfil/carteiras': typeof ShellAuthedPerfilCarteirasRoute
+  '/perfil/': typeof ShellAuthedPerfilIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof ShellIndexRoute
+  '/carrinho': typeof ShellCarrinhoRoute
+  '/criar-conta': typeof ShellCriarContaRoute
+  '/entrar': typeof ShellEntrarRoute
   '/spike/realtime': typeof SpikeRealtimeRoute
+  '/favoritos': typeof ShellAuthedFavoritosRoute
+  '/pagamento': typeof ShellAuthedPagamentoRoute
+  '/nft/$slug': typeof ShellNftSlugRoute
+  '/pedido/$orderId': typeof ShellAuthedPedidoOrderIdRoute
+  '/perfil/carteiras': typeof ShellAuthedPerfilCarteirasRoute
+  '/perfil': typeof ShellAuthedPerfilIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_shell': typeof ShellRouteWithChildren
+  '/_shell/_authed': typeof ShellAuthedRouteWithChildren
+  '/_shell/carrinho': typeof ShellCarrinhoRoute
+  '/_shell/criar-conta': typeof ShellCriarContaRoute
+  '/_shell/entrar': typeof ShellEntrarRoute
   '/spike/realtime': typeof SpikeRealtimeRoute
+  '/_shell/': typeof ShellIndexRoute
+  '/_shell/_authed/favoritos': typeof ShellAuthedFavoritosRoute
+  '/_shell/_authed/pagamento': typeof ShellAuthedPagamentoRoute
+  '/_shell/_authed/perfil': typeof ShellAuthedPerfilRouteWithChildren
+  '/_shell/nft/$slug': typeof ShellNftSlugRoute
+  '/_shell/_authed/pedido/$orderId': typeof ShellAuthedPedidoOrderIdRoute
+  '/_shell/_authed/perfil/carteiras': typeof ShellAuthedPerfilCarteirasRoute
+  '/_shell/_authed/perfil/': typeof ShellAuthedPerfilIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/spike/realtime'
+  fullPaths:
+    | '/'
+    | '/carrinho'
+    | '/criar-conta'
+    | '/entrar'
+    | '/spike/realtime'
+    | '/favoritos'
+    | '/pagamento'
+    | '/perfil'
+    | '/nft/$slug'
+    | '/pedido/$orderId'
+    | '/perfil/carteiras'
+    | '/perfil/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/spike/realtime'
-  id: '__root__' | '/' | '/spike/realtime'
+  to:
+    | '/'
+    | '/carrinho'
+    | '/criar-conta'
+    | '/entrar'
+    | '/spike/realtime'
+    | '/favoritos'
+    | '/pagamento'
+    | '/nft/$slug'
+    | '/pedido/$orderId'
+    | '/perfil/carteiras'
+    | '/perfil'
+  id:
+    | '__root__'
+    | '/_shell'
+    | '/_shell/_authed'
+    | '/_shell/carrinho'
+    | '/_shell/criar-conta'
+    | '/_shell/entrar'
+    | '/spike/realtime'
+    | '/_shell/'
+    | '/_shell/_authed/favoritos'
+    | '/_shell/_authed/pagamento'
+    | '/_shell/_authed/perfil'
+    | '/_shell/nft/$slug'
+    | '/_shell/_authed/pedido/$orderId'
+    | '/_shell/_authed/perfil/carteiras'
+    | '/_shell/_authed/perfil/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  ShellRoute: typeof ShellRouteWithChildren
   SpikeRealtimeRoute: typeof SpikeRealtimeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_shell': {
+      id: '/_shell'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ShellRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_shell/': {
+      id: '/_shell/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof ShellIndexRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/_authed': {
+      id: '/_shell/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ShellAuthedRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/carrinho': {
+      id: '/_shell/carrinho'
+      path: '/carrinho'
+      fullPath: '/carrinho'
+      preLoaderRoute: typeof ShellCarrinhoRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/criar-conta': {
+      id: '/_shell/criar-conta'
+      path: '/criar-conta'
+      fullPath: '/criar-conta'
+      preLoaderRoute: typeof ShellCriarContaRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/entrar': {
+      id: '/_shell/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof ShellEntrarRouteImport
+      parentRoute: typeof ShellRoute
     }
     '/spike/realtime': {
       id: '/spike/realtime'
@@ -65,11 +241,111 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpikeRealtimeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_shell/_authed/favoritos': {
+      id: '/_shell/_authed/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof ShellAuthedFavoritosRouteImport
+      parentRoute: typeof ShellAuthedRoute
+    }
+    '/_shell/_authed/pagamento': {
+      id: '/_shell/_authed/pagamento'
+      path: '/pagamento'
+      fullPath: '/pagamento'
+      preLoaderRoute: typeof ShellAuthedPagamentoRouteImport
+      parentRoute: typeof ShellAuthedRoute
+    }
+    '/_shell/_authed/perfil': {
+      id: '/_shell/_authed/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof ShellAuthedPerfilRouteImport
+      parentRoute: typeof ShellAuthedRoute
+    }
+    '/_shell/nft/$slug': {
+      id: '/_shell/nft/$slug'
+      path: '/nft/$slug'
+      fullPath: '/nft/$slug'
+      preLoaderRoute: typeof ShellNftSlugRouteImport
+      parentRoute: typeof ShellRoute
+    }
+    '/_shell/_authed/pedido/$orderId': {
+      id: '/_shell/_authed/pedido/$orderId'
+      path: '/pedido/$orderId'
+      fullPath: '/pedido/$orderId'
+      preLoaderRoute: typeof ShellAuthedPedidoOrderIdRouteImport
+      parentRoute: typeof ShellAuthedRoute
+    }
+    '/_shell/_authed/perfil/': {
+      id: '/_shell/_authed/perfil/'
+      path: '/'
+      fullPath: '/perfil/'
+      preLoaderRoute: typeof ShellAuthedPerfilIndexRouteImport
+      parentRoute: typeof ShellAuthedPerfilRoute
+    }
+    '/_shell/_authed/perfil/carteiras': {
+      id: '/_shell/_authed/perfil/carteiras'
+      path: '/carteiras'
+      fullPath: '/perfil/carteiras'
+      preLoaderRoute: typeof ShellAuthedPerfilCarteirasRouteImport
+      parentRoute: typeof ShellAuthedPerfilRoute
+    }
   }
 }
 
+interface ShellAuthedPerfilRouteChildren {
+  ShellAuthedPerfilCarteirasRoute: typeof ShellAuthedPerfilCarteirasRoute
+  ShellAuthedPerfilIndexRoute: typeof ShellAuthedPerfilIndexRoute
+}
+
+const ShellAuthedPerfilRouteChildren: ShellAuthedPerfilRouteChildren = {
+  ShellAuthedPerfilCarteirasRoute: ShellAuthedPerfilCarteirasRoute,
+  ShellAuthedPerfilIndexRoute: ShellAuthedPerfilIndexRoute,
+}
+
+const ShellAuthedPerfilRouteWithChildren =
+  ShellAuthedPerfilRoute._addFileChildren(ShellAuthedPerfilRouteChildren)
+
+interface ShellAuthedRouteChildren {
+  ShellAuthedFavoritosRoute: typeof ShellAuthedFavoritosRoute
+  ShellAuthedPagamentoRoute: typeof ShellAuthedPagamentoRoute
+  ShellAuthedPerfilRoute: typeof ShellAuthedPerfilRouteWithChildren
+  ShellAuthedPedidoOrderIdRoute: typeof ShellAuthedPedidoOrderIdRoute
+}
+
+const ShellAuthedRouteChildren: ShellAuthedRouteChildren = {
+  ShellAuthedFavoritosRoute: ShellAuthedFavoritosRoute,
+  ShellAuthedPagamentoRoute: ShellAuthedPagamentoRoute,
+  ShellAuthedPerfilRoute: ShellAuthedPerfilRouteWithChildren,
+  ShellAuthedPedidoOrderIdRoute: ShellAuthedPedidoOrderIdRoute,
+}
+
+const ShellAuthedRouteWithChildren = ShellAuthedRoute._addFileChildren(
+  ShellAuthedRouteChildren,
+)
+
+interface ShellRouteChildren {
+  ShellAuthedRoute: typeof ShellAuthedRouteWithChildren
+  ShellCarrinhoRoute: typeof ShellCarrinhoRoute
+  ShellCriarContaRoute: typeof ShellCriarContaRoute
+  ShellEntrarRoute: typeof ShellEntrarRoute
+  ShellIndexRoute: typeof ShellIndexRoute
+  ShellNftSlugRoute: typeof ShellNftSlugRoute
+}
+
+const ShellRouteChildren: ShellRouteChildren = {
+  ShellAuthedRoute: ShellAuthedRouteWithChildren,
+  ShellCarrinhoRoute: ShellCarrinhoRoute,
+  ShellCriarContaRoute: ShellCriarContaRoute,
+  ShellEntrarRoute: ShellEntrarRoute,
+  ShellIndexRoute: ShellIndexRoute,
+  ShellNftSlugRoute: ShellNftSlugRoute,
+}
+
+const ShellRouteWithChildren = ShellRoute._addFileChildren(ShellRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  ShellRoute: ShellRouteWithChildren,
   SpikeRealtimeRoute: SpikeRealtimeRoute,
 }
 export const routeTree = rootRouteImport

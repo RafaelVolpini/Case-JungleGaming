@@ -67,3 +67,6 @@ export const updateProfileSchema = z.object({
   avatarEmoji: z.string().min(1),
 })
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>
+
+export const authResponseSchema = sessionSchema.extend({ token: z.string() })
+export type AuthResponse = z.infer<typeof authResponseSchema>

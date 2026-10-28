@@ -10,6 +10,8 @@
   --kurio-sand: #cfb28c;
   --kurio-cream: #f5f1eb;
   --kurio-stone: #8a7a68;
+  --kurio-orange-light: #e89b55;
+  --kurio-brown: #38220f;
 
   --kurio-surface-raised: #2f1d17;
   --kurio-orange-hover: #c07a3c;
@@ -75,9 +77,11 @@
   --color-success: var(--kurio-success);
   --color-warning: var(--kurio-warning);
   --color-primary-hover: var(--kurio-orange-hover);
+  --color-primary-light: var(--kurio-orange-light);
+  --color-brown: var(--kurio-brown);
 
-  --font-sans: 'Space Mono', 'IBM Plex Mono', ui-monospace, monospace;
-  --font-mono: 'Space Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --font-sans: 'Roboto Mono', ui-monospace, monospace;
+  --font-mono: 'Roboto Mono', ui-monospace, monospace;
 
   --text-hero: 3rem;
   --text-hero--line-height: 1.1;
@@ -138,5 +142,20 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@utility page-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1200px;
+  padding-inline: 1rem;
+
+  @media (min-width: 768px) {
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: 1248px) {
+    padding-inline: 0;
   }
 }
