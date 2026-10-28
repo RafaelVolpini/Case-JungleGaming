@@ -4,12 +4,16 @@ import { Heart, House, ScanLine, ShoppingCart, UserRound } from 'lucide-react'
 import { UnavailableAction } from '@/components/shared/unavailable-action'
 import { useCartCount } from '@/features/cart/hooks/use-cart'
 
+import { useTabBarVisible } from './use-tab-bar-visible'
+
 const TAB = 'text-foreground grid h-full place-items-center'
 const ACTIVE = { className: 'text-primary-light' }
 const ICON = 'size-[22px] fill-current'
 
 export function MobileTabBar() {
   const count = useCartCount()
+  const visible = useTabBarVisible()
+  if (!visible) return null
 
   return (
     <nav

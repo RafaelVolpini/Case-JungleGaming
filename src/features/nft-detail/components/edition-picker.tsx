@@ -7,9 +7,10 @@ type EditionPickerProps = {
   editions: Edition[]
   value: string
   onChange: (editionId: string) => void
+  itemClassName?: string
 }
 
-export function EditionPicker({ editions, value, onChange }: EditionPickerProps) {
+export function EditionPicker({ editions, value, onChange, itemClassName }: EditionPickerProps) {
   return (
     <RadioGroupPrimitive.Root
       aria-label="Edição"
@@ -29,6 +30,7 @@ export function EditionPicker({ editions, value, onChange }: EditionPickerProps)
               'text-cream h-7 rounded-full border border-[#3a2210] px-1.5 text-[13px] transition-colors outline-none',
               'focus-visible:ring-ring focus-visible:ring-2 data-[state=checked]:border-primary data-[state=checked]:text-primary-light data-[state=checked]:border-[1.5px]',
               'hover:border-primary/60 disabled:cursor-not-allowed disabled:line-through disabled:opacity-40',
+              itemClassName,
             )}
           >
             {edition.label}

@@ -1,10 +1,15 @@
 import type { ReactNode } from 'react'
 
+import { cn } from '@/lib/utils'
+
 import { MobileTabBar } from './mobile-tab-bar'
 import { SiteFooter } from './footer/site-footer'
 import { SiteHeader } from './header/site-header'
+import { useTabBarVisible } from './use-tab-bar-visible'
 
 export function SiteShell({ children }: { children: ReactNode }) {
+  const tabBarVisible = useTabBarVisible()
+
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -14,7 +19,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
         Pular para o conteúdo
       </a>
       <SiteHeader />
-      <main id="conteudo" className="flex-1 pb-28 outline-none md:pb-0" tabIndex={-1}>
+      <main
+        id="conteudo"
+        className={cn('flex-1 outline-none md:pb-0', tabBarVisible && 'pb-28')}
+        tabIndex={-1}
+      >
         {children}
       </main>
       <SiteFooter />

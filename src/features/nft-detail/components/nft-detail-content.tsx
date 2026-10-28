@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
-import type { Edition, NftDetail } from '@/contracts/nft'
+import type { NftDetail } from '@/contracts/nft'
+
+import { pickDefaultEdition } from '../lib/default-edition'
 
 import { DetailTabs } from './detail-tabs'
 import { EditionPicker } from './edition-picker'
@@ -9,16 +11,6 @@ import { NftMetadata } from './nft-metadata'
 import { ProductSummary } from './product-summary'
 import { PurchaseActions } from './purchase-actions'
 import { RelatedNfts } from './related-nfts'
-
-const DEFAULT_EDITION_LABEL = '1/50'
-
-function pickDefaultEdition(editions: Edition[]): Edition {
-  return (
-    editions.find((edition) => edition.label === DEFAULT_EDITION_LABEL && edition.available > 0) ??
-    editions.find((edition) => edition.available > 0) ??
-    editions[0]!
-  )
-}
 
 export function NftDetailContent({ nft }: { nft: NftDetail }) {
   const [editionId, setEditionId] = useState(() => pickDefaultEdition(nft.editions).id)
