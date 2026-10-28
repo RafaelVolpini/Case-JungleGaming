@@ -25,7 +25,7 @@ export function NewsletterForm() {
           id={inputId}
           type="email"
           placeholder={NEWSLETTER.placeholder}
-          className="bg-brown placeholder:text-foreground/75 text-foreground min-w-0 flex-1 px-3 text-sm outline-none focus-visible:ring-primary focus-visible:ring-1"
+          className="bg-brown placeholder:text-placeholder text-foreground min-w-0 flex-1 px-3 text-sm outline-none focus-visible:ring-primary focus-visible:ring-1"
         />
         <button
           type="submit"

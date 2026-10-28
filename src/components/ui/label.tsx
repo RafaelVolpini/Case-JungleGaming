@@ -14,7 +14,7 @@ export function Label({ className, required, children, ...props }: LabelProps) {
     >
       {children}
       {required && (
-        <span aria-hidden="true" className="text-primary">
+        <span aria-hidden="true" className="text-asterisk">
           *
         </span>
       )}

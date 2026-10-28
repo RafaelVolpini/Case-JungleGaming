@@ -12,6 +12,9 @@
   --kurio-stone: #8a7a68;
   --kurio-orange-light: #e89b55;
   --kurio-brown: #38220f;
+  --kurio-asterisk: #f0805f;
+  --kurio-field-border: #3f2319;
+  --kurio-placeholder: #b39463;
 
   --kurio-surface-raised: #2f1d17;
   --kurio-orange-hover: #c07a3c;
@@ -44,7 +47,7 @@
   --destructive-foreground: var(--kurio-cream);
 
   --border: color-mix(in srgb, var(--kurio-orange) 25%, transparent);
-  --input: color-mix(in srgb, var(--kurio-orange) 25%, transparent);
+  --input: var(--kurio-field-border);
   --ring: var(--kurio-orange);
 
   --radius: 0.5rem;
@@ -79,6 +82,8 @@
   --color-primary-hover: var(--kurio-orange-hover);
   --color-primary-light: var(--kurio-orange-light);
   --color-brown: var(--kurio-brown);
+  --color-asterisk: var(--kurio-asterisk);
+  --color-placeholder: var(--kurio-placeholder);
 
   --font-sans: 'Roboto Mono', ui-monospace, monospace;
   --font-mono: 'Roboto Mono', ui-monospace, monospace;

@@ -30,7 +30,7 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         fieldClassName,
-        'flex h-[52px] items-center justify-between gap-2 whitespace-nowrap md:h-12',
+        'flex h-[52px] items-center justify-between gap-2 whitespace-nowrap md:h-10',
         'data-[placeholder]:text-muted-foreground *:data-[slot=select-value]:line-clamp-1',
         '[&_svg]:pointer-events-none [&_svg]:shrink-0',
         className,

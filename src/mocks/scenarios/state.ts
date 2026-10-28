@@ -6,10 +6,12 @@ import {
   FAILURE_MODES,
   LATENCY_PROFILES,
   PAYMENT_OUTCOMES,
+  WALLET_BEHAVIORS,
   type FailureMode,
   type LatencyProfile,
   type PaymentOutcome,
   type ScenarioConfig,
+  type WalletBehavior,
 } from './types'
 
 const STORAGE_KEY = 'kurio:mock-scenario'
@@ -28,6 +30,10 @@ function isPayment(value: string | null): value is PaymentOutcome {
   return value !== null && (PAYMENT_OUTCOMES as readonly string[]).includes(value)
 }
 
+function isWalletBehavior(value: string | null): value is WalletBehavior {
+  return value !== null && (WALLET_BEHAVIORS as readonly string[]).includes(value)
+}
+
 function applySearchParams(base: ScenarioConfig, search: string): ScenarioConfig {
   const params = new URLSearchParams(search)
   const next = { ...base }
@@ -37,6 +43,7 @@ function applySearchParams(base: ScenarioConfig, search: string): ScenarioConfig
   const failEvery = params.get('failEvery')
   const seed = params.get('seed')
   const payment = params.get('payment')
+  const wallet = params.get('wallet')
   const orderTimeout = params.get('orderTimeout')
 
   if (isLatency(latency)) next.latency = latency
@@ -45,6 +52,7 @@ function applySearchParams(base: ScenarioConfig, search: string): ScenarioConfig
   if (failEvery) next.failEvery = Math.max(1, Number(failEvery) || DEFAULT_SCENARIO.failEvery)
   if (seed) next.seed = Number(seed) || DEFAULT_SCENARIO.seed
   if (isPayment(payment)) next.payment = payment
+  if (isWalletBehavior(wallet)) next.wallet = wallet
   if (orderTimeout) next.orderTimeout = orderTimeout === '1'
   return next
 }

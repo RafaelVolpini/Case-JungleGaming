@@ -11,6 +11,7 @@ import { nftHandlers } from './handlers/nfts'
 import { orderHandlers } from './handlers/orders'
 import { profileHandlers } from './handlers/profile'
 import { quoteHandlers } from './handlers/quotes'
+import { walletConnectionHandlers } from './handlers/wallet-connection'
 import { walletHandlers } from './handlers/wallets'
 import { loadScenario } from './scenarios/state'
 import { createSocketGateway, type SocketGatewayOptions } from './socket/gateway'
@@ -31,6 +32,7 @@ export async function startMockWorker(options: SocketGatewayOptions = {}) {
     ...orderHandlers,
     ...profileHandlers,
     ...walletHandlers,
+    ...walletConnectionHandlers,
     createSocketGateway(options),
   )
 
