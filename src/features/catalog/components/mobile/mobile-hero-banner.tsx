@@ -1,22 +1,22 @@
 import { ArrowRight } from 'lucide-react'
-import { useState } from 'react'
 
 import { ArtImage } from '@/components/nft/art-image'
-import { NftImage } from '@/components/nft/nft-image'
 import { HERO_COPY_MOBILE } from '@/content/home'
 
 import { useFeatured } from '../../hooks/use-catalog-queries'
+import { useHeroRotation } from '../../hooks/use-hero-rotation'
 import { HeroDots } from '../hero/hero-dots'
+import { HeroSlides } from '../hero/hero-slides'
 
 export function MobileHeroBanner() {
   const { data } = useFeatured()
-  const [active, setActive] = useState(0)
   const slides = data?.hero ?? []
-  const current = slides[active]
+  const { active, select, hoverProps, focusProps } = useHeroRotation(slides.length)
 
   return (
     <section
       aria-labelledby="hero-title"
+      {...focusProps}
       className="relative mt-4 h-[190px] overflow-hidden rounded-[20px] bg-[#2a1b12] bg-[radial-gradient(circle_98px_at_118px_98px,rgba(214,150,96,0.2)_0_99%,transparent_100%),radial-gradient(circle_135px_at_215px_130px,rgba(214,150,96,0.1)_0_99%,transparent_100%),radial-gradient(circle_at_26%_50%,#7c5434_0%,#5a3b22_30%,#3a2615_62%,#2a1b12_100%)]"
     >
       <div className="absolute top-1.5 left-4 w-[190px]">
@@ -35,9 +35,13 @@ export function MobileHeroBanner() {
         {HERO_COPY_MOBILE.action}
         <ArrowRight className="size-[18px]" aria-hidden="true" />
       </a>
-      <div className="absolute top-[10.5px] right-4 size-[138px] overflow-hidden rounded-[18px]">
-        {current && <NftImage image={current.image} priority sizes="138px" className="size-full" />}
-      </div>
+      <HeroSlides
+        slides={slides}
+        active={active}
+        sizes="138px"
+        className="absolute top-[10.5px] right-4 size-[138px] rounded-[18px]"
+        {...hoverProps}
+      />
       <ArtImage
         art="sage"
         alt=""
@@ -48,7 +52,7 @@ export function MobileHeroBanner() {
         <HeroDots
           count={slides.length}
           active={active}
-          onSelect={setActive}
+          onSelect={select}
           dotClassName="size-[7px]"
           className="absolute bottom-[9px] left-1/2 -translate-x-1/2 gap-[17px]"
         />
