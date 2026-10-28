@@ -10,6 +10,7 @@ export function createAppRouter(queryClient: QueryClient) {
     context: { queryClient },
     defaultPreload: 'intent',
     scrollRestoration: true,
+    scrollToTopSelectors: ['[data-modal-overlay]'],
     parseSearch: parseSearchWith((value) => value),
     stringifySearch: stringifySearchWith((value) => String(value)),
     defaultNotFoundComponent: NotFoundScreen,
