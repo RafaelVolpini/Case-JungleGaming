@@ -1,3 +1,5 @@
+import { useIsDesktop } from '@/lib/use-media-query'
+
 import { CatalogGrid } from '../components/catalog-grid'
 import { CatalogToolbar } from '../components/catalog-toolbar'
 import { HeroSection } from '../components/hero/hero-section'
@@ -5,8 +7,12 @@ import { JournalSection } from '../components/journal-section'
 import { PromoCards } from '../components/promo-cards'
 import { FilterSidebar } from '../components/sidebar/filter-sidebar'
 import { Spotlight } from '../components/spotlight'
+import { MobileHomePage } from './mobile-home-page'
 
 export function HomePage() {
+  const isDesktop = useIsDesktop()
+  if (!isDesktop) return <MobileHomePage />
+
   return (
     <>
       <HeroSection />
