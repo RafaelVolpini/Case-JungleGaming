@@ -116,7 +116,7 @@ outro usuário são descartados. Detalhes, restrições do transporte e a polít
 
 ## Testes e auditoria
 
-- `npm run test:e2e`: 14 arquivos de teste cobrindo os 12 cenários do enunciado, mais responsividade e regressão visual
+- `npm run test:e2e`: 17 arquivos de teste cobrindo os 12 cenários do enunciado, mais responsividade e regressão visual
   (início, detalhe, carrinho e pagamento) em desktop 1440 e mobile 390. Relatório em `playwright-report/`.
 - `npm run lighthouse`: mediana de 3 medições por página e perfil, com relatórios HTML/JSON em `lighthouse/reports/`.
 

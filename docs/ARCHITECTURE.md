@@ -161,6 +161,11 @@ outros três. Para trocar por uma arte nativa basta substituir `assets/nft-sourc
 | Edições | O frame mobile repete `1/10`; a interface mostra as edições reais (1/1, 1/10, 1/50, ABERTA) |
 | Cabeçalho ativo | `Início` em início, acesso e perfil; `Mercado` em detalhe, carrinho, pagamento e pedido (como nos frames) |
 | Tablet | O Figma não tem frame de tablet; usa-se o layout mobile em coluna de 640 px (§11) |
+| Modais no desktop | Centralizados na vertical e reduzidos (escala mínima de 0,6) para caber inteiros na altura da janela, em vez de ficarem a 159 px do topo; abaixo da escala mínima rolam por dentro. Em 1440×900 ficam no tamanho do Figma |
+| Cadastro | O modal de acesso ganhou o convite "Novo na Kurio? Crie uma conta" / "Já tem uma conta? Entre" (o Figma só tem as abas), igual ao frame mobile |
+| Destaque da home | Ponto ativo em cor cheia com halo e os demais a 55%; o destaque avança sozinho a cada 5 s, pausa com o ponteiro sobre a imagem, com foco por teclado e com a aba oculta, e não avança com "reduzir movimento" |
+| Abas e menus no mobile | Nunca rolam para o lado: abas e menu do perfil quebram linha; as abas da home reduzem a fonte (até ~11 px em 320 px) e usam 6 px entre si; "Avaliações de colecionadores" vira "Avaliações" abaixo de 768 px |
+| Barra inferior (mobile) | Ícones 84 px afastados (Figma: 72 e 62,5 px) e gradiente de 45% (filtro) e 40% (scan) até a cor cheia, como no frame |
 
 ## 5. Camada de mocks
 
@@ -233,6 +238,7 @@ race condition na camada de query.
 | `GET\|POST /api/__mock__/scenario` | Lê ou ajusta as condições de rede |
 | `POST /api/__mock__/expire-sessions` | Expira todas as sessões na hora |
 | `GET /api/__mock__/state` | Snapshot para asserção nos testes |
+| `GET /api/__mock__/ping` | Responde JSON enquanto o worker atende a aba; usado pelo guardião do worker (§5.6) |
 | `POST /api/__mock__/nfts/:slug` | Altera preço ou disponibilidade; o evento `nft.updated` sai pelo bus |
 | `GET /api/__mock__/socket` | Quantidade de clientes Socket.IO conectados |
 | `POST /api/__mock__/socket/drop` | Derruba as conexões (o cliente reconecta) |
@@ -258,6 +264,26 @@ Senhas são guardadas como SHA-256 com salt por usuário e nunca voltam na
 resposta, nem para a própria conta. Login responde igual para conta
 inexistente e senha errada, para não transformar o formulário em um oráculo de
 contas.
+
+### 5.6 Worker do MSW encerrado pelo navegador
+
+O MSW responde pela rede através de um service worker. O worker guarda em memória a lista de abas "ativas"
+(`activeClientIds`) e, quando o navegador o encerra por inatividade (abas em segundo plano ou ociosas), essa lista se
+perde: ao acordar, o worker deixa **todas** as chamadas passarem direto para o servidor estático. No Vite (e na Vercel,
+por causa da reescrita para `index.html`) um `GET /api/nfts` passa a devolver o HTML da aplicação com status 200.
+
+O sintoma era o catálogo exibir "Não foi possível carregar o catálogo — Algo deu errado" ao filtrar: dados já em cache
+continuavam na tela, mas qualquer consulta nova (filtro, ordenação, página) falhava ao validar o HTML contra o contrato.
+Reproduz-se encerrando o worker pelo DevTools (`ServiceWorker.stopAllWorkers`) e é coberto por `mock-resilience.spec.ts`.
+
+Correção em duas pontas, sem lógica de negócio fora de `src/mocks/`:
+
+- `lib/http/client.ts`: resposta `text/html` de uma rota `/api` é tratada como falha de rede (nunca chega à
+  validação) e dispara o evento `kurio:api-unreachable`. As leituras do Query já tentam de novo (§8.3), então a segunda
+  tentativa encontra o worker restaurado.
+- `mocks/worker-guard.ts`: sobre o evento, ao focar a janela, ao voltar a aba para o primeiro plano, ao reconectar e a
+  cada 15 s com a aba visível, faz `GET /api/__mock__/ping`; se a resposta não for JSON, reenvia `MOCK_ACTIVATE` ao
+  worker, que volta a atender a aba.
 
 ## 6. Fixtures
 
@@ -455,6 +481,8 @@ lateral).
 - Mutations e eventos em tempo real anunciam por regiões `aria-live` (`sonner`, totais do carrinho, aviso de cotação).
 - Ações fora do escopo (Criadores, Aprenda, Atividade, Ofertas, Arquivos baixados, Suporte, login social, recuperar
   senha) são botões `aria-disabled` que respondem com aviso "não está disponível nesta versão"; nunca fingem sucesso.
+- O carrossel de destaques não avança sozinho com `prefers-reduced-motion`, pausa com foco visível por teclado e com a aba
+  oculta, e o ponto ativo usa `aria-current`.
 - Alvos dos indicadores de carrossel, semântica de `dl`, ordem de títulos e `aria-controls` foram auditados e
   corrigidos a partir do relatório do Lighthouse.
 
@@ -518,6 +546,9 @@ pelo plano de controle dos mocks (§5.4), sem relógios ou esperas arbitrárias.
 | `keyboard-a11y.spec.ts` | Teclado, foco em diálogos e drawers, erros associados |
 | `loading-states.spec.ts` | Skeletons, shimmer e movimento reduzido, falha e recuperação |
 | `responsive.spec.ts` | Sem overflow horizontal em 390, 768 e 1440 px |
+| `hero.spec.ts` | Ponto ativo do destaque, avanço automático e respeito a "reduzir movimento" |
+| `modal-fit.spec.ts` | Login, cadastro e recibo cabem inteiros em 1280×600; acesso ao cadastro pelo convite do login |
+| `mock-resilience.spec.ts` | Filtro por rede troca a lista; catálogo se recupera com o worker do MSW encerrado (§5.6) |
 | `visual.spec.ts` | Regressão visual de início, detalhe, carrinho e pagamento (desktop e mobile) |
 
 Baselines em `e2e/__screenshots__/{projeto}/` foram geradas no Chromium do Playwright em Windows, com
