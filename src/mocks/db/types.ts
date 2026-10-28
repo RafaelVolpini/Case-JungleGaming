@@ -8,6 +8,7 @@ export type * from './records/commerce'
 
 export type MockDb = {
   schemaVersion: number
+  fixtureRevision: string
   collections: CollectionRecord[]
   nfts: NftRecord[]
   users: UserRecord[]

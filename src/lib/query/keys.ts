@@ -8,6 +8,7 @@ export const queryKeys = {
   catalog: {
     list: (scope: string, query: CatalogQuery) => ['catalog', scope, 'list', query] as const,
     detail: (scope: string, slug: string) => ['catalog', scope, 'detail', slug] as const,
+    related: (scope: string, slug: string) => ['catalog', scope, 'related', slug] as const,
     featured: (scope: string) => ['catalog', scope, 'featured'] as const,
     collections: ['catalog', 'collections'] as const,
     networks: ['catalog', 'networks'] as const,

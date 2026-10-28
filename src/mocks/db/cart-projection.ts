@@ -33,6 +33,7 @@ export function projectCartItems(cart: CartRecord): CartItem[] {
       unitPriceEth: edition.priceEth,
       subtotalEth: multiplyEth(edition.priceEth, line.quantity),
       availableQuantity: edition.available,
+      maxQuantity: Math.min(edition.available, nft.maxPerOrder),
     })
   }
 

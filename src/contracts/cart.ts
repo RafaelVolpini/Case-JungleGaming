@@ -21,6 +21,7 @@ export const cartItemSchema = z.object({
   unitPriceEth: ethAmountSchema,
   subtotalEth: ethAmountSchema,
   availableQuantity: z.number().int().nonnegative(),
+  maxQuantity: z.number().int().nonnegative(),
 })
 export type CartItem = z.infer<typeof cartItemSchema>
 

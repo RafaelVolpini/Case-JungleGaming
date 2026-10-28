@@ -18,13 +18,13 @@ export function artAlt(nft: NftRecord): string {
 
 export function shortDescription(nft: NftRecord): string {
   const network = NETWORK_LABELS[nft.network]
-  return `Um colecionável digital finalizado à mão da coleção ${nft.series}, verificado na ${network}, com arte desbloqueável e acesso para colecionadores.`
+  return `Um colecionável digital finalizado à mão da coleção Kurio Editions, verificado na ${network}, com arte desbloqueável e acesso para colecionadores.`
 }
 
 export function storyParagraphs(nft: NftRecord): string[] {
   const network = NETWORK_LABELS[nft.network]
   return [
-    `${nft.name} é uma obra digital finalizada à mão da coleção ${nft.series}. Cada atributo fica armazenado nos metadados do token e verificado na ${network}. A obra explora identidade, movimento e luz em um mundo digital sem fronteiras.`,
+    `${nft.name} é uma obra digital finalizada à mão da coleção Kurio Editions. Cada atributo fica armazenado nos metadados do token e verificado na ${network}. A obra explora identidade, movimento e luz em um mundo digital sem fronteiras.`,
     `A propriedade inclui a arte em alta resolução, lançamentos exclusivos para colecionadores e um registro permanente de procedência registrada na rede. O criador recebe ${ROYALTY_PERCENT}% de direitos autorais nas vendas secundárias, apoiando novos trabalhos e lançamentos da comunidade.`,
   ]
 }

@@ -1,7 +1,7 @@
 import { eth } from '@/contracts/common'
 
 import { COLLECTION_SEEDS } from '../fixtures/collections'
-import { NFT_SEEDS } from '../fixtures/nfts.generated'
+import { NFT_FIXTURE_REVISION, NFT_SEEDS } from '../fixtures/nfts.generated'
 import { USER_SEEDS } from '../fixtures/users'
 import { hashPassword } from './crypto'
 import { SCHEMA_VERSION } from './store'
@@ -84,6 +84,7 @@ export function createSeed(): MockDb {
 
   return {
     schemaVersion: SCHEMA_VERSION,
+    fixtureRevision: NFT_FIXTURE_REVISION,
     collections: COLLECTION_SEEDS.map((collection) => ({ ...collection })),
     nfts,
     users: hashedUsers.map((user) => ({ ...user })),

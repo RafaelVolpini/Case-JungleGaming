@@ -6,12 +6,14 @@ import {
   networkOptionSchema,
   nftDetailSchema,
   nftListResponseSchema,
+  nftSummarySchema,
   type CatalogQuery,
   type Collection,
   type Featured,
   type NetworkOption,
   type NftDetail,
   type NftListResponse,
+  type NftSummary,
 } from '@/contracts/nft'
 import { http } from '@/lib/http/client'
 import { serializeCatalogParams } from '@/lib/url/catalog-params'
@@ -43,4 +45,9 @@ export async function fetchNetworks(signal?: AbortSignal): Promise<NetworkOption
 export async function fetchFeatured(signal?: AbortSignal): Promise<Featured> {
   const { data } = await http.get('/featured', { signal })
   return featuredSchema.parse(data)
+}
+
+export async function fetchRelatedNfts(slug: string, signal?: AbortSignal): Promise<NftSummary[]> {
+  const { data } = await http.get(`/nfts/${encodeURIComponent(slug)}/related`, { signal })
+  return z.array(nftSummarySchema).parse(data)
 }

@@ -1,5 +1,7 @@
 import { readJsonStorage, writeJsonStorage } from '@/lib/storage'
 
+import { NFT_FIXTURE_REVISION } from '../fixtures/nfts.generated'
+
 import type { MockDb } from './types'
 
 export const SCHEMA_VERSION = 2
@@ -48,7 +50,9 @@ export function nextVersion(): number {
 
 function readPersisted(): MockDb | null {
   const parsed = readJsonStorage<Partial<MockDb>>(STORAGE_KEY)
-  if (!parsed || parsed.schemaVersion !== SCHEMA_VERSION) return null
+  if (!parsed) return null
+  if (parsed.schemaVersion !== SCHEMA_VERSION) return null
+  if (parsed.fixtureRevision !== NFT_FIXTURE_REVISION) return null
   return parsed as MockDb
 }
 

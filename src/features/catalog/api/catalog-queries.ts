@@ -9,6 +9,7 @@ import {
   fetchFeatured,
   fetchNetworks,
   fetchNftDetail,
+  fetchRelatedNfts,
 } from './catalog-api'
 
 const FACET_STALE_MS = 5 * 60_000
@@ -50,5 +51,12 @@ export function featuredQueryOptions(scope: string) {
     queryKey: queryKeys.catalog.featured(scope),
     queryFn: ({ signal }) => fetchFeatured(signal),
     staleTime: FACET_STALE_MS,
+  })
+}
+
+export function relatedNftsQueryOptions(scope: string, slug: string) {
+  return queryOptions({
+    queryKey: queryKeys.catalog.related(scope, slug),
+    queryFn: ({ signal }) => fetchRelatedNfts(slug, signal),
   })
 }

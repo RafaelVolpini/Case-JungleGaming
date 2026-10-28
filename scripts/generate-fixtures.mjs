@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -124,7 +125,7 @@ const FIGMA_NFTS = [
     price: '1.39',
     art: 'sage',
     rarity: 'common',
-    series: 'Kurio Nomads',
+    series: 'Kurio Apes',
     favorites: 105,
   },
   {
@@ -133,7 +134,7 @@ const FIGMA_NFTS = [
     price: '1.79',
     art: 'ivory',
     rarity: 'rare',
-    series: 'Kurio Editions',
+    series: 'Kurio Apes',
     favorites: 142,
   },
   {
@@ -151,7 +152,7 @@ const FIGMA_NFTS = [
     price: '0.59',
     art: 'golden',
     rarity: 'common',
-    series: 'Kurio Apes',
+    series: 'Kurio Nomads',
     favorites: 70,
   },
   {
@@ -302,10 +303,16 @@ for (let i = 0; i < TOTAL; i++) {
   })
 }
 
-const output =
-  "import type { NftSeed } from './types'\n\nexport const NFT_SEEDS: NftSeed[] = " +
-  JSON.stringify(nfts, null, 2) +
-  '\n'
+const revision = createHash('sha1').update(JSON.stringify(nfts)).digest('hex').slice(0, 12)
+
+const output = [
+  "import type { NftSeed } from './types'",
+  '',
+  `export const NFT_FIXTURE_REVISION = '${revision}'`,
+  '',
+  `export const NFT_SEEDS: NftSeed[] = ${JSON.stringify(nfts, null, 2)}`,
+  '',
+].join('\n')
 
 writeFileSync(join(ROOT, 'src', 'mocks', 'fixtures', 'nfts.generated.ts'), output)
 

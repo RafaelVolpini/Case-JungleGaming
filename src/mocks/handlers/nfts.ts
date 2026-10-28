@@ -19,6 +19,7 @@ import { resolveCaller } from './identity'
 import { simulated } from './network'
 
 const NETWORKS = ['ethereum', 'polygon', 'solana'] as const
+const RELATED_LIMIT = 12
 
 export const nftHandlers = [
   http.get(
@@ -44,6 +45,25 @@ export const nftHandlers = [
       }
       const favorites = favoriteIdsFor(resolveCaller(request).user?.id ?? null)
       return HttpResponse.json(toNftDetail(nft, favorites))
+    }),
+  ),
+
+  http.get(
+    `${API}/nfts/:slug/related`,
+    simulated(({ request, params }) => {
+      const nft = findNftBySlug(String(params['slug']))
+      if (!nft) {
+        return errorResponse('NOT_FOUND', 'Este NFT não existe ou foi removido do mercado.')
+      }
+      const favorites = favoriteIdsFor(resolveCaller(request).user?.id ?? null)
+      const siblings = getDb().nfts.filter(
+        (candidate) => candidate.id !== nft.id && candidate.series === nft.series,
+      )
+      return HttpResponse.json(
+        sortNfts(siblings, 'recent')
+          .slice(0, RELATED_LIMIT)
+          .map((item) => toNftSummary(item, favorites)),
+      )
     }),
   ),
 

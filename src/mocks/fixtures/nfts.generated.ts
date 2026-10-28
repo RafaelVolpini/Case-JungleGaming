@@ -1,5 +1,7 @@
 import type { NftSeed } from './types'
 
+export const NFT_FIXTURE_REVISION = '248b84786e0e'
+
 export const NFT_SEEDS: NftSeed[] = [
   {
     "id": "nft-emerald-ape-042",
@@ -283,7 +285,7 @@ export const NFT_SEEDS: NftSeed[] = [
     "name": "Violet Nomad #314",
     "tokenId": "#314",
     "art": "sage",
-    "series": "Kurio Nomads",
+    "series": "Kurio Apes",
     "collectionId": "col-colecionaveis",
     "network": "ethereum",
     "priceEth": "1.39",
@@ -352,7 +354,7 @@ export const NFT_SEEDS: NftSeed[] = [
     "name": "Ivory Baron #088",
     "tokenId": "#088",
     "art": "ivory",
-    "series": "Kurio Editions",
+    "series": "Kurio Apes",
     "collectionId": "col-musica",
     "network": "ethereum",
     "priceEth": "1.79",
@@ -490,7 +492,7 @@ export const NFT_SEEDS: NftSeed[] = [
     "name": "Golden Echo #233",
     "tokenId": "#233",
     "art": "golden",
-    "series": "Kurio Apes",
+    "series": "Kurio Nomads",
     "collectionId": "col-arte-digital",
     "network": "polygon",
     "priceEth": "0.59",

@@ -9,6 +9,7 @@ import {
   featuredQueryOptions,
   networksQueryOptions,
   nftDetailQueryOptions,
+  relatedNftsQueryOptions,
 } from '../api/catalog-queries'
 
 export function useCatalog(query: CatalogQuery) {
@@ -32,4 +33,9 @@ export function useNetworks() {
 export function useFeatured() {
   const { scope } = useSession()
   return useQuery(featuredQueryOptions(scope))
+}
+
+export function useRelatedNfts(slug: string) {
+  const { scope } = useSession()
+  return useQuery(relatedNftsQueryOptions(scope, slug))
 }

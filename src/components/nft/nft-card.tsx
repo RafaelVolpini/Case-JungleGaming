@@ -12,10 +12,17 @@ type NftCardProps = {
   nft: NftSummary
   actions?: ReactNode
   priority?: boolean
+  compact?: boolean
   className?: string
 }
 
-export function NftCard({ nft, actions, priority = false, className }: NftCardProps) {
+export function NftCard({
+  nft,
+  actions,
+  priority = false,
+  compact = false,
+  className,
+}: NftCardProps) {
   const soldOut = nft.available === 0
 
   return (
@@ -25,7 +32,12 @@ export function NftCard({ nft, actions, priority = false, className }: NftCardPr
         params={{ slug: nft.slug }}
         className="focus-visible:ring-ring block outline-none focus-visible:ring-2"
       >
-        <div className="bg-card relative px-1 py-[25px] max-md:rounded-2xl max-md:p-1">
+        <div
+          className={cn(
+            'bg-card relative px-1 max-md:rounded-2xl max-md:p-1',
+            compact ? 'py-[22px]' : 'py-[25px]',
+          )}
+        >
           <NftImage image={nft.image} priority={priority} className="rounded-[14px]" />
           {nft.rarity === 'rare' && (
             <Badge className="absolute top-0 left-0 rounded-none rounded-br-md px-4 py-2 text-xs md:hidden">
@@ -35,20 +47,28 @@ export function NftCard({ nft, actions, priority = false, className }: NftCardPr
           {soldOut && (
             <Badge
               variant="wallet"
-              className="absolute right-3 bottom-8 max-md:right-3 max-md:bottom-3 bg-background/80"
+              className="bg-background/80 absolute right-3 bottom-8 max-md:right-3 max-md:bottom-3"
             >
               Esgotado
             </Badge>
           )}
         </div>
         <div className="mt-[8.5px] max-md:mt-3 max-md:px-2">
-          <h3 className="text-cream truncate text-[15px] leading-[22px] max-md:text-xs">
+          <h3
+            className={cn(
+              'text-cream truncate leading-[22px] max-md:text-xs',
+              compact ? 'text-sm' : 'text-[15px]',
+            )}
+          >
             {nft.name}
           </h3>
           <NftPrice
             priceEth={nft.priceEth}
             previousPriceEth={nft.previousPriceEth}
-            className="mt-[5.5px] text-lg leading-6 max-md:text-sm"
+            className={cn(
+              'leading-6 max-md:text-sm',
+              compact ? '-mt-[2.5px] text-sm' : 'mt-[5.5px] text-lg',
+            )}
           />
         </div>
       </Link>
