@@ -1,0 +1,1 @@
+export const NFT_FIXTURE_REVISION = '248b84786e0e'

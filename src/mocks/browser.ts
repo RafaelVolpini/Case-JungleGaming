@@ -24,18 +24,18 @@ export async function startMockWorker(options: SocketGatewayOptions = {}) {
   const scenario = loadScenario()
 
   const worker = setupWorker(
-    ...devHandlers,
-    ...devNftHandlers,
-    ...healthHandlers,
-    ...authHandlers,
     ...nftHandlers,
-    ...favoriteHandlers,
     ...cartHandlers,
+    ...authHandlers,
+    ...favoriteHandlers,
     ...quoteHandlers,
     ...orderHandlers,
     ...profileHandlers,
     ...walletHandlers,
     ...walletConnectionHandlers,
+    ...healthHandlers,
+    ...devHandlers,
+    ...devNftHandlers,
     createSocketGateway(options),
   )
 

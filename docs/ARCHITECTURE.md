@@ -287,8 +287,10 @@ Correção em duas pontas, sem lógica de negócio fora de `src/mocks/`:
 
 ## 6. Fixtures
 
-`npm run fixtures` regenera o catálogo a partir da seed fixa `20261027`. A saída é commitada,
-então um checkout limpo não precisa rodar o script.
+O catálogo é gerado em tempo de execução por `src/mocks/fixtures/generate-nfts.ts`, a partir da seed fixa `20261027`
+(PRNG `mulberry32`), só na primeira visita ou após o reset; visitas seguintes leem a base persistida. A saída é idêntica
+byte a byte à do antigo arquivo gerado (conferida por deep-equal na troca), e o `NFT_FIXTURE_REVISION` fica em
+`fixtures/revision.ts`. Não há mais um literal de 200 KB no bundle nem script para rodar.
 
 São 239 NFTs, 27 páginas de 9. A distribuição por coleção reproduz exatamente o sidebar do Figma
 (33, 12, 65, 39, 23, 17, 19, 13 e 18). Os nove primeiros itens, na ordem de "Listados

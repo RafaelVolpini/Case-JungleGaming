@@ -12,6 +12,7 @@ test.describe('compra completa', () => {
   test('do catálogo ao recibo confirmado @mobile', async ({ page, isMobile }) => {
     await openApp(page)
     await catalogCards(page).first().getByRole('link').first().click()
+    await expect(page).toHaveURL(/\/nft\/[^/]+$/)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     const name = (await page.getByRole('heading', { level: 1 }).innerText()).trim()
 

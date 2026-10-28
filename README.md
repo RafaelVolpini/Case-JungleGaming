@@ -34,7 +34,6 @@ A aplicação sobe em http://localhost:5173 já com os mocks ativos. Não há ba
 | `npm run test:e2e` | Playwright: compila, sobe o preview e roda desktop e mobile |
 | `npm run test:e2e:report` | Abre o relatório HTML do último teste |
 | `npm run lighthouse` | Compila e audita início e detalhe (3 medições, mobile e desktop) |
-| `npm run fixtures` | Regenera `src/mocks/fixtures/nfts.generated.ts` (determinístico) |
 | `npm run art` | Regenera as variantes otimizadas das artes de NFT |
 
 ## Variáveis de ambiente

@@ -105,6 +105,11 @@ addEventListener('fetch', function (event) {
     return
   }
 
+  const { origin, pathname } = new URL(event.request.url)
+  if (origin !== self.location.origin || !pathname.startsWith('/api/')) {
+    return
+  }
+
   // Bypass all requests when there are no active clients.
   // Prevents the self-unregistered worked from handling requests
   // after it's been terminated (still remains active until the next reload).

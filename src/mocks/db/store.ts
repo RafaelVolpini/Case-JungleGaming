@@ -1,6 +1,6 @@
 import { readJsonStorage, writeJsonStorage } from '@/lib/storage'
 
-import { NFT_FIXTURE_REVISION } from '../fixtures/nfts.generated'
+import { NFT_FIXTURE_REVISION } from '../fixtures/revision'
 
 import type { MockDb } from './types'
 
@@ -60,6 +60,16 @@ export function persist(): void {
   if (db) writeJsonStorage(STORAGE_KEY, db)
 }
 
+const PERSIST_IDLE_TIMEOUT_MS = 3000
+
+function persistWhenIdle(): void {
+  const flush = () => persist()
+  window.addEventListener('pagehide', flush, { once: true })
+  const idle = window.requestIdleCallback
+  if (idle) idle.call(window, flush, { timeout: PERSIST_IDLE_TIMEOUT_MS })
+  else setTimeout(flush, PERSIST_IDLE_TIMEOUT_MS)
+}
+
 export function mutate<T>(fn: (current: MockDb) => T, events: DbEvent[] = []): T {
   const result = fn(getDb())
   persist()
@@ -92,6 +102,7 @@ export function loadOrSeed(seed: () => MockDb): { db: MockDb; seeded: boolean } 
     return { db: persisted, seeded: false }
   }
   const fresh = seed()
-  setDb(fresh)
+  db = fresh
+  persistWhenIdle()
   return { db: fresh, seeded: true }
 }

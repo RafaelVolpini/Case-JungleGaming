@@ -12,7 +12,6 @@
     "lint": "oxlint",
     "format": "prettier --write src scripts",
     "format:check": "prettier --check src scripts",
-    "fixtures": "node scripts/generate-fixtures.mjs",
     "art": "node scripts/build-nft-art.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

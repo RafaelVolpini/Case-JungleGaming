@@ -1,13 +1,16 @@
-import { eth } from '@/contracts/common'
+import type { EthAmount } from '@/contracts/common'
 
 import { COLLECTION_SEEDS } from '../fixtures/collections'
-import { NFT_FIXTURE_REVISION, NFT_SEEDS } from '../fixtures/nfts.generated'
+import { generateNftSeeds } from '../fixtures/generate-nfts'
+import { NFT_FIXTURE_REVISION } from '../fixtures/revision'
 import { USER_SEEDS } from '../fixtures/users'
 import { hashPassword } from './crypto'
 import { SCHEMA_VERSION } from './store'
 import type { MockDb, NftRecord, UserRecord, WalletRecord } from './types'
 
 let hashedUsers: UserRecord[] | null = null
+
+const trustedEth = (value: string) => value as EthAmount
 
 export async function prepareSeed(): Promise<void> {
   hashedUsers = await Promise.all(
@@ -36,7 +39,7 @@ export function createSeed(): MockDb {
   let sequence = 0
   const nextVersion = () => (sequence += 1)
 
-  const nfts: NftRecord[] = NFT_SEEDS.map((seed) => ({
+  const nfts: NftRecord[] = generateNftSeeds().map((seed) => ({
     id: seed.id,
     slug: seed.slug,
     name: seed.name,
@@ -45,8 +48,8 @@ export function createSeed(): MockDb {
     series: seed.series,
     collectionId: seed.collectionId,
     network: seed.network,
-    priceEth: eth(seed.priceEth),
-    previousPriceEth: seed.previousPriceEth ? eth(seed.previousPriceEth) : null,
+    priceEth: trustedEth(seed.priceEth),
+    previousPriceEth: seed.previousPriceEth ? trustedEth(seed.previousPriceEth) : null,
     rarity: seed.rarity,
     editions: seed.editions.map((edition) => ({
       id: edition.id,
@@ -54,7 +57,7 @@ export function createSeed(): MockDb {
       index: edition.index,
       total: edition.total,
       available: edition.available,
-      priceEth: eth(edition.priceEth),
+      priceEth: trustedEth(edition.priceEth),
     })),
     attributes: seed.attributes,
     rating: seed.rating,
