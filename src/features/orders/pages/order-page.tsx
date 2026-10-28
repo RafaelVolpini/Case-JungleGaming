@@ -12,7 +12,6 @@ import { OrderDetails } from '../components/order-details'
 import { OrderModal } from '../components/order-modal'
 import { OrderSkeleton } from '../components/order-skeleton'
 import { useOrder } from '../hooks/use-order'
-import { orderTitle } from '../lib/order-title'
 import { clearPendingOrderId } from '../lib/pending-order'
 
 export function OrderPage({ orderId }: { orderId: string }) {
@@ -33,7 +32,7 @@ export function OrderPage({ orderId }: { orderId: string }) {
   const close = () => void navigate({ to: '/' })
 
   return (
-    <OrderModal title={status ? orderTitle(status) : 'Pedido'} onClose={close}>
+    <OrderModal title="Detalhes do pedido" onClose={close}>
       {order ? (
         <OrderDetails order={order} />
       ) : error ? (

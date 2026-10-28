@@ -54,7 +54,7 @@ export function AuthPage({ mode, redirect, expired = false }: AuthPageProps) {
 
   return (
     <AuthModal
-      title={copy.title}
+      title="Acesso à conta"
       onClose={() => router.history.replace('/')}
       className={cn(copy.height)}
     >
