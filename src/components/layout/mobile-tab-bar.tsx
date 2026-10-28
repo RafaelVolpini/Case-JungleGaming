@@ -27,16 +27,16 @@ export function MobileTabBar() {
       <UnavailableAction
         subject="O leitor de QR code"
         aria-label="Escanear QR code"
-        className="absolute top-0 left-1/2 grid size-[65px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-gradient-to-b from-[#d99a62]/90 to-[#b9773f]/90 text-white"
+        className="absolute top-0 left-1/2 grid size-[65px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-linear-to-b/srgb from-primary-glow/40 to-primary/95 text-white"
       >
         <ScanLine className="size-8" strokeWidth={1.75} aria-hidden="true" />
       </UnavailableAction>
       <div className="absolute inset-x-0 top-0 flex h-[100px] items-start pt-10">
-        <div className="ml-2.5 flex w-36">
+        <div className="ml-1 flex w-[168px]">
           <Link
             to="/"
             aria-label="Início"
-            className={`${TAB} h-8 w-[72px]`}
+            className={`${TAB} h-8 w-[84px]`}
             activeProps={ACTIVE}
             activeOptions={{ exact: true }}
           >
@@ -45,22 +45,22 @@ export function MobileTabBar() {
           <Link
             to="/favoritos"
             aria-label="Lista de interesse"
-            className={`${TAB} h-8 w-[72px]`}
+            className={`${TAB} h-8 w-[84px]`}
             activeProps={ACTIVE}
           >
             <Heart className={ICON} aria-hidden="true" />
           </Link>
         </div>
-        <div className="ml-auto mr-[19px] flex w-[125px]">
+        <div className="mr-1 ml-auto flex w-[168px]">
           <Link
             to="/carrinho"
             aria-label={`Carrinho, ${count} itens`}
-            className={`${TAB} relative h-8 w-[62.5px]`}
+            className={`${TAB} relative h-8 w-[84px]`}
             activeProps={ACTIVE}
           >
             <ShoppingCart className="size-[22px]" aria-hidden="true" />
             {count > 0 && (
-              <span className="bg-primary text-primary-foreground absolute top-0 right-2.5 grid size-4 place-items-center rounded-full text-[10px] font-bold">
+              <span className="bg-primary text-primary-foreground absolute top-0 right-[21px] grid size-4 place-items-center rounded-full text-[10px] font-bold">
                 {count}
               </span>
             )}
@@ -68,7 +68,7 @@ export function MobileTabBar() {
           <Link
             to="/perfil"
             aria-label="Perfil"
-            className={`${TAB} h-8 w-[62.5px]`}
+            className={`${TAB} h-8 w-[84px]`}
             activeProps={ACTIVE}
           >
             <UserRound className={ICON} aria-hidden="true" />

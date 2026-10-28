@@ -11,6 +11,7 @@
   --kurio-cream: #f5f1eb;
   --kurio-stone: #8a7a68;
   --kurio-orange-light: #e89b55;
+  --kurio-orange-glow: #fca85c;
   --kurio-brown: #38220f;
   --kurio-asterisk: #f0805f;
   --kurio-field-border: #3f2319;
@@ -82,6 +83,7 @@
   --color-warning: var(--kurio-warning);
   --color-primary-hover: var(--kurio-orange-hover);
   --color-primary-light: var(--kurio-orange-light);
+  --color-primary-glow: var(--kurio-orange-glow);
   --color-brown: var(--kurio-brown);
   --color-asterisk: var(--kurio-asterisk);
   --color-placeholder: var(--kurio-placeholder);

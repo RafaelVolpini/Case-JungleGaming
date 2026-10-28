@@ -37,7 +37,7 @@ export function MobileSearchBar({ onOpenFilters }: { onOpenFilters: () => void }
         type="button"
         onClick={onOpenFilters}
         aria-label="Abrir filtros"
-        className="text-background focus-visible:ring-ring grid size-[45px] shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#c4854a] to-[#a56c3c] outline-none focus-visible:ring-2"
+        className="text-background focus-visible:ring-ring grid size-[45px] shrink-0 place-items-center rounded-xl bg-linear-to-br/srgb from-primary-glow/45 to-primary outline-none focus-visible:ring-2"
       >
         <Settings2 className="size-[22px]" strokeWidth={2} aria-hidden="true" />
       </button>
