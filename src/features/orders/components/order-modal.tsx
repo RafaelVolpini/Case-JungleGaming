@@ -2,6 +2,8 @@ import { XIcon } from 'lucide-react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import type { ReactNode } from 'react'
 
+import { useFitScale } from '@/lib/use-fit-scale'
+
 type OrderModalProps = {
   title: string
   onClose: () => void
@@ -9,13 +11,17 @@ type OrderModalProps = {
 }
 
 export function OrderModal({ title, onClose, children }: OrderModalProps) {
+  const fit = useFitScale<HTMLDivElement>()
+
   return (
     <DialogPrimitive.Root open onOpenChange={(open) => !open && onClose()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="bg-background fixed inset-0 z-50" />
         <DialogPrimitive.Content
+          ref={fit.ref}
+          style={fit.style}
           aria-describedby={undefined}
-          className="bg-card fixed inset-0 z-50 flex flex-col overflow-y-auto outline-none md:inset-auto md:top-1/2 md:left-1/2 md:max-h-dvh md:w-[578px] md:-translate-x-1/2 md:-translate-y-1/2"
+          className="bg-card fixed inset-0 z-50 flex flex-col overflow-y-auto outline-none md:inset-auto md:top-1/2 md:left-1/2 md:max-h-[calc((100dvh-24px)/var(--fit))] md:w-[578px] md:-translate-x-1/2 md:-translate-y-1/2 md:scale-(--fit)"
         >
           <DialogPrimitive.Title className="sr-only">{title}</DialogPrimitive.Title>
           <DialogPrimitive.Close className="text-primary focus-visible:ring-ring absolute top-3 right-3 grid size-6 place-items-center rounded-sm outline-none focus-visible:ring-2">

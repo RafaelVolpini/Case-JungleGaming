@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 
 import { AuthIntro } from '../components/auth-intro'
 import { AuthModal } from '../components/auth-modal'
+import { AuthSwitchPrompt } from '../components/auth-switch-prompt'
 import { AuthScreen } from '../components/auth-screen'
 import { AuthTabs } from '../components/auth-tabs'
 import { LoginForm } from '../components/login-form'
@@ -23,12 +24,12 @@ const COPY = {
   login: {
     title: 'Entrar',
     intro: 'Entre para gerenciar sua carteira, coleção e perfil de criador.',
-    height: 'md:top-[160px] md:h-[600px]',
+    height: 'md:h-[600px]',
   },
   register: {
     title: 'Criar conta',
     intro: 'Crie seu perfil de colecionador e conecte uma carteira quando quiser.',
-    height: 'md:top-[158px] md:h-[656px]',
+    height: 'md:h-[656px]',
   },
 }
 
@@ -66,6 +67,7 @@ export function AuthPage({ mode, redirect, expired = false }: AuthPageProps) {
         </p>
       )}
       <div className="mx-auto mt-[24.5px] w-full max-w-[340px] px-4 md:px-0">{form}</div>
+      <AuthSwitchPrompt mode={mode} redirect={redirect} className="mt-5 mb-4 text-sm" />
     </AuthModal>
   )
 }

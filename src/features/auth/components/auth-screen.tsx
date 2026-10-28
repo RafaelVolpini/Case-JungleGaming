@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { AuthSwitchPrompt } from './auth-switch-prompt'
+
 type AuthScreenProps = {
   mode: 'login' | 'register'
   redirect?: string
@@ -10,24 +12,9 @@ type AuthScreenProps = {
   children: ReactNode
 }
 
-const COPY = {
-  login: {
-    title: 'Entrar',
-    prompt: 'Novo na Kurio?',
-    action: 'Crie uma conta',
-    to: '/criar-conta',
-  },
-  register: {
-    title: 'Criar perfil de colecionador',
-    prompt: 'Já tem uma conta?',
-    action: 'Entre',
-    to: '/entrar',
-  },
-} as const
+const TITLES = { login: 'Entrar', register: 'Criar perfil de colecionador' } as const
 
 export function AuthScreen({ mode, redirect, expired, children }: AuthScreenProps) {
-  const copy = COPY[mode]
-
   return (
     <div className="bg-background mx-auto min-h-dvh max-w-[460px] px-7 pt-[130px] pb-10">
       <Link
@@ -43,7 +30,7 @@ export function AuthScreen({ mode, redirect, expired, children }: AuthScreenProp
           mode === 'login' ? 'text-xl' : 'text-lg',
         )}
       >
-        {copy.title}
+        {TITLES[mode]}
       </h1>
       {expired && mode === 'login' && (
         <p role="status" className="text-primary-light mt-3 text-center text-sm">
@@ -51,16 +38,7 @@ export function AuthScreen({ mode, redirect, expired, children }: AuthScreenProp
         </p>
       )}
       <div className="mt-[33px]">{children}</div>
-      <p className="text-foreground mt-[38.5px] text-center text-base leading-6">
-        {copy.prompt}{' '}
-        <Link
-          to={copy.to}
-          search={redirect ? { redirect } : {}}
-          className="focus-visible:ring-ring rounded-sm underline-offset-4 outline-none hover:underline focus-visible:ring-2"
-        >
-          {copy.action}
-        </Link>
-      </p>
+      <AuthSwitchPrompt mode={mode} redirect={redirect} className="mt-[38.5px]" />
     </div>
   )
 }

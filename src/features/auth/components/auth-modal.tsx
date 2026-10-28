@@ -2,6 +2,7 @@ import { XIcon } from 'lucide-react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import { useRef, type ReactNode } from 'react'
 
+import { useFitScale } from '@/lib/use-fit-scale'
 import { cn } from '@/lib/utils'
 
 type AuthModalProps = {
@@ -13,13 +14,18 @@ type AuthModalProps = {
 
 export function AuthModal({ title, onClose, className, children }: AuthModalProps) {
   const contentRef = useRef<HTMLDivElement>(null)
+  const fit = useFitScale<HTMLDivElement>()
 
   return (
     <DialogPrimitive.Root open onOpenChange={(open) => !open && onClose()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="bg-background fixed inset-0 z-50 md:bg-transparent" />
         <DialogPrimitive.Content
-          ref={contentRef}
+          ref={(node) => {
+            contentRef.current = node
+            fit.ref(node)
+          }}
+          style={fit.style}
           aria-describedby={undefined}
           onOpenAutoFocus={(event) => {
             event.preventDefault()
@@ -27,7 +33,7 @@ export function AuthModal({ title, onClose, className, children }: AuthModalProp
           }}
           className={cn(
             'bg-card fixed inset-0 z-50 flex flex-col overflow-y-auto outline-none',
-            'md:inset-auto md:top-[159px] md:left-1/2 md:max-h-[calc(100dvh-159px)] md:w-[500px] md:-translate-x-1/2',
+            'md:inset-auto md:top-1/2 md:left-1/2 md:max-h-[calc((100dvh-24px)/var(--fit))] md:w-[500px] md:-translate-x-1/2 md:-translate-y-1/2 md:scale-(--fit)',
             className,
           )}
         >
