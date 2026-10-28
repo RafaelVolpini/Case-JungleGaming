@@ -10,8 +10,11 @@ import { useSession } from '@/features/auth/hooks/use-session'
 import { useCart } from '@/features/cart/hooks/use-cart'
 import { usePendingOrder } from '@/features/orders/hooks/use-pending-order'
 import { useWallets } from '@/features/wallets/hooks/use-wallets'
+import { useIsDesktop } from '@/lib/use-media-query'
 
 import { CheckoutForm } from '../components/checkout-form'
+import { MobileCheckout } from '../components/mobile/mobile-checkout'
+import { MobileCheckoutHeader } from '../components/mobile/mobile-checkout-header'
 import { useQuote } from '../hooks/use-quote'
 
 function CheckoutSkeleton() {
@@ -37,6 +40,7 @@ function CheckoutSkeleton() {
 }
 
 export function CheckoutPage() {
+  const isDesktop = useIsDesktop()
   const { user } = useSession()
   const wallets = useWallets()
   const cart = useCart()
@@ -56,14 +60,18 @@ export function CheckoutPage() {
   const emptyCart = cart.data?.items.length === 0
 
   return (
-    <div className="page-container pt-4 md:pt-[28px]">
-      <Breadcrumbs
-        items={[
-          { label: 'Início', to: '/' },
-          { label: 'Mercado', to: '/' },
-          { label: 'Pagamento' },
-        ]}
-      />
+    <div className={isDesktop ? 'page-container pt-[28px]' : 'px-6 pt-8'}>
+      {isDesktop ? (
+        <Breadcrumbs
+          items={[
+            { label: 'Início', to: '/' },
+            { label: 'Mercado', to: '/' },
+            { label: 'Pagamento' },
+          ]}
+        />
+      ) : (
+        <MobileCheckoutHeader />
+      )}
 
       {pending && (
         <p
@@ -81,7 +89,7 @@ export function CheckoutPage() {
         </p>
       )}
 
-      <div className="mt-[25px]">
+      <div className={isDesktop ? 'mt-[25px]' : 'mt-[21px]'}>
         {loading && !failure && <CheckoutSkeleton />}
         {failure && (
           <ErrorState
@@ -116,17 +124,31 @@ export function CheckoutPage() {
             }
           />
         )}
-        {user && wallet && cart.data && !emptyCart && quote.data && (
-          <CheckoutForm
-            key={wallet.id}
-            user={user}
-            wallet={wallet}
-            wallets={list}
-            cart={cart.data}
-            quote={quote.data}
-            onWalletChange={setSelectedId}
-          />
-        )}
+        {user &&
+          wallet &&
+          cart.data &&
+          !emptyCart &&
+          quote.data &&
+          (isDesktop ? (
+            <CheckoutForm
+              key={wallet.id}
+              user={user}
+              wallet={wallet}
+              wallets={list}
+              cart={cart.data}
+              quote={quote.data}
+              onWalletChange={setSelectedId}
+            />
+          ) : (
+            <MobileCheckout
+              key={wallet.id}
+              user={user}
+              wallet={wallet}
+              wallets={list}
+              quote={quote.data}
+              onWalletChange={setSelectedId}
+            />
+          ))}
       </div>
     </div>
   )
