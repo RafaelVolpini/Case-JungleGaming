@@ -1,0 +1,148 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+/* ============================================================================
+   KURIO — Design tokens
+   Source of truth: docs/design/KURIO-Design-Specs.md (extracted from Figma).
+   The app is dark-only: the Figma has no light variant.
+   ========================================================================= */
+
+:root {
+  /* ---- Raw palette (exact Figma values) ---------------------------------- */
+  --kurio-orange: #d28a4c;
+  --kurio-ink: #140d0a;
+  --kurio-surface: #241612;
+  --kurio-footer: #1a0f0b;
+  --kurio-sand: #cfb28c;
+  --kurio-cream: #f5f1eb;
+  --kurio-stone: #8a7a68;
+
+  /* ---- Derived values (NOT in the Figma) --------------------------------- */
+  /* The Figma defines no hover, error, success or skeleton treatment.
+     These keep the same hue family. Logged in ARCHITECTURE.md as deviations. */
+  --kurio-surface-raised: #2f1d17;
+  --kurio-orange-hover: #c07a3c;
+  --kurio-danger: #e2574c;
+  --kurio-success: #5c9e6b;
+  --kurio-warning: #d9a441;
+
+  /* ---- shadcn/ui semantic layer ------------------------------------------ */
+  /* shadcn components consume these names unchanged, so CLI output needs
+     no edits to match the brand. */
+  --background: var(--kurio-ink);
+  --foreground: var(--kurio-sand);
+
+  --card: var(--kurio-surface);
+  --card-foreground: var(--kurio-cream);
+
+  --popover: var(--kurio-surface);
+  --popover-foreground: var(--kurio-sand);
+
+  --primary: var(--kurio-orange);
+  --primary-foreground: var(--kurio-ink);
+
+  --secondary: var(--kurio-surface);
+  --secondary-foreground: var(--kurio-sand);
+
+  --muted: var(--kurio-surface);
+  --muted-foreground: var(--kurio-stone);
+
+  --accent: var(--kurio-surface-raised);
+  --accent-foreground: var(--kurio-cream);
+
+  --destructive: var(--kurio-danger);
+  --destructive-foreground: var(--kurio-cream);
+
+  --border: color-mix(in srgb, var(--kurio-orange) 25%, transparent);
+  --input: color-mix(in srgb, var(--kurio-orange) 25%, transparent);
+  --ring: var(--kurio-orange);
+
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  /* ---- Colors ------------------------------------------------------------ */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand aliases for cases the semantic names do not cover. */
+  --color-cream: var(--kurio-cream);
+  --color-footer: var(--kurio-footer);
+  --color-surface-raised: var(--kurio-surface-raised);
+  --color-success: var(--kurio-success);
+  --color-warning: var(--kurio-warning);
+
+  /* ---- Typography -------------------------------------------------------- */
+  /* The whole UI is monospace — intentional Web3 identity, not a code style. */
+  --font-sans: 'Space Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --font-mono: 'Space Mono', 'IBM Plex Mono', ui-monospace, monospace;
+
+  --text-hero: 3rem; /* 48px */
+  --text-hero--line-height: 1.1;
+  --text-hero-mobile: 1.75rem; /* 28px */
+  --text-hero-mobile--line-height: 1.15;
+
+  --text-overline: 0.75rem; /* 12px */
+  --text-overline--line-height: 1.2;
+  --text-overline--letter-spacing: 0.125em;
+
+  --text-logo: 1.25rem; /* 20px */
+  --text-logo--line-height: 1;
+  --text-logo--letter-spacing: 0.15em;
+
+  /* ---- Radii ------------------------------------------------------------- */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    /* Guards against the horizontal overflow the challenge explicitly checks. */
+    overflow-x: clip;
+  }
+
+  /* Visible focus is a hard requirement of the challenge, not a nicety. */
+  :focus-visible {
+    @apply outline-ring outline-2 outline-offset-2;
+  }
+
+  /* Respect reduced motion globally — skeleton shimmer included. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

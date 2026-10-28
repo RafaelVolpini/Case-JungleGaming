@@ -1,0 +1,256 @@
+# Arquitetura — Kurio NFT Marketplace
+
+> Documento vivo. Esta versão cobre a camada de tempo real e de mocks, validada
+> por spike executável em `/spike/realtime`. Demais seções serão preenchidas
+> conforme as features forem entregues.
+
+## 1. Stack
+
+| Responsabilidade | Escolha | Observação |
+| --- | --- | --- |
+| Build | Vite 8 | Alvo de deploy: Vercel |
+| Interface | React 19.3 | |
+| Linguagem | TypeScript 5.9 | `strict` + `noUncheckedIndexedAccess` |
+| Roteamento | TanStack Router | File-based, `autoCodeSplitting` |
+| Estado remoto | TanStack Query v5 | |
+| HTTP | Axios | |
+| Tempo real | socket.io-client 4.8 | |
+| Estilização | Tailwind CSS v4 | Tokens CSS-first em `@theme` |
+| Componentes | shadcn/ui | |
+| Mocking | **MSW 2.15** + `@mswjs/socket.io-binding` 0.2 | Ver §2.1 |
+| E2E | Playwright | |
+
+### 1.1 Por que TypeScript 5.9 e não 7.0
+
+O template atual do Vite entrega TypeScript 7 (port nativo). TanStack Router e
+Zod estão entre as bibliotecas com inferência de tipos mais pesada do
+ecossistema, e um desvio de inferência no meio do projeto custaria mais do que o
+ganho de tempo de compilação. A migração é um número no `package.json`.
+
+## 2. Tempo real: Socket.IO sobre MSW
+
+A camada de mocks e a de tempo real compartilham o mesmo transporte: o cliente
+é um `socket.io-client` real e os eventos atravessam um servidor Socket.IO
+simulado dentro do MSW, via `@mswjs/socket.io-binding`.
+
+### 2.1 Restrição de versão
+
+`@mswjs/socket.io-binding@0.2.0` declara `peerDependencies: { msw: "^2.10.2" }`.
+**O MSW está fixado na linha 2.x** por causa disso, embora a v3 já seja o
+`latest`. Atualizar o MSW para a v3 quebra o tempo real.
+
+### 2.2 Três restrições do transporte
+
+Descobertas no spike e documentadas aqui porque nenhuma é óbvia no código.
+
+**a) O cliente precisa falar só WebSocket.**
+O MSW intercepta WebSocket, nunca HTTP long-polling. Como o `socket.io-client`
+usa `['polling', 'websocket']` por padrão e começa no polling, o handshake
+jamais chegaria ao MSW. Daí `transports: ['websocket']` em
+`src/lib/realtime/socket.ts`.
+
+**b) A barra final do path quebra o matching.**
+O `WebSocketHandler#resolveWebSocketUrl` do MSW remove a barra final do padrão
+registrado (`/socket.io/` vira `/socket.io`), mas compara contra a URL do
+cliente com `getCleanUrl`, que preserva o `pathname` como está. O Engine.IO
+acrescenta `/` ao path por padrão, produzindo `/socket.io/` — que nunca é igual
+ao padrão normalizado. Daí `addTrailingSlash: false` no cliente.
+
+**c) A ordem de carregamento dos módulos importa.**
+`engine.io-client/transports/websocket.js` captura
+`const WebSocketCtor = globalThis.WebSocket` **no escopo do módulo**. O MSW
+substitui esse global dentro de `worker.start()`. Portanto, se qualquer módulo
+avaliado antes do `start()` importar `socket.io-client`, o cliente guarda o
+`WebSocket` original e a conexão passa direto, sem interceptação e sem erro
+visível — só um socket que nunca conecta.
+
+Duas consequências de projeto:
+
+1. `src/mocks/**` **não pode importar `socket.io-client`**. A constante
+   compartilhada do path vive em `src/lib/realtime/constants.ts`, que não tem
+   esse import.
+2. O `main.tsx` aguarda `enableMocking()` antes de renderizar. Como as rotas
+   são code-split, nenhum componente é avaliado antes disso.
+
+### 2.3 Heartbeat do Engine.IO
+
+No Engine.IO v4 o heartbeat é dirigido pelo servidor: ele envia `PING` ("2") e
+o cliente responde `PONG` ("3"). O `@mswjs/socket.io-binding@0.2.0` completa o
+handshake anunciando `pingInterval: 25000, pingTimeout: 5000`, mas **nunca
+envia o ping**, e descarta todo pacote Engine.IO que não seja `message`.
+
+Resultado medido no spike, com o heartbeat desligado:
+
+```
+000s  connect — id=test transport=websocket
+030s  disconnect — ping timeout
+032s  connect — id=test transport=websocket
+```
+
+O cliente se derruba sozinho em exatamente `pingInterval + pingTimeout` = 30s e
+entra em ciclo de reconexão a cada 30s. Como o desafio exige reconexão,
+reconciliação e pedido pendente sobrevivendo a quedas, um socket que pisca a
+cada 30s contaminaria todos esses cenários.
+
+**Solução:** o gateway envia o `PING` por conta própria a cada 20s
+(`HEARTBEAT_INTERVAL_MS` em `src/mocks/socket/gateway.ts`) e limpa o timer no
+`close`. Com o heartbeat ligado o spike passou de 76s sem nenhuma desconexão.
+
+A opção `heartbeat: false` fica exposta de propósito: é o gancho para os testes
+E2E reproduzirem queda de conexão sem precisar derrubar o servidor.
+
+### 2.4 Limitações assumidas
+
+- Sem namespaces, rooms ou broadcasting — o binding não os implementa. Como a
+  aplicação é single-tenant por aba, não há necessidade.
+- O `sid` do handshake é fixo (`"test"`), codificado no binding. O isolamento
+  por usuário é feito na camada de aplicação, não pelo `sid`.
+- Só o transporte WebSocket existe no ambiente de mocks; não há upgrade a
+  partir de polling para exercitar.
+
+## 3. Verificação
+
+`/spike/realtime` é a página de smoke test do transporte. Ela mostra estado da
+conexão, uptime e log de eventos, e aceita `?heartbeat=0` para reproduzir o
+ping timeout. Serve de base para os testes E2E de tempo real.
+
+## 4. Desvios do Figma
+
+| Item | Desvio | Motivo |
+| --- | --- | --- |
+| Cor de erro | Adicionado `#E2574C` | O Figma só usa o laranja primário no asterisco de campo obrigatório; não há cor de erro de validação |
+| Cor de sucesso | Adicionado `#5C9E6B` | Necessária para pedido confirmado; ausente no Figma |
+| Hover de botão | Adicionado `#C07A3C` | Ausente no Figma |
+| Surface elevada | Adicionado `#2F1D17` | Para estados de hover/accent do shadcn |
+| Separador decimal | Ponto em todos os valores | O Figma alterna entre `1.19 ETH` nos cards e `0,02 - 12,30 ETH` no filtro. ETH é escrito com ponto mundialmente; usar vírgula só no filtro seria inconsistência replicada |
+
+Todos mantêm a família de matiz da paleta e estão marcados em comentário no
+`src/app/styles/globals.css`.
+
+### 4.1 Substituição de assets
+
+As artes dos NFTs no Figma são ilustrações de primatas que não acompanham o
+arquivo exportado. Em seu lugar, `scripts/generate-fixtures.mjs` gera arte
+geométrica determinística em `public/nft/*.svg`, usando os mesmos fundos claros
+observados no layout (sálvia, creme, turquesa, lavanda).
+
+A escolha é deliberada em três frentes: não há dependência de imagem externa
+(requisito de execução local e de Lighthouse), os arquivos têm ~600 bytes cada
+contra megabytes de PNG, e são byte-estáveis — o que faz as baselines de
+regressão visual não oscilarem.
+
+Para trocar pelas artes reais, basta substituir os arquivos em `public/nft/`
+mantendo os nomes; o contrato já referencia `image.url`.
+
+## 5. Camada de mocks
+
+### 5.1 Base simulada
+
+`src/mocks/db` guarda registros internos que **não** são as formas da API: o
+servidor é dono de hash de senha, propriedade e referências cruas, e os
+handlers projetam isso nos contratos na saída.
+
+A consequência mais importante desse corte está no carrinho. Uma linha guarda
+apenas `nftId + editionId + quantity` — nunca o preço. Preço unitário,
+subtotal e disponibilidade são lidos do NFT a cada projeção. Então um
+`nft.updated` aparece no resumo do carrinho **sem nenhum código de
+sincronização**, e é estruturalmente impossível o carrinho carregar um preço
+que o catálogo não oferece mais.
+
+Toda escrita passa por `mutate()`, que persiste e só então emite os eventos.
+Nenhuma mutação consegue pular a persistência, e nenhum evento sai antes do
+estado estar consistente.
+
+### 5.2 REST e Socket.IO não têm como divergir
+
+A base expõe um event bus (`onDbEvent`). O gateway assina esse bus e monta o
+payload **lendo o mesmo store que os handlers REST leem**, em vez de usar o que
+a mutação tinha em mãos. Não existe caminho em que um evento discorde da
+resposta REST do mesmo recurso.
+
+Eventos de catálogo vão para todos os clientes; eventos de pedido só para
+sockets que se identificaram como o dono (`session.identify`). Esse é o lado
+servidor do isolamento entre usuários — o cliente ainda confere `ownerId`.
+
+### 5.3 Cenários de rede
+
+Configuráveis por query string, por `POST /api/__mock__/scenario` ou por
+`localStorage`. A query string vence, para que um link de demonstração ou um
+teste Playwright fixe um cenário sem limpar storage de ninguém.
+
+| Latência | Comportamento |
+| --- | --- |
+| `none` | 0 ms |
+| `fast` | 120 ms (padrão) |
+| `slow` | 1500 ms |
+| `variable` | 100–2000 ms, gerador semeado |
+| `out-of-order` | Requisições sucessivas resolvem **mais rápido** que as anteriores |
+
+| Falha | Comportamento |
+| --- | --- |
+| `offline` | Falha de transporte (`TypeError`), não status HTTP |
+| `server-error` | 500 com envelope `SERVER_ERROR` |
+| `timeout` | Nunca resolve; quem encerra é o timeout do Axios |
+| `intermittent` | Falha 1 a cada `failEvery` requisições |
+| `unauthorized` | 401, para simular expiração no meio do fluxo |
+
+`scope` restringe a falha a prefixos de caminho, então dá para derrubar só
+`/api/cart` e manter o resto de pé.
+
+**Nada aqui usa `Math.random`.** O enunciado pede cenários reproduzíveis, e uma
+taxa de falha aleatória tornaria a suíte Playwright instável em vez de
+determinística. Falhas intermitentes são contadas por requisição e a latência
+variável vem de um gerador semeado. Medido: `intermittent` com `failEvery: 3`
+produz exatamente `[200, 200, 500, 200, 200, 500]`, e `out-of-order` resolve
+cinco requisições paralelas na ordem `[5, 4, 3, 2, 1]` — que é o que expõe
+race condition na camada de query.
+
+### 5.4 Controle da simulação
+
+| Rota | Função |
+| --- | --- |
+| `POST /api/__mock__/reset` | Restaura o cenário semeado |
+| `GET\|POST /api/__mock__/scenario` | Lê ou ajusta as condições de rede |
+| `POST /api/__mock__/expire-sessions` | Expira todas as sessões na hora |
+| `GET /api/__mock__/state` | Snapshot para asserção nos testes |
+
+Essas rotas **não** passam pela simulação de rede, de propósito: é preciso
+conseguir resetar a base ou desligar uma falha enquanto o cenário `offline`
+está ativo, senão a única saída seria limpar o storage na mão.
+
+`expire-sessions` existe porque esperar um TTL real deixaria o teste de
+expiração lento e dependente de relógio — inclusive o caso de expirar no meio
+do checkout.
+
+### 5.5 Sessão
+
+O token viaja como header `Authorization: Bearer`, não como cookie. O
+tratamento de cookie do MSW difere entre o worker do browser e o Node, e um
+header se comporta igual nos dois — o que importa porque os mesmos handlers
+sustentam a suíte Playwright. Um backend de produção deveria usar cookie
+`httpOnly`; é uma simplificação deliberada do ambiente simulado.
+
+Senhas são guardadas como SHA-256 com salt por usuário e nunca voltam na
+resposta, nem para a própria conta. Login responde igual para conta
+inexistente e senha errada, para não transformar o formulário em um oráculo de
+contas.
+
+## 6. Fixtures
+
+`npm run fixtures` regenera catálogo e arte a partir da seed fixa `20261027`.
+A saída é commitada, então um checkout limpo não precisa rodar o script.
+
+São 36 NFTs — 4 páginas de 9, como a paginação do Figma — distribuídos pelas 9
+coleções e 3 redes, com faixa de preço de 0.02 a 12.30 ETH (a mesma do filtro
+do layout). A distribuição é propositalmente desigual para que os cenários
+existam de verdade: 2 NFTs esgotados, 4 com preço anterior riscado, 2
+lendários, vários raros, e edições com estoque variando de 0 a 6.
+
+As contagens por coleção e por rede são derivadas dos dados gerados, não
+fixadas. Os números do Figma são decorativos: as coleções somam 239 e as redes
+somam 283, para o mesmo catálogo.
+
+Dois usuários (`ana@kurio.test`, `bruno@kurio.test`) com carrinhos, favoritos,
+carteiras e pedidos disjuntos sustentam os cenários de isolamento entre contas.
+As senhas são fictícias, existem em texto apenas no seed e são guardadas com
+hash na base simulada. Credenciais documentadas no README do projeto.
