@@ -7,7 +7,6 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [
-    // Must come before the react plugin so generated routes are transformed.
     tanstackRouter({
       target: 'react',
       routesDirectory: './src/routes',

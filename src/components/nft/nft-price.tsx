@@ -11,7 +11,7 @@ type NftPriceProps = {
 export function NftPrice({ priceEth, previousPriceEth, className }: NftPriceProps) {
   return (
     <p className={cn('text-primary-light font-bold', className)}>
-      <span>{formatEth(priceEth)}</span>
+      <span data-testid="nft-price">{formatEth(priceEth)}</span>
       {previousPriceEth && (
         <span className="text-muted-foreground ml-2 font-normal">
           <span className="sr-only">Preço anterior: </span>

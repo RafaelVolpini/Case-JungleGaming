@@ -1,4 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
+import { toast } from 'sonner'
 
 import type { AuthResponse } from '@/contracts/session'
 import { clearToken, writeToken } from '@/lib/auth/token'
@@ -9,6 +11,7 @@ import { loginRequest, logoutRequest, registerRequest } from '../api/auth-api'
 
 export function useAuthActions() {
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   async function startSession(response: AuthResponse) {
     await resetQueryCache(queryClient)
@@ -27,6 +30,8 @@ export function useAuthActions() {
     onSettled: async () => {
       clearToken()
       await resetQueryCache(queryClient)
+      await router.navigate({ to: '/', replace: true })
+      toast.success('Você saiu da sua conta.')
     },
   })
 

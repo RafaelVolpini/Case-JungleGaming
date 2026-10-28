@@ -1,6 +1,5 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { ChevronDown, Heart, LogOut, UserRound, Wallet } from 'lucide-react'
-import { toast } from 'sonner'
 
 import {
   DropdownMenu,
@@ -15,16 +14,6 @@ import { useAuthActions } from '@/features/auth/hooks/use-auth-actions'
 
 export function UserMenu({ user }: { user: User }) {
   const { logout } = useAuthActions()
-  const navigate = useNavigate()
-
-  function handleLogout() {
-    logout.mutate(undefined, {
-      onSettled: () => {
-        toast.success('Você saiu da sua conta.')
-        void navigate({ to: '/' })
-      },
-    })
-  }
 
   return (
     <DropdownMenu>
@@ -54,7 +43,7 @@ export function UserMenu({ user }: { user: User }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={handleLogout}>
+        <DropdownMenuItem onSelect={() => logout.mutate()}>
           <LogOut /> Sair
         </DropdownMenuItem>
       </DropdownMenuContent>

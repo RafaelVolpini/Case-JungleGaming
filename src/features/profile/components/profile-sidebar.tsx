@@ -1,4 +1,3 @@
-import { useNavigate } from '@tanstack/react-router'
 import {
   BadgeDollarSign,
   Heart,
@@ -15,11 +14,7 @@ import { useAuthActions } from '@/features/auth/hooks/use-auth-actions'
 import { ProfileLink, ProfileUnavailable } from './profile-menu-item'
 
 export function ProfileSidebar() {
-  const navigate = useNavigate()
   const { logout } = useAuthActions()
-
-  const signOut = () =>
-    logout.mutate(undefined, { onSettled: () => void navigate({ to: '/', replace: true }) })
 
   return (
     <aside className="bg-card pt-3 pb-2">
@@ -35,7 +30,7 @@ export function ProfileSidebar() {
         <div className="border-primary/40 border-t">
           <button
             type="button"
-            onClick={signOut}
+            onClick={() => logout.mutate()}
             disabled={logout.isPending}
             className="text-primary-light focus-visible:ring-ring flex h-10 w-full items-center gap-3 pl-[17px] text-[15px] font-bold outline-none focus-visible:ring-2 focus-visible:ring-inset"
           >

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 
 import { useAuthActions } from '@/features/auth/hooks/use-auth-actions'
 import { cn } from '@/lib/utils'
@@ -15,11 +15,7 @@ const LINKS = [
 ] as const
 
 export function ProfileMobileNav() {
-  const navigate = useNavigate()
   const { logout } = useAuthActions()
-
-  const signOut = () =>
-    logout.mutate(undefined, { onSettled: () => void navigate({ to: '/', replace: true }) })
 
   return (
     <nav aria-label="Menu do perfil" className="-mx-6 mt-5 flex gap-2 overflow-x-auto px-6 pb-1">
@@ -36,7 +32,7 @@ export function ProfileMobileNav() {
       ))}
       <button
         type="button"
-        onClick={signOut}
+        onClick={() => logout.mutate()}
         disabled={logout.isPending}
         className={cn(PILL, IDLE)}
       >
