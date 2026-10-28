@@ -61,6 +61,11 @@ export type NftSummary = z.infer<typeof nftSummarySchema>
 
 export const nftDetailSchema = nftSummarySchema.extend({
   description: z.string(),
+  series: z.string(),
+  story: z.array(z.string()),
+  networkNote: z.string(),
+  contractNote: z.string(),
+  royaltyNote: z.string(),
   images: z.array(nftImageSchema).min(1),
   editions: z.array(editionSchema).min(1),
   attributes: z.array(nftAttributeSchema),
@@ -69,7 +74,6 @@ export const nftDetailSchema = nftSummarySchema.extend({
     count: z.number().int().nonnegative(),
   }),
   contractAddress: z.string(),
-  copyright: z.string(),
   maxPerOrder: z.number().int().positive(),
 })
 export type NftDetail = z.infer<typeof nftDetailSchema>

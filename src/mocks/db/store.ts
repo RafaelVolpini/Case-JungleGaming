@@ -2,7 +2,7 @@ import { readJsonStorage, writeJsonStorage } from '@/lib/storage'
 
 import type { MockDb } from './types'
 
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 export const STORAGE_KEY = 'kurio:mock-db'
 
 export type DbEvent =

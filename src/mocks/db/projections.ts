@@ -1,18 +1,11 @@
 import type { NftDetail, NftSummary } from '@/contracts/nft'
 
+import { artAlt, contractNote, networkNote, royaltyNote, shortDescription, storyParagraphs } from './copy'
 import { getDb } from './store'
 import type { NftRecord } from './types'
 
 export function imageFor(nft: NftRecord) {
-  const collection = getDb().collections.find((item) => item.id === nft.collectionId)
-  return {
-    url: `/nft/${nft.slug}.svg`,
-    alt: collection
-      ? `${nft.name} — arte digital da coleção ${collection.name}`
-      : `${nft.name} — arte digital`,
-    width: 600,
-    height: 600,
-  }
+  return { url: `/nft/${nft.art}-960.webp`, alt: artAlt(nft), width: 960, height: 960 }
 }
 
 export function totalAvailable(nft: NftRecord): number {
@@ -48,13 +41,17 @@ export function toNftSummary(nft: NftRecord, favoriteIds: Set<string>): NftSumma
 export function toNftDetail(nft: NftRecord, favoriteIds: Set<string>): NftDetail {
   return {
     ...toNftSummary(nft, favoriteIds),
-    description: nft.description,
-    images: [imageFor(nft)],
+    description: shortDescription(nft),
+    series: nft.series,
+    story: storyParagraphs(nft),
+    networkNote: networkNote(nft),
+    contractNote: contractNote(nft),
+    royaltyNote: royaltyNote(),
+    images: Array.from({ length: 4 }, () => imageFor(nft)),
     editions: nft.editions.map((edition) => ({ ...edition })),
     attributes: nft.attributes.map((attribute) => ({ ...attribute })),
     rating: { ...nft.rating },
     contractAddress: nft.contractAddress,
-    copyright: nft.copyright,
     maxPerOrder: nft.maxPerOrder,
   }
 }

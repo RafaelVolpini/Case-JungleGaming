@@ -10,7 +10,7 @@ const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const CATALOG_NOW = new Date('2026-10-01T00:00:00.000Z').getTime()
 
 function matchesSearch(nft: NftRecord, term: string): boolean {
-  const haystack = `${nft.name} ${nft.tokenId} ${nft.description}`.toLowerCase()
+  const haystack = `${nft.name} ${nft.tokenId} ${nft.series}`.toLowerCase()
   return haystack.includes(term.toLowerCase())
 }
 

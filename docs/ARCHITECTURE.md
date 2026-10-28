@@ -127,20 +127,21 @@ ping timeout. Serve de base para os testes E2E de tempo real.
 Todos mantêm a família de matiz da paleta e estão marcados em comentário no
 `src/app/styles/globals.css`.
 
-### 4.1 Substituição de assets
+### 4.1 Assets de NFT
 
-As artes dos NFTs no Figma são ilustrações de primatas que não acompanham o
-arquivo exportado. Em seu lugar, `scripts/generate-fixtures.mjs` gera arte
-geométrica determinística em `public/nft/*.svg`, usando os mesmos fundos claros
-observados no layout (sálvia, creme, turquesa, lavanda).
+As artes de primata do Figma não acompanham o arquivo exportado, mas três delas foram fornecidas
+(macaco dourado de fones, macaco escuro de blazer, macaco marrom de óculos). O quarto personagem
+que domina o catálogo do layout, o gorila cinza de chapéu e moletom roxo, não veio como arquivo e
+foi recortado do screenshot em resolução original (476 px, recorte com margem para evitar os
+cantos arredondados do card).
 
-A escolha é deliberada em três frentes: não há dependência de imagem externa
-(requisito de execução local e de Lighthouse), os arquivos têm ~600 bytes cada
-contra megabytes de PNG, e são byte-estáveis — o que faz as baselines de
-regressão visual não oscilarem.
+Os quatro originais ficam em `assets/nft-source/` e `npm run art` gera as variantes otimizadas em
+`public/nft/` (`{arte}-480.webp` e `{arte}-960.webp`, 14 a 56 KB cada, contra 140 a 188 KB dos
+originais). Há quatro personagens para 239 NFTs, então as artes se repetem entre itens: é a mesma
+repetição que o próprio Figma faz.
 
-Para trocar pelas artes reais, basta substituir os arquivos em `public/nft/`
-mantendo os nomes; o contrato já referencia `image.url`.
+O Sage tem origem de 476 px e é ampliado para 960 px, ficando mais suave no detalhe do que os
+outros três. Para trocar por uma arte nativa basta substituir `assets/nft-source/sage.webp`.
 
 ## 5. Camada de mocks
 
@@ -237,23 +238,34 @@ contas.
 
 ## 6. Fixtures
 
-`npm run fixtures` regenera catálogo e arte a partir da seed fixa `20261027`.
-A saída é commitada, então um checkout limpo não precisa rodar o script.
+`npm run fixtures` regenera o catálogo a partir da seed fixa `20261027`. A saída é commitada,
+então um checkout limpo não precisa rodar o script.
 
-São 36 NFTs — 4 páginas de 9, como a paginação do Figma — distribuídos pelas 9
-coleções e 3 redes, com faixa de preço de 0.02 a 12.30 ETH (a mesma do filtro
-do layout). A distribuição é propositalmente desigual para que os cenários
-existam de verdade: 2 NFTs esgotados, 4 com preço anterior riscado, 2
-lendários, vários raros, e edições com estoque variando de 0 a 6.
+São 239 NFTs, 27 páginas de 9. A distribuição por coleção reproduz exatamente o sidebar do Figma
+(33, 12, 65, 39, 23, 17, 19, 13 e 18). Os nove primeiros itens, na ordem de "Listados
+recentemente", são os do layout, com nome, preço e raridade idênticos (Emerald Ape #042 a 1.19,
+Neon Vessel #552 a 1.99 com 2.29 riscado, e assim por diante). O Figma deixa o nome do oitavo
+card em branco; a fixture o chama de Golden Echo #233.
 
-As contagens por coleção e por rede são derivadas dos dados gerados, não
-fixadas. Os números do Figma são decorativos: as coleções somam 239 e as redes
-somam 283, para o mesmo catálogo.
+O restante é gerado com preços de 0.02 a 12.30 ETH, a mesma faixa do filtro do layout, com
+distribuição enviesada para valores baixos. Há 4 NFTs esgotados, 22 com preço anterior riscado e
+edições com estoque de 0 a 40, para que cada cenário exista de verdade.
 
-Dois usuários (`ana@kurio.test`, `bruno@kurio.test`) com carrinhos, favoritos,
-carteiras e pedidos disjuntos sustentam os cenários de isolamento entre contas.
-As senhas são fictícias, existem em texto apenas no seed e são guardadas com
-hash na base simulada. Credenciais documentadas no README do projeto.
+Cada NFT tem as quatro edições do layout, `1/1`, `1/10`, `1/50` e `ABERTA`. O preço exibido é o
+da `1/50`, que é a edição selecionada por padrão no Figma.
+
+As contagens por rede do Figma (119, 78 e 86) somam 283 e são incompatíveis com as de coleção,
+que somam 239. A fixture mantém as de coleção e distribui as redes na mesma proporção (101, 66 e
+72); as contagens exibidas na interface são derivadas dos dados.
+
+Os textos descritivos (descrição curta, história, notas de rede, contrato e direitos autorais) são
+gerados por template em `src/mocks/db/copy.ts` em vez de guardados 239 vezes, e o `alt` de cada
+imagem descreve o personagem. O Figma troca os rótulos "Contrato" e "Direitos autorais" entre o
+texto de royalties e o endereço; a interface corrige o pareamento.
+
+Dois usuários (`ana@kurio.test`, `bruno@kurio.test`) com carrinhos, favoritos, carteiras e pedidos
+disjuntos sustentam os cenários de isolamento entre contas. As senhas são fictícias, existem em
+texto apenas no seed e são guardadas com hash na base simulada. Credenciais no README do projeto.
 
 ## 7. Decisões de código
 

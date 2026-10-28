@@ -1,10 +1,79 @@
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const SEED = 20261027
-const TOTAL = 36
+const TOTAL = 239
+
+const COLLECTION_COUNTS = [
+  ['col-arte-digital', 33],
+  ['col-fotografia', 12],
+  ['col-musica', 65],
+  ['col-arte-3d', 39],
+  ['col-colecionaveis', 23],
+  ['col-generativa', 17],
+  ['col-jogos', 19],
+  ['col-assinaturas', 13],
+  ['col-utilidade', 18],
+]
+
+const NETWORK_COUNTS = [
+  ['ethereum', 101],
+  ['polygon', 66],
+  ['solana', 72],
+]
+
+const ART_BY_ADJECTIVE = {
+  Emerald: 'emerald',
+  Azure: 'emerald',
+  Copper: 'emerald',
+  Sage: 'sage',
+  Cosmic: 'sage',
+  Violet: 'sage',
+  Lilac: 'sage',
+  Neon: 'ivory',
+  Ivory: 'ivory',
+  Obsidian: 'ivory',
+  Crimson: 'ivory',
+  Golden: 'golden',
+  Amber: 'golden',
+  Solar: 'golden',
+  Jade: 'golden',
+}
+
+const NOUNS = [
+  'Ape', 'Nomad', 'Vessel', 'Bloom', 'Baron', 'Beat', 'Signal', 'Oracle',
+  'Relic', 'Cipher', 'Drift', 'Ember', 'Echo', 'Muse', 'Prism', 'Atlas',
+]
+
+const SERIES = ['Kurio Apes', 'Kurio Nomads', 'Kurio Editions']
+
+const EDITION_TIERS = [
+  { label: '1/1', total: 1, multiplier: 1.6 },
+  { label: '1/10', total: 10, multiplier: 1.25 },
+  { label: '1/50', total: 50, multiplier: 1 },
+  { label: 'ABERTA', total: 1000, multiplier: 0.8 },
+]
+
+const ACCESSORY_BY_ART = {
+  emerald: ['Óculos', 'Esmeralda'],
+  sage: ['Chapéu', 'Roxo'],
+  ivory: ['Brinco', 'Verde-escuro'],
+  golden: ['Fones', 'Dourado'],
+}
+
+const FIGMA_NFTS = [
+  { name: 'Emerald Ape', token: '042', price: '1.19', art: 'emerald', rarity: 'rare', network: 'ethereum', series: 'Kurio Apes', rating: [4.8, 19], contract: '0x7a42c9d81f3b60e5a2d74c1b8e09f35a6d2c19e8', favorites: 214 },
+  { name: 'Sage Nomad', token: '009', price: '1.69', art: 'sage', rarity: 'common', series: 'Kurio Nomads', favorites: 180 },
+  { name: 'Neon Vessel', token: '552', price: '1.99', previous: '2.29', art: 'ivory', rarity: 'rare', series: 'Kurio Editions', favorites: 160 },
+  { name: 'Cosmic Bloom', token: '118', price: '1.29', art: 'sage', rarity: 'common', series: 'Kurio Apes', favorites: 120 },
+  { name: 'Violet Nomad', token: '314', price: '1.39', art: 'sage', rarity: 'common', series: 'Kurio Nomads', favorites: 105 },
+  { name: 'Ivory Baron', token: '088', price: '1.79', art: 'ivory', rarity: 'rare', series: 'Kurio Editions', favorites: 142 },
+  { name: 'Golden Beat', token: '207', price: '0.99', art: 'golden', rarity: 'common', series: 'Kurio Apes', favorites: 133 },
+  { name: 'Golden Echo', token: '233', price: '0.59', art: 'golden', rarity: 'common', series: 'Kurio Apes', favorites: 70 },
+  { name: 'Golden Signal', token: '160', price: '0.39', art: 'golden', rarity: 'common', series: 'Kurio Apes', favorites: 96 },
+]
 
 function mulberry32(seed) {
   let a = seed >>> 0
@@ -15,157 +84,143 @@ function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
 }
+
 const rand = mulberry32(SEED)
-const pick = (arr) => arr[Math.floor(rand() * arr.length)]
+const pick = (list) => list[Math.floor(rand() * list.length)]
 const int = (min, max) => min + Math.floor(rand() * (max - min + 1))
 
-const ADJECTIVES = [
-  'Emerald', 'Sage', 'Neon', 'Cosmic', 'Violet', 'Ivory', 'Golden', 'Crimson',
-  'Obsidian', 'Azure', 'Amber', 'Jade',
-]
-const NOUNS = [
-  'Ape', 'Nomad', 'Vessel', 'Bloom', 'Baron', 'Beat', 'Signal', 'Oracle',
-  'Relic', 'Cipher', 'Drift', 'Ember',
-]
-const COLLECTIONS = [
-  'col-arte-digital', 'col-fotografia', 'col-musica', 'col-arte-3d',
-  'col-colecionaveis', 'col-generativa', 'col-jogos', 'col-assinaturas',
-  'col-utilidade',
-]
-const NETWORKS = ['ethereum', 'ethereum', 'ethereum', 'polygon', 'polygon', 'solana']
-const TRAITS = [
-  ['Fundo', ['Sálvia', 'Creme', 'Turquesa', 'Lavanda']],
-  ['Acessório', ['Óculos', 'Chapéu', 'Fones', 'Corrente']],
-  ['Pelagem', ['Castanha', 'Cinza', 'Dourada', 'Negra']],
-  ['Expressão', ['Serena', 'Altiva', 'Curiosa', 'Impassível']],
-]
+function shuffled(list) {
+  const copy = [...list]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
 
-const used = new Set()
+function expand(counts) {
+  return shuffled(counts.flatMap(([value, count]) => Array(count).fill(value)))
+}
+
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+}
+
+const collections = expand(COLLECTION_COUNTS)
+const networks = expand(NETWORK_COUNTS)
+const ethereumIndex = networks.indexOf('ethereum')
+;[networks[0], networks[ethereumIndex]] = [networks[ethereumIndex], networks[0]]
+
+const SOLD_OUT = new Set([13, 41, 97, 150])
+const adjectives = Object.keys(ART_BY_ADJECTIVE)
+const usedNames = new Set(FIGMA_NFTS.map((item) => `${item.name} #${item.token}`))
+
+function priceFor(index) {
+  if (index === 9) return '0.02'
+  if (index === 10) return '12.30'
+  const cents = Math.round(Math.pow(rand(), 2.4) * 1228) + 2
+  return (cents / 100).toFixed(2)
+}
+
+function buildSpec(index) {
+  const figma = FIGMA_NFTS[index]
+  if (figma) return { ...figma }
+
+  let name
+  let token
+  do {
+    token = String(int(1, 999)).padStart(3, '0')
+    name = `${pick(adjectives)} ${pick(NOUNS)}`
+  } while (usedNames.has(`${name} #${token}`))
+  usedNames.add(`${name} #${token}`)
+
+  const adjective = name.split(' ')[0]
+  const hasPrevious = index % 11 === 4
+  const price = priceFor(index)
+
+  return {
+    name,
+    token,
+    price,
+    previous: hasPrevious ? (Number(price) * 1.18).toFixed(2) : null,
+    art: ART_BY_ADJECTIVE[adjective],
+    rarity: index % 17 === 5 ? 'legendary' : index % 6 === 3 ? 'rare' : 'common',
+    series: pick(SERIES),
+    favorites: int(0, 240),
+  }
+}
+
+function buildEditions(slug, basePrice, soldOut, isFigma) {
+  return EDITION_TIERS.map((tier, position) => {
+    const available = soldOut
+      ? 0
+      : isFigma
+        ? [2, 6, 12, 40][position]
+        : [int(0, 1), int(0, 6), int(1, 12), int(5, 40)][position]
+    return {
+      id: `${slug}-ed-${position + 1}`,
+      label: tier.label,
+      index: 1,
+      total: tier.total,
+      available,
+      priceEth: (Number(basePrice) * tier.multiplier).toFixed(2),
+    }
+  })
+}
+
 const nfts = []
 
 for (let i = 0; i < TOTAL; i++) {
-  let name
-  let tokenNumber
-  do {
-    tokenNumber = String(int(1, 999)).padStart(3, '0')
-    name = `${pick(ADJECTIVES)} ${pick(NOUNS)} #${tokenNumber}`
-  } while (used.has(name))
-  used.add(name)
-
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-
-  const priceCents = int(2, 1230)
-  const priceEth = (priceCents / 100).toFixed(2)
-
-  const hasDiscount = i % 9 === 2
-  const previousPriceEth = hasDiscount ? ((priceCents * 1.18) / 100).toFixed(2) : null
-
-  const rarity = i % 18 === 5 ? 'legendary' : i % 6 === 3 ? 'rare' : 'common'
-
-  const soldOut = i === 7 || i === 23
-  const editionTotal = pick([10, 25, 50, 100])
-  const editionCount = int(2, 3)
-
-  const editions = Array.from({ length: editionCount }, (_, e) => {
-    const index = e + 1
-    return {
-      id: `${slug}-ed-${index}`,
-      label: `${index}/${editionTotal}`,
-      index,
-      total: editionTotal,
-      available: soldOut ? 0 : int(0, 6),
-      priceEth: ((priceCents * (1 + e * 0.04)) / 100).toFixed(2),
-    }
-  })
-
-  if (!soldOut && editions.every((e) => e.available === 0)) {
-    editions[0].available = 3
-  }
-
-  const attributes = TRAITS.map(([trait, values]) => ({ trait, value: pick(values) }))
-
-  const listedAt = new Date(Date.UTC(2026, 8, 30) - i * 36e5 * 7).toISOString()
-
-  const contractAddress =
-    '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[int(0, 15)]).join('')
+  const spec = buildSpec(i)
+  const isFigma = i < FIGMA_NFTS.length
+  const slug = slugify(`${spec.name} ${spec.token}`)
+  const soldOut = SOLD_OUT.has(i)
+  const [accessory, color] = ACCESSORY_BY_ART[spec.art]
+  const rarityLabel = { common: 'Comum', rare: 'Raro', legendary: 'Lendário' }[spec.rarity]
 
   nfts.push({
     id: `nft-${slug}`,
     slug,
-    name,
-    tokenId: `#${tokenNumber}`,
-    description:
-      'Peça única de uma coleção curada de arte digital. Cada edição é cunhada ' +
-      'on-chain e acompanha procedência verificável e direitos de exibição.',
-    collectionId: pick(COLLECTIONS),
-    network: pick(NETWORKS),
-    priceEth,
-    previousPriceEth,
-    rarity,
-    editions,
-    attributes,
-    rating: { average: Number((3.8 + rand() * 1.2).toFixed(1)), count: int(4, 180) },
-    contractAddress,
-    copyright: 'Uso pessoal e exibição. Revenda permitida com royalties de 5%.',
-    maxPerOrder: pick([3, 5, 10]),
-    listedAt,
-    favoritesCount: int(0, 240),
+    name: `${spec.name} #${spec.token}`,
+    tokenId: `#${spec.token}`,
+    art: spec.art,
+    series: spec.series,
+    collectionId: collections[i],
+    network: networks[i],
+    priceEth: spec.price,
+    previousPriceEth: spec.previous ?? null,
+    rarity: spec.rarity,
+    editions: buildEditions(slug, spec.price, soldOut, isFigma),
+    attributes: [
+      { trait: 'Acessório', value: accessory },
+      { trait: 'Cor', value: color },
+      { trait: 'Raridade', value: rarityLabel },
+    ],
+    rating: {
+      average: spec.rating ? spec.rating[0] : Number((3.8 + rand() * 1.2).toFixed(1)),
+      count: spec.rating ? spec.rating[1] : int(4, 180),
+    },
+    contractAddress:
+      spec.contract ?? '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[int(0, 15)]).join(''),
+    maxPerOrder: isFigma ? 10 : pick([3, 5, 10]),
+    listedAt: new Date(Date.UTC(2026, 8, 30, 12) - i * 36e5 * 7).toISOString(),
+    favoritesCount: spec.favorites,
   })
 }
 
-const BACKDROPS = ['#C9D7C2', '#F0EDE2', '#CFE3DE', '#D8CEE9', '#E8DCC8']
-const INKS = ['#D28A4C', '#2F5D4A', '#6B5B8A', '#8A5A3C', '#3F4A52']
+const output =
+  "import type { NftSeed } from './types'\n\nexport const NFT_SEEDS: NftSeed[] = " +
+  JSON.stringify(nfts, null, 2) +
+  '\n'
 
-function artwork(slug) {
-  const seed = [...slug].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7)
-  const r = mulberry32(seed)
-  const p = (arr) => arr[Math.floor(r() * arr.length)]
-  const bg = p(BACKDROPS)
-  const shapes = []
+writeFileSync(join(ROOT, 'src', 'mocks', 'fixtures', 'nfts.generated.ts'), output)
 
-  for (let i = 0; i < 5; i++) {
-    const ink = p(INKS)
-    const cx = Math.round(120 + r() * 360)
-    const cy = Math.round(120 + r() * 360)
-    const size = Math.round(60 + r() * 190)
-    const opacity = (0.25 + r() * 0.5).toFixed(2)
-
-    if (r() > 0.45) {
-      shapes.push(
-        `<circle cx="${cx}" cy="${cy}" r="${size}" fill="${ink}" opacity="${opacity}"/>`,
-      )
-    } else {
-      const angle = Math.round(r() * 90)
-      shapes.push(
-        `<rect x="${cx - Math.round(size / 2)}" y="${cy - Math.round(size / 2)}" ` +
-          `width="${size}" height="${size}" rx="${Math.round(size / 6)}" ` +
-          `fill="${ink}" opacity="${opacity}" transform="rotate(${angle} ${cx} ${cy})"/>`,
-      )
-    }
-  }
-
-  return (
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" ' +
-    `height="600"><rect width="600" height="600" fill="${bg}"/>` +
-    `<g>${shapes.join('')}</g></svg>`
-  )
-}
-
-mkdirSync(join(ROOT, 'public', 'nft'), { recursive: true })
+const byCollection = {}
+const byNetwork = {}
 for (const nft of nfts) {
-  writeFileSync(join(ROOT, 'public', 'nft', `${nft.slug}.svg`), artwork(nft.slug))
+  byCollection[nft.collectionId] = (byCollection[nft.collectionId] ?? 0) + 1
+  byNetwork[nft.network] = (byNetwork[nft.network] ?? 0) + 1
 }
-
-const header =
-  '// GENERATED FILE - do not edit by hand.\n' +
-  `// Produced by scripts/generate-fixtures.mjs (seed ${SEED}). Run \`npm run fixtures\`.\n\n` +
-  "import type { NftSeed } from './types'\n\n" +
-  'export const NFT_SEEDS: NftSeed[] = '
-
-writeFileSync(
-  join(ROOT, 'src', 'mocks', 'fixtures', 'nfts.generated.ts'),
-  header + JSON.stringify(nfts, null, 2) + '\n',
-)
-
-console.log(`${nfts.length} NFTs -> src/mocks/fixtures/nfts.generated.ts`)
-console.log(`${nfts.length} SVGs -> public/nft/`)
+console.log(`${nfts.length} NFTs`)
+console.log('collections', JSON.stringify(byCollection))
+console.log('networks', JSON.stringify(byNetwork))

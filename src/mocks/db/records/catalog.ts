@@ -1,6 +1,8 @@
 import type { EthAmount, Network } from '@/contracts/common'
 import type { Rarity } from '@/contracts/nft'
 
+export type NftArt = 'golden' | 'ivory' | 'emerald' | 'sage'
+
 export type EditionRecord = {
   id: string
   label: string
@@ -15,7 +17,8 @@ export type NftRecord = {
   slug: string
   name: string
   tokenId: string
-  description: string
+  art: NftArt
+  series: string
   collectionId: string
   network: Network
   priceEth: EthAmount
@@ -25,7 +28,6 @@ export type NftRecord = {
   attributes: Array<{ trait: string; value: string }>
   rating: { average: number; count: number }
   contractAddress: string
-  copyright: string
   maxPerOrder: number
   listedAt: string
   favoritesCount: number

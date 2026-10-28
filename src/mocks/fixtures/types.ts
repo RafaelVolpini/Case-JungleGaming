@@ -1,4 +1,5 @@
 import type { Network } from '@/contracts/common'
+import type { NftArt } from '../db/records/catalog'
 import type { Rarity } from '@/contracts/nft'
 
 export type NftSeed = {
@@ -6,7 +7,8 @@ export type NftSeed = {
   slug: string
   name: string
   tokenId: string
-  description: string
+  art: NftArt
+  series: string
   collectionId: string
   network: Network
   priceEth: string
@@ -23,7 +25,6 @@ export type NftSeed = {
   attributes: Array<{ trait: string; value: string }>
   rating: { average: number; count: number }
   contractAddress: string
-  copyright: string
   maxPerOrder: number
   listedAt: string
   favoritesCount: number
