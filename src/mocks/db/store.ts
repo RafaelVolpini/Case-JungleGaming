@@ -4,7 +4,7 @@ import { NFT_FIXTURE_REVISION } from '../fixtures/nfts.generated'
 
 import type { MockDb } from './types'
 
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 export const STORAGE_KEY = 'kurio:mock-db'
 
 export type DbEvent =

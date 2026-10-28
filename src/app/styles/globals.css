@@ -15,6 +15,7 @@
   --kurio-asterisk: #f0805f;
   --kurio-field-border: #3f2319;
   --kurio-placeholder: #b39463;
+  --kurio-divider: #915e36;
 
   --kurio-surface-raised: #2f1d17;
   --kurio-orange-hover: #c07a3c;
@@ -84,6 +85,7 @@
   --color-brown: var(--kurio-brown);
   --color-asterisk: var(--kurio-asterisk);
   --color-placeholder: var(--kurio-placeholder);
+  --color-divider: var(--kurio-divider);
 
   --font-sans: 'Roboto Mono', ui-monospace, monospace;
   --font-mono: 'Roboto Mono', ui-monospace, monospace;

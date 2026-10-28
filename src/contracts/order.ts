@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { ethAmountSchema, networkSchema, timestampSchema, versionSchema } from './common'
 import { appliedCouponSchema, cartTotalsSchema } from './cart'
 import { nftImageSchema } from './nft'
+import { walletTypeSchema } from './wallet'
 
 export const IDEMPOTENCY_HEADER = 'x-idempotency-key'
 
@@ -39,6 +40,7 @@ export const orderSchema = z.object({
     label: z.string(),
     address: z.string(),
     network: networkSchema,
+    walletType: walletTypeSchema,
   }),
   explorerUrl: z.string(),
   createdAt: timestampSchema,

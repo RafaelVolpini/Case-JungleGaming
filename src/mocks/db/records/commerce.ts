@@ -1,6 +1,7 @@
 import type { EthAmount, Network } from '@/contracts/common'
 import type { OrderStatus } from '@/contracts/order'
 import type { QuoteIssue } from '@/contracts/quote'
+import type { WalletType } from '@/contracts/wallet'
 
 export type CartItemRecord = {
   id: string
@@ -50,6 +51,7 @@ export type OrderRecord = {
   walletId: string
   walletLabel: string
   walletAddress: string
+  walletType: WalletType
   network: Network
   explorerUrl: string
   createdAt: string
