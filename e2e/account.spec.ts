@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { loginViaApi, loginViaUi, openApp } from './support/app'
+import { loginViaApi, openApp } from './support/app'
 import { api } from './support/mock-api'
 
 const save = (page: Page) => page.getByRole('button', { name: 'Salvar', exact: true }).click()

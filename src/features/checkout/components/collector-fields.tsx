@@ -1,20 +1,15 @@
-import { Controller, type UseFormReturn } from 'react-hook-form'
+import type { UseFormReturn } from 'react-hook-form'
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { NETWORK_LABELS, networkSchema } from '@/contracts/common'
 import type { CollectorDetails } from '@/contracts/order'
-import { ENS_SUFFIXES } from '@/lib/ens'
 import { WALLET_TYPE_LABELS, walletTypeSchema, type Wallet } from '@/contracts/wallet'
+
+import { EnsSuffixField } from './ens-suffix-field'
+import { LockedSelectField } from './locked-select-field'
 
 type CollectorFieldsProps = {
   form: UseFormReturn<CollectorDetails>
@@ -37,30 +32,21 @@ export function CollectorFields({
   return (
     <div className="grid gap-x-[25px] gap-y-[13px] md:grid-cols-2">
       <Field label="Nome de exibição" required error={errors.displayName?.message}>
-        {(control) => <Input {...control} autoComplete="name" {...register('displayName')} />}
+        {(field) => <Input {...field} autoComplete="name" {...register('displayName')} />}
       </Field>
       <Field label="Nome de usuário" required error={errors.username?.message}>
-        {(control) => <Input {...control} autoComplete="username" {...register('username')} />}
+        {(field) => <Input {...field} autoComplete="username" {...register('username')} />}
       </Field>
 
-      <Field label="Rede" required>
-        {(field) => (
-          <Select value={wallet.network} disabled>
-            <SelectTrigger id={field.id} className="disabled:opacity-100">
-              <SelectValue placeholder="Selecione uma rede" />
-            </SelectTrigger>
-            <SelectContent>
-              {networkSchema.options.map((network) => (
-                <SelectItem key={network} value={network}>
-                  {NETWORK_LABELS[network]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </Field>
+      <LockedSelectField
+        label="Rede"
+        placeholder="Selecione uma rede"
+        value={wallet.network}
+        options={networkSchema.options}
+        labels={NETWORK_LABELS}
+      />
       <Field label="Nome do perfil" required error={errors.profileName?.message}>
-        {(control) => <Input {...control} {...register('profileName')} />}
+        {(field) => <Input {...field} {...register('profileName')} />}
       </Field>
 
       <Field label="Endereço da carteira" required>
@@ -75,9 +61,9 @@ export function CollectorFields({
         )}
       </Field>
       <Field label="ENS ou carteira secundária (opcional)" className="md:[&>label]:invisible">
-        {(control) => (
+        {(field) => (
           <Input
-            {...control}
+            {...field}
             aria-label="ENS ou carteira secundária (opcional)"
             placeholder="ENS ou carteira secundária (opcional)"
             {...register('secondaryWallet')}
@@ -85,53 +71,21 @@ export function CollectorFields({
         )}
       </Field>
 
-      <Field label="Tipo de carteira" required>
-        {(field) => (
-          <Select value={wallet.walletType} disabled>
-            <SelectTrigger id={field.id} className="disabled:opacity-100">
-              <SelectValue placeholder="Selecione uma carteira" />
-            </SelectTrigger>
-            <SelectContent>
-              {walletTypeSchema.options.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {WALLET_TYPE_LABELS[type]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </Field>
+      <LockedSelectField
+        label="Tipo de carteira"
+        placeholder="Selecione uma carteira"
+        value={wallet.walletType}
+        options={walletTypeSchema.options}
+        labels={WALLET_TYPE_LABELS}
+      />
       <Field label="Código de indicação" required error={errors.referralCode?.message}>
-        {(control) => <Input {...control} {...register('referralCode')} />}
+        {(field) => <Input {...field} {...register('referralCode')} />}
       </Field>
 
       <Field label="E-mail" required error={errors.email?.message}>
-        {(control) => (
-          <Input {...control} type="email" autoComplete="email" {...register('email')} />
-        )}
+        {(field) => <Input {...field} type="email" autoComplete="email" {...register('email')} />}
       </Field>
-      <Field label="Nome ENS" required error={errors.ensSuffix?.message}>
-        {(field) => (
-          <Controller
-            control={control}
-            name="ensSuffix"
-            render={({ field: { value, onChange } }) => (
-              <Select value={value} onValueChange={onChange}>
-                <SelectTrigger id={field.id} className="w-[77px] px-2.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ENS_SUFFIXES.map((suffix) => (
-                    <SelectItem key={suffix} value={suffix}>
-                      {suffix}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        )}
-      </Field>
+      <EnsSuffixField control={control} error={errors.ensSuffix?.message} />
 
       <label className="text-cream col-span-full mt-[9.5px] flex items-start gap-2 text-[15px] leading-6">
         <Checkbox
@@ -150,9 +104,7 @@ export function CollectorFields({
         controlClassName="mt-[8.5px]"
         className="col-span-full mt-1 md:max-w-[350px]"
       >
-        {(control) => (
-          <Textarea {...control} className="h-[152px] resize-none" {...register('note')} />
-        )}
+        {(field) => <Textarea {...field} className="h-[152px] resize-none" {...register('note')} />}
       </Field>
     </div>
   )

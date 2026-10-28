@@ -4,13 +4,9 @@ import { createOrderSchema, IDEMPOTENCY_HEADER } from '@/contracts/order'
 
 import { hashPayload } from '../db/crypto'
 import { paginate } from '../db/catalog'
-import {
-  createOrder,
-  findOrder,
-  projectOrder,
-  scheduleSettlement,
-  settleDueOrders,
-} from '../db/orders'
+import { createOrder } from '../db/orders'
+import { projectOrder } from '../db/order-projection'
+import { findOrder, scheduleSettlement, settleDueOrders } from '../db/order-settlement'
 import { findQuote, isQuoteStale } from '../db/quotes'
 import { getDb, mutateWith } from '../db/store'
 import { getScenario, setScenario } from '../scenarios/state'

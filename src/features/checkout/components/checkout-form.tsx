@@ -1,24 +1,18 @@
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
 
-import { Button } from '@/components/ui/button'
 import type { Cart } from '@/contracts/cart'
-import { collectorDetailsSchema, type CollectorDetails } from '@/contracts/order'
 import type { Quote } from '@/contracts/quote'
 import type { User } from '@/contracts/session'
 import type { Wallet } from '@/contracts/wallet'
 import { ApiRequestError } from '@/lib/http/errors'
 import { useIsExpired } from '@/lib/use-is-expired'
 
+import { useCollectorForm } from '../hooks/use-collector-form'
 import { usePlaceOrder } from '../hooks/use-place-order'
 import { useAcknowledgeQuote, useQuote } from '../hooks/use-quote'
-import { CheckoutItems } from './checkout-items'
-import { CheckoutTotals } from './checkout-totals'
+import { CheckoutSummary } from './checkout-summary'
 import { CollectorFields } from './collector-fields'
-import { QuoteAlerts } from './quote-alerts'
 import { WalletConnectDialog } from './wallet-connect-dialog'
-import { WalletPicker } from './wallet-picker'
 
 type CheckoutFormProps = {
   user: User
@@ -41,19 +35,7 @@ export function CheckoutForm({
   const quoteQuery = useQuote(wallet)
   const acknowledge = useAcknowledgeQuote(wallet.id)
   const placeOrder = usePlaceOrder()
-  const form = useForm<CollectorDetails>({
-    resolver: zodResolver(collectorDetailsSchema),
-    defaultValues: {
-      displayName: user.displayName,
-      username: user.username,
-      profileName: wallet.profileName ?? '',
-      referralCode: wallet.referralCode ?? '',
-      email: user.email,
-      ensSuffix: '.eth',
-      secondaryWallet: '',
-      note: '',
-    },
-  })
+  const form = useCollectorForm(user, wallet)
 
   const secondary = wallets.find((candidate) => candidate.kind === 'secondary')
   const primary = wallets.find((candidate) => candidate.kind === 'primary') ?? wallets[0]
@@ -102,34 +84,19 @@ export function CheckoutForm({
         </div>
       </section>
 
-      <section aria-labelledby="order-title" className="mt-10 md:mt-0">
-        <h2 id="order-title" className="text-cream text-lg leading-6 font-bold">
-          Seus NFTs
-        </h2>
-        <div className="mt-[3px]">
-          <QuoteAlerts
-            quote={quote}
-            expired={expired}
-            acknowledging={acknowledge.isPending}
-            refreshing={quoteQuery.isFetching}
-            onAcknowledge={() => acknowledge.mutate(quote)}
-            onRefresh={() => void quoteQuery.refetch()}
-          />
-          <CheckoutItems items={cart.items} />
-          <CheckoutTotals totals={quote.totals} />
-        </div>
-        <h2 className="text-cream mt-1 text-center text-lg leading-6 font-bold">Carteira e rede</h2>
-        <div className="mt-4">
-          <WalletPicker wallets={wallets} value={wallet.id} onChange={onWalletChange} />
-        </div>
-        <Button
-          type="submit"
-          className="mt-6 h-11 w-full rounded-lg text-base"
-          disabled={blocked || placeOrder.isPending}
-        >
-          Confirmar compra
-        </Button>
-      </section>
+      <CheckoutSummary
+        cart={cart}
+        quote={quote}
+        wallet={wallet}
+        wallets={wallets}
+        expired={expired}
+        acknowledging={acknowledge.isPending}
+        refreshing={quoteQuery.isFetching}
+        submitDisabled={blocked || placeOrder.isPending}
+        onAcknowledge={() => acknowledge.mutate(quote)}
+        onRefresh={() => void quoteQuery.refetch()}
+        onWalletChange={onWalletChange}
+      />
 
       <WalletConnectDialog
         open={dialogOpen}
