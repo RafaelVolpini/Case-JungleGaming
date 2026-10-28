@@ -2,14 +2,9 @@ import { http, HttpResponse } from 'msw'
 
 import { createSeed } from '../db/seed'
 import { getDb, persist, resetDb } from '../db/store'
-import {
-  getScenario,
-  loadScenario,
-  resetScenario,
-  setScenario,
-  type ScenarioConfig,
-} from '../scenarios/config'
-import { API } from './helpers'
+import { getScenario, loadScenario, resetScenario, setScenario } from '../scenarios/state'
+import type { ScenarioConfig } from '../scenarios/types'
+import { API } from './constants'
 
 export const devHandlers = [
   http.post(`${API}/__mock__/reset`, async ({ request }) => {

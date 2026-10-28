@@ -7,7 +7,7 @@ import { cartHandlers } from './handlers/cart'
 import { devHandlers } from './handlers/dev'
 import { favoriteHandlers } from './handlers/favorites'
 import { nftHandlers } from './handlers/nfts'
-import { loadScenario } from './scenarios/config'
+import { loadScenario } from './scenarios/state'
 import { createSocketGateway, type SocketGatewayOptions } from './socket/gateway'
 
 export async function startMockWorker(options: SocketGatewayOptions = {}) {
