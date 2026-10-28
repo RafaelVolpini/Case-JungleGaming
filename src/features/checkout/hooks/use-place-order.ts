@@ -3,12 +3,14 @@ import { useNavigate } from '@tanstack/react-router'
 
 import type { CreateOrderInput } from '@/contracts/order'
 import { useSession } from '@/features/auth/hooks/use-session'
+import { ApiRequestError } from '@/lib/http/errors'
 import { getIdempotencyKey } from '@/lib/idempotency'
 import { queryKeys } from '@/lib/query/keys'
 
 import { writePendingOrderId } from '@/features/orders/lib/pending-order'
 
 import { createOrderRequest } from '../api/checkout-api'
+import { clearOrderAttempt, writeOrderAttempt } from '../lib/order-attempt'
 
 export function usePlaceOrder() {
   const queryClient = useQueryClient()
@@ -20,12 +22,14 @@ export function usePlaceOrder() {
       createOrderRequest(input, getIdempotencyKey(`order:${input.quoteId}`)),
 
     onSuccess: (order) => {
+      clearOrderAttempt(scope)
       writePendingOrderId(scope, order.id)
       queryClient.setQueryData(queryKeys.orders.detail(scope, order.id), order)
       void navigate({ to: '/pedido/$orderId', params: { orderId: order.id } })
     },
 
-    onError: (error) => {
+    onError: (error, input) => {
+      if (error instanceof ApiRequestError && error.isTransient) writeOrderAttempt(scope, { input })
       if ((error as { code?: string }).code === 'QUOTE_STALE') {
         void queryClient.invalidateQueries({ queryKey: queryKeys.quote(scope) })
       }

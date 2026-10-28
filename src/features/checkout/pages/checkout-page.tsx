@@ -14,7 +14,9 @@ import { useIsDesktop } from '@/lib/use-media-query'
 
 import { CheckoutForm } from '../components/checkout-form'
 import { MobileCheckout } from '../components/mobile/mobile-checkout'
+import { OrderRecovery } from '../components/order-recovery'
 import { MobileCheckoutHeader } from '../components/mobile/mobile-checkout-header'
+import { useOrderAttempt } from '../hooks/use-order-attempt'
 import { useQuote } from '../hooks/use-quote'
 
 function CheckoutSkeleton() {
@@ -45,6 +47,7 @@ export function CheckoutPage() {
   const wallets = useWallets()
   const cart = useCart()
   const pending = usePendingOrder()
+  const attempt = useOrderAttempt()
   const [selectedId, setSelectedId] = useState<string>()
 
   const list = wallets.data ?? []
@@ -72,6 +75,8 @@ export function CheckoutPage() {
       ) : (
         <MobileCheckoutHeader />
       )}
+
+      {attempt && <OrderRecovery input={attempt.input} />}
 
       {pending && (
         <p

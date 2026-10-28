@@ -5,16 +5,24 @@ export const USERS = {
   bruno: { email: 'bruno@kurio.test', password: 'kurio-bruno-2026', name: 'Bruno Carvalho' },
 } as const
 
-type ApiOptions = { method?: string; body?: unknown; auth?: boolean }
+type ApiOptions = {
+  method?: string
+  body?: unknown
+  auth?: boolean
+  headers?: Record<string, string>
+}
 
 export async function api<T = unknown>(
   page: Page,
   path: string,
-  { method = 'GET', body, auth = false }: ApiOptions = {},
+  { method = 'GET', body, auth = false, headers: extra = {} }: ApiOptions = {},
 ): Promise<{ status: number; body: T }> {
   return page.evaluate(
-    async ([url, verb, payload, withAuth]) => {
-      const headers: Record<string, string> = { 'content-type': 'application/json' }
+    async ([url, verb, payload, withAuth, extraHeaders]) => {
+      const headers: Record<string, string> = {
+        'content-type': 'application/json',
+        ...(extraHeaders as Record<string, string>),
+      }
       const visitor = localStorage.getItem('kurio:visitor-id')
       if (visitor) headers['x-visitor-id'] = visitor
       const token = localStorage.getItem('kurio:session-token')
@@ -27,7 +35,7 @@ export async function api<T = unknown>(
       const text = await response.text()
       return { status: response.status, body: text ? JSON.parse(text) : null }
     },
-    [path, method, body, auth] as const,
+    [path, method, body, auth, extra] as const,
   ) as Promise<{ status: number; body: T }>
 }
 
