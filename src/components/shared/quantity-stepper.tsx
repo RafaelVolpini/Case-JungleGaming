@@ -8,14 +8,14 @@ type QuantityStepperProps = {
   max: number
   onChange: (value: number) => void
   disabled?: boolean
-  size?: 'lg' | 'sm'
+  size?: 'lg' | 'compact'
   label?: string
   className?: string
 }
 
 const buttonSize = {
   lg: 'h-12 w-[31px]',
-  sm: 'size-7',
+  compact: 'h-[29px] w-[19px]',
 }
 
 export function QuantityStepper({
@@ -45,15 +45,9 @@ export function QuantityStepper({
         onClick={() => value > min && onChange(value - 1)}
         className={buttonClassName}
       >
-        <Minus className={size === 'lg' ? 'size-5' : 'size-4'} strokeWidth={3} />
+        <Minus className={size === 'lg' ? 'size-5' : 'size-3'} strokeWidth={3} />
       </button>
-      <output
-        aria-live="polite"
-        className={cn(
-          'text-cream min-w-4 text-center',
-          size === 'lg' ? 'text-base' : 'text-base font-bold',
-        )}
-      >
+      <output aria-live="polite" className={cn('text-cream min-w-4 text-center', 'text-base')}>
         {value}
       </output>
       <button
@@ -64,7 +58,7 @@ export function QuantityStepper({
         onClick={() => value < max && onChange(value + 1)}
         className={buttonClassName}
       >
-        <Plus className={size === 'lg' ? 'size-5' : 'size-4'} strokeWidth={3} />
+        <Plus className={size === 'lg' ? 'size-5' : 'size-3'} strokeWidth={3} />
       </button>
     </div>
   )

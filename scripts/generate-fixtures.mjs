@@ -125,6 +125,7 @@ const FIGMA_NFTS = [
     price: '1.39',
     art: 'sage',
     rarity: 'common',
+    network: 'ethereum',
     series: 'Kurio Apes',
     favorites: 105,
   },
@@ -134,6 +135,7 @@ const FIGMA_NFTS = [
     price: '1.79',
     art: 'ivory',
     rarity: 'rare',
+    network: 'ethereum',
     series: 'Kurio Apes',
     favorites: 142,
   },
@@ -202,8 +204,13 @@ function slugify(text) {
 
 const collections = expand(COLLECTION_COUNTS)
 const networks = expand(NETWORK_COUNTS)
-const ethereumIndex = networks.indexOf('ethereum')
-;[networks[0], networks[ethereumIndex]] = [networks[ethereumIndex], networks[0]]
+FIGMA_NFTS.forEach((figma, index) => {
+  if (!figma.network) return
+  const match = networks.findIndex(
+    (value, position) => position >= index && value === figma.network,
+  )
+  ;[networks[index], networks[match]] = [networks[match], networks[index]]
+})
 
 const SOLD_OUT = new Set([13, 41, 97, 150])
 const adjectives = Object.keys(ART_BY_ADJECTIVE)

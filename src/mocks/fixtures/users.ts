@@ -89,7 +89,7 @@ export const USER_SEEDS: UserSeed[] = [
 ]
 
 export const NETWORK_FEES: Record<Network, string> = {
-  ethereum: '0.0042',
-  polygon: '0.0008',
-  solana: '0.0003',
+  ethereum: '0.016',
+  polygon: '0.004',
+  solana: '0.002',
 }
