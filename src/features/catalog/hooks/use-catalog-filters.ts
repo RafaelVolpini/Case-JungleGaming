@@ -3,10 +3,10 @@ import { useCallback, useMemo } from 'react'
 
 import type { CatalogQuery } from '@/contracts/nft'
 
-import { resolveCatalogQuery, stripCatalogDefaults } from '../search'
+import { resolveCatalogQuery, stripCatalogDefaults, type CatalogSearch } from '../search'
 
 export function useCatalogFilters() {
-  const search = useSearch({ from: '/_shell/' })
+  const search = useSearch({ strict: false }) as CatalogSearch
   const navigate = useNavigate({ from: '/' })
   const query = useMemo(() => resolveCatalogQuery(search), [search])
 
