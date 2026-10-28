@@ -1,5 +1,6 @@
 import type { EthAmount, Network } from '@/contracts/common'
 import type { OrderStatus } from '@/contracts/order'
+import type { QuoteIssue } from '@/contracts/quote'
 
 export type CartItemRecord = {
   id: string
@@ -54,6 +55,8 @@ export type OrderRecord = {
   createdAt: string
   confirmedAt: string | null
   declinedReason: string | null
+  settleAt: string
+  plannedOutcome: 'confirmed' | 'declined'
   version: number
 }
 
@@ -77,6 +80,7 @@ export type QuoteRecord = {
   network: Network
   issuedAt: string
   expiresAt: string
+  issues: QuoteIssue[]
 }
 
 export type IdempotencyRecord = {

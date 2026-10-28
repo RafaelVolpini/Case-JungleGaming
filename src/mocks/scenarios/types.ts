@@ -11,12 +11,17 @@ export const FAILURE_MODES = [
 ] as const
 export type FailureMode = (typeof FAILURE_MODES)[number]
 
+export const PAYMENT_OUTCOMES = ['confirm', 'decline'] as const
+export type PaymentOutcome = (typeof PAYMENT_OUTCOMES)[number]
+
 export type ScenarioConfig = {
   latency: LatencyProfile
   failure: FailureMode
   scope: string[]
   failEvery: number
   seed: number
+  payment: PaymentOutcome
+  orderTimeout: boolean
 }
 
 export const DEFAULT_SCENARIO: ScenarioConfig = {
@@ -25,4 +30,6 @@ export const DEFAULT_SCENARIO: ScenarioConfig = {
   scope: [],
   failEvery: 3,
   seed: 1,
+  payment: 'confirm',
+  orderTimeout: false,
 }

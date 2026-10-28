@@ -5,8 +5,10 @@ import {
   DEFAULT_SCENARIO,
   FAILURE_MODES,
   LATENCY_PROFILES,
+  PAYMENT_OUTCOMES,
   type FailureMode,
   type LatencyProfile,
+  type PaymentOutcome,
   type ScenarioConfig,
 } from './types'
 
@@ -22,6 +24,10 @@ function isFailure(value: string | null): value is FailureMode {
   return value !== null && (FAILURE_MODES as readonly string[]).includes(value)
 }
 
+function isPayment(value: string | null): value is PaymentOutcome {
+  return value !== null && (PAYMENT_OUTCOMES as readonly string[]).includes(value)
+}
+
 function applySearchParams(base: ScenarioConfig, search: string): ScenarioConfig {
   const params = new URLSearchParams(search)
   const next = { ...base }
@@ -30,12 +36,16 @@ function applySearchParams(base: ScenarioConfig, search: string): ScenarioConfig
   const scope = params.get('failScope')
   const failEvery = params.get('failEvery')
   const seed = params.get('seed')
+  const payment = params.get('payment')
+  const orderTimeout = params.get('orderTimeout')
 
   if (isLatency(latency)) next.latency = latency
   if (isFailure(failure)) next.failure = failure
   if (scope) next.scope = scope.split(',').filter(Boolean)
   if (failEvery) next.failEvery = Math.max(1, Number(failEvery) || DEFAULT_SCENARIO.failEvery)
   if (seed) next.seed = Number(seed) || DEFAULT_SCENARIO.seed
+  if (isPayment(payment)) next.payment = payment
+  if (orderTimeout) next.orderTimeout = orderTimeout === '1'
   return next
 }
 

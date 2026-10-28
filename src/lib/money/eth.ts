@@ -58,3 +58,7 @@ export function formatEth(
   const value = `${whole}.${padded}`
   return unit ? `${value} ETH` : value
 }
+
+export function roundEth(amount: EthAmount, decimals: number): EthAmount {
+  return fromBig(toBig(amount).round(decimals, Big.roundHalfUp))
+}

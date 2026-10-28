@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { ethAmountSchema, timestampSchema, versionSchema } from './common'
+import { ethAmountSchema, networkSchema, timestampSchema, versionSchema } from './common'
 import { cartTotalsSchema } from './cart'
 
 export const quoteIssueSchema = z.object({
@@ -33,3 +33,9 @@ export type Quote = z.infer<typeof quoteSchema>
 export function isQuoteConfirmable(quote: Quote): boolean {
   return quote.issues.length === 0 && new Date(quote.expiresAt) > new Date()
 }
+
+export const createQuoteSchema = z.object({
+  walletId: z.string(),
+  network: networkSchema,
+})
+export type CreateQuoteInput = z.infer<typeof createQuoteSchema>
