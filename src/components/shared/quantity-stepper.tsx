@@ -8,7 +8,7 @@ type QuantityStepperProps = {
   max: number
   onChange: (value: number) => void
   disabled?: boolean
-  size?: 'lg' | 'compact'
+  size?: 'lg' | 'compact' | 'round'
   label?: string
   className?: string
 }
@@ -16,6 +16,7 @@ type QuantityStepperProps = {
 const buttonSize = {
   lg: 'h-12 w-[31px]',
   compact: 'h-[29px] w-[19px]',
+  round: 'size-6',
 }
 
 export function QuantityStepper({
@@ -29,7 +30,10 @@ export function QuantityStepper({
   className,
 }: QuantityStepperProps) {
   const buttonClassName = cn(
-    'bg-primary text-primary-foreground hover:bg-primary-hover grid shrink-0 place-items-center rounded-full transition-colors outline-none',
+    size === 'round'
+      ? 'bg-surface-raised text-cream hover:text-primary-light aria-disabled:text-primary/40'
+      : 'bg-primary text-primary-foreground hover:bg-primary-hover',
+    'grid shrink-0 place-items-center rounded-full transition-colors outline-none',
     'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
     'disabled:cursor-not-allowed disabled:opacity-40 aria-disabled:cursor-not-allowed',
     buttonSize[size],
@@ -47,7 +51,13 @@ export function QuantityStepper({
       >
         <Minus className={size === 'lg' ? 'size-5' : 'size-3'} strokeWidth={3} />
       </button>
-      <output aria-live="polite" className={cn('text-cream min-w-4 text-center', 'text-base')}>
+      <output
+        aria-live="polite"
+        className={cn(
+          'text-cream min-w-4 text-center text-base',
+          size === 'round' && 'relative top-1.5',
+        )}
+      >
         {value}
       </output>
       <button

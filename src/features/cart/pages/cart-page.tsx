@@ -1,5 +1,6 @@
 import { ErrorState } from '@/components/feedback/error-state'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { useIsDesktop } from '@/lib/use-media-query'
 
 import { CartEmpty } from '../components/cart-empty'
 import { CartRecommendations } from '../components/cart-recommendations'
@@ -7,8 +8,14 @@ import { CartSkeleton } from '../components/cart-skeleton'
 import { CartTable } from '../components/cart-table'
 import { OrderSummary } from '../components/order-summary'
 import { useCart } from '../hooks/use-cart'
+import { MobileCartPage } from './mobile-cart-page'
 
 export function CartPage() {
+  const isDesktop = useIsDesktop()
+  return isDesktop ? <DesktopCartPage /> : <MobileCartPage />
+}
+
+function DesktopCartPage() {
   const { data: cart, error, isPending, refetch } = useCart()
   const firstItem = cart?.items[0]
 
