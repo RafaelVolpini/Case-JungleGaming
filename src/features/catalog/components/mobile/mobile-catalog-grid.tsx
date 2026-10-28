@@ -3,37 +3,10 @@ import { ErrorState } from '@/components/feedback/error-state'
 import { NftCardSkeleton } from '@/components/nft/nft-card-skeleton'
 import { Pagination } from '@/components/shared/pagination'
 import { Button } from '@/components/ui/button'
-import type { NftSummary } from '@/contracts/nft'
 
 import { useCatalogFilters } from '../../hooks/use-catalog-filters'
 import { useCatalog } from '../../hooks/use-catalog-queries'
-import { MobileNftCard } from './mobile-nft-card'
-
-const COLUMN = 'flex min-w-0 flex-1 flex-col gap-5'
-
-function Columns({ items }: { items: NftSummary[] }) {
-  const left = items.filter((_, index) => index % 2 === 0)
-  const right = items.filter((_, index) => index % 2 === 1)
-
-  return (
-    <div className="flex gap-4">
-      <ul className={COLUMN}>
-        {left.map((nft, index) => (
-          <li key={nft.id}>
-            <MobileNftCard nft={nft} imageAlign="top" priority={index < 2} />
-          </li>
-        ))}
-      </ul>
-      <ul className={`${COLUMN} mt-8`}>
-        {right.map((nft) => (
-          <li key={nft.id}>
-            <MobileNftCard nft={nft} imageAlign="bottom" />
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
+import { MobileNftColumns } from './mobile-nft-columns'
 
 export function MobileCatalogGrid() {
   const { query, update, reset } = useCatalogFilters()
@@ -73,7 +46,7 @@ export function MobileCatalogGrid() {
         {data.pagination.total} NFTs encontrados. Página {data.pagination.page} de{' '}
         {data.pagination.totalPages}.
       </p>
-      <Columns items={data.items} />
+      <MobileNftColumns items={data.items} />
       <Pagination
         className="mt-8"
         page={data.pagination.page}

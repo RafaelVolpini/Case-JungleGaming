@@ -3,7 +3,7 @@ import { formatEth, isZeroEth } from '@/lib/money/eth'
 
 function FeeRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className="text-cream flex items-center justify-between pl-[169px] leading-6">
+    <div className="text-cream flex items-center justify-between md:pl-[169px] leading-6">
       <dt className={strong ? 'text-[15px] font-bold' : 'text-[15px]'}>{label}</dt>
       <dd className={strong ? 'text-primary-light text-lg/6 font-bold' : 'text-lg/6'}>{value}</dd>
     </div>

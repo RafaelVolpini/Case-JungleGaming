@@ -11,7 +11,7 @@ export function OrderDetails({ order }: { order: Order }) {
     <>
       <OrderHero status={order.status} />
       <OrderSummaryStrip order={order} />
-      <section aria-labelledby="order-details-title" className="px-4 pt-[16.5px] pb-12 md:px-11">
+      <section aria-labelledby="order-details-title" className="px-6 pt-[16.5px] pb-12 md:px-11">
         <h2
           id="order-details-title"
           className="text-cream mb-[3.5px] text-[15px] leading-6 font-bold"

@@ -17,7 +17,7 @@ import { WALLET_TYPE_LABELS, walletTypeSchema } from '@/contracts/wallet'
 import type { WalletFormValues } from '../lib/wallet-form'
 
 const FIELD = { labelClassName: 'text-[15px]/6', controlClassName: 'mt-0' }
-const BLANK_LABEL = { labelClassName: 'sr-only', controlClassName: 'mt-6' }
+const BLANK_LABEL = { labelClassName: 'sr-only', controlClassName: 'mt-0 md:mt-6' }
 
 type WalletFieldsProps = { form: UseFormReturn<WalletFormValues>; user: User }
 

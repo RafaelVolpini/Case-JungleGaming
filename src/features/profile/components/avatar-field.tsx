@@ -11,7 +11,7 @@ export function AvatarField({ value, onChange }: AvatarFieldProps) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="-mt-[6px]">
+    <div className="md:-mt-[6px]">
       <p id="avatar-label" className="text-cream text-[15px] leading-6">
         Avatar
       </p>

@@ -17,13 +17,13 @@ function Cell({ label, value, strong, className }: CellProps) {
 }
 
 const DIVIDER =
-  "before:bg-primary before:absolute before:top-[3.5px] before:left-0 before:h-8 before:w-px before:content-['']"
+  "before:bg-primary before:absolute before:top-0 md:before:top-[3.5px] before:left-0 before:h-8 before:w-px before:content-['']"
 
 export function OrderSummaryStrip({ order }: { order: Order }) {
   const date = order.confirmedAt ?? order.createdAt
 
   return (
-    <dl className="border-primary grid h-[66px] grid-cols-2 border-b pt-[13px] md:grid-cols-[181px_144px_126px_1fr]">
+    <dl className="border-primary grid grid-cols-2 gap-y-4 border-b px-2 py-4 md:h-[66px] md:grid-cols-[181px_144px_126px_1fr] md:gap-y-0 md:px-0 md:pt-[13px] md:pb-0">
       <Cell
         strong
         label="ID da transação"
@@ -31,7 +31,11 @@ export function OrderSummaryStrip({ order }: { order: Order }) {
         className="md:pl-9"
       />
       <Cell label="Data" value={formatShortDate(date)} className={DIVIDER} />
-      <Cell label="Total" value={formatEth(order.totals.totalEth)} className={DIVIDER} />
+      <Cell
+        label="Total"
+        value={formatEth(order.totals.totalEth)}
+        className="md:before:bg-primary md:before:absolute md:before:top-[3.5px] md:before:left-0 md:before:h-8 md:before:w-px md:before:content-['']"
+      />
       <Cell
         strong
         label="Carteira"

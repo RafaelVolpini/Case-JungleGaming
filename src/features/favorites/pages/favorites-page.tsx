@@ -7,12 +7,15 @@ import { NftCardSkeleton } from '@/components/nft/nft-card-skeleton'
 import { Pagination } from '@/components/shared/pagination'
 import { buttonVariants } from '@/components/ui/button'
 import { CardActions } from '@/features/catalog/components/card-actions'
+import { MobileNftColumns } from '@/features/catalog/components/mobile/mobile-nft-columns'
+import { useIsDesktop } from '@/lib/use-media-query'
 
 import { useFavoriteList } from '../hooks/use-favorites'
 
 const GRID = 'grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 md:gap-x-[34px] md:gap-y-[48px]'
 
 export function FavoritesPage() {
+  const isDesktop = useIsDesktop()
   const [page, setPage] = useState(1)
   const { data, error, isPending, isPlaceholderData, refetch } = useFavoriteList(page)
 
@@ -49,13 +52,17 @@ export function FavoritesPage() {
         )}
         {data && data.items.length > 0 && (
           <>
-            <ul className={`${GRID} ${isPlaceholderData ? 'opacity-60' : ''}`}>
-              {data.items.map((nft) => (
-                <li key={nft.id}>
-                  <NftCard nft={nft} actions={<CardActions nft={nft} />} />
-                </li>
-              ))}
-            </ul>
+            {isDesktop ? (
+              <ul className={`${GRID} ${isPlaceholderData ? 'opacity-60' : ''}`}>
+                {data.items.map((nft) => (
+                  <li key={nft.id}>
+                    <NftCard nft={nft} actions={<CardActions nft={nft} />} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <MobileNftColumns items={data.items} />
+            )}
             <Pagination
               className="mt-10"
               page={data.pagination.page}
