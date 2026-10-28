@@ -56,8 +56,9 @@ export function NftCard({
         <div className="mt-[8.5px] max-md:mt-3 max-md:px-2">
           <h3
             className={cn(
-              'text-cream truncate leading-[22px] max-md:text-xs',
+              'text-cream truncate max-md:text-xs',
               compact ? 'text-sm' : 'text-[15px]',
+              'leading-[22px]',
             )}
           >
             {nft.name}
@@ -66,8 +67,8 @@ export function NftCard({
             priceEth={nft.priceEth}
             previousPriceEth={nft.previousPriceEth}
             className={cn(
-              'leading-6 max-md:text-sm',
               compact ? '-mt-[2.5px] text-sm' : 'mt-[5.5px] text-lg',
+              'leading-6 max-md:text-sm',
             )}
           />
         </div>
