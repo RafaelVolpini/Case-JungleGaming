@@ -6,15 +6,7 @@ import { totalAvailable } from './projections'
 import { getDb } from './store'
 import type { NftRecord } from './types'
 
-/**
- * Catalog querying lives in the database layer, not the handler, so the
- * handler stays a thin translation of HTTP to a query. Filters are applied
- * before sorting and sorting before paging — the order matters, because
- * paging a differently-sorted set would make page 2 unreachable content.
- */
-
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
-/** Fixed "now" for the `new` feed, so the fixture catalog stays deterministic. */
 const CATALOG_NOW = new Date('2026-10-01T00:00:00.000Z').getTime()
 
 function matchesSearch(nft: NftRecord, term: string): boolean {
@@ -60,9 +52,6 @@ const COMPARATORS: Record<
 
 export function sortNfts(nfts: NftRecord[], sort: CatalogQuery['sort']): NftRecord[] {
   const primary = COMPARATORS[sort]
-  // The id tiebreak keeps equal-ranked NFTs in a fixed order. Without it two
-  // items at the same price could swap between requests, which would make
-  // pagination skip rows and visual regression baselines flap.
   return [...nfts].sort((a, b) => primary(a, b) || a.id.localeCompare(b.id))
 }
 
@@ -78,7 +67,6 @@ export function paginate<T>(items: T[], page: number, perPage = CATALOG_PER_PAGE
   }
 }
 
-/** Counts shown beside each sidebar filter, derived from the data itself. */
 export function collectionCounts(): Record<string, number> {
   const counts: Record<string, number> = {}
   for (const nft of getDb().nfts) {

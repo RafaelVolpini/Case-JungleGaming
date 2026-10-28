@@ -7,12 +7,6 @@ import { findCoupon, getOrCreateCart, isCouponExpired, projectCart, touchCart } 
 import { mutate } from '../db/store'
 import { API, errorResponse, fieldErrors, resolveCaller, simulateNetwork } from './helpers'
 
-/**
- * The cart works for visitors and for signed-in users alike: a visitor cart is
- * keyed by the `x-visitor-id` header and folded into the account on login
- * (see `mergeVisitorCart`), which is what preserves a visitor's items through
- * authentication.
- */
 export const cartHandlers = [
   http.get(`${API}/cart`, async ({ request }) => {
     const failure = await simulateNetwork(request)
@@ -145,8 +139,6 @@ export const cartHandlers = [
         return errorResponse('NOT_FOUND', 'Item não encontrado no carrinho.')
       }
 
-      // An empty cart cannot carry a coupon; leaving one would show a discount
-      // against a zero subtotal.
       if (cart.items.length === 0) cart.couponCode = null
 
       touchCart(cart)

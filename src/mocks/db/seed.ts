@@ -7,11 +7,6 @@ import { hashPassword } from './crypto'
 import { SCHEMA_VERSION } from './store'
 import type { MockDb, NftRecord, UserRecord, WalletRecord } from './types'
 
-/**
- * Password hashing is async, but seeding must stay synchronous so that `reset`
- * can be called from a handler. The hashes are computed once by
- * `prepareSeed()` during startup and cached here.
- */
 let hashedUsers: UserRecord[] | null = null
 
 export async function prepareSeed(): Promise<void> {
@@ -33,11 +28,6 @@ export async function prepareSeed(): Promise<void> {
   )
 }
 
-/**
- * Builds a complete, known-good database. Every call produces the same result,
- * which is what makes `POST /__mock__/reset` a reliable starting point for
- * each Playwright test.
- */
 export function createSeed(): MockDb {
   if (!hashedUsers) {
     throw new Error('[mock-db] prepareSeed() must run before createSeed()')
@@ -46,8 +36,6 @@ export function createSeed(): MockDb {
   let sequence = 0
   const nextVersion = () => (sequence += 1)
 
-  // `eth()` validates on the way in, so a malformed fixture fails here rather
-  // than surfacing as a broken total somewhere in the checkout.
   const nfts: NftRecord[] = NFT_SEEDS.map((seed) => ({
     id: seed.id,
     slug: seed.slug,

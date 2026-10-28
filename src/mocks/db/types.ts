@@ -3,13 +3,6 @@ import type { OrderStatus } from '@/contracts/order'
 import type { Rarity } from '@/contracts/nft'
 import type { WalletKind, WalletType } from '@/contracts/wallet'
 
-/**
- * Internal records of the simulated backend. They are deliberately NOT the API
- * shapes: records hold what the server owns (password hashes, ownership, raw
- * references), and the handlers project them into contract shapes on the way
- * out. Keeping the two apart is what lets the cart recompute prices on read.
- */
-
 export type EditionRecord = {
   id: string
   label: string
@@ -52,7 +45,6 @@ export type UserRecord = {
   displayName: string
   username: string
   email: string
-  /** SHA-256 of `salt:password`. The plaintext never reaches the store. */
   passwordHash: string
   passwordSalt: string
   ensName: string | null
@@ -66,11 +58,6 @@ export type SessionRecord = {
   expiresAt: string
 }
 
-/**
- * A cart line references the NFT and edition; it never copies the price.
- * Prices are read from the NFT when the cart is projected, so a `nft.updated`
- * event is reflected in the cart with no synchronisation code at all.
- */
 export type CartItemRecord = {
   id: string
   nftId: string
@@ -81,7 +68,6 @@ export type CartItemRecord = {
 
 export type CartRecord = {
   id: string
-  /** Null for a visitor cart; set once the cart is merged into an account. */
   ownerId: string | null
   items: CartItemRecord[]
   couponCode: string | null
@@ -101,7 +87,6 @@ export type OrderItemRecord = {
   editionIndex: number
   editionTotal: number
   quantity: number
-  /** Frozen at creation — the receipt must not follow the catalog. */
   unitPriceEth: EthAmount
   subtotalEth: EthAmount
 }
@@ -147,7 +132,6 @@ export type QuoteRecord = {
   id: string
   ownerId: string
   cartVersion: number
-  /** Snapshot of unit prices at issue time, used to detect drift on submit. */
   lines: Array<{ itemId: string; nftId: string; editionId: string; quantity: number; unitPriceEth: EthAmount }>
   subtotalEth: EthAmount
   discountEth: EthAmount
@@ -160,10 +144,6 @@ export type QuoteRecord = {
   expiresAt: string
 }
 
-/**
- * Idempotency ledger for order creation. `requestHash` is what makes replaying
- * the same key with a different body a conflict rather than a silent overwrite.
- */
 export type IdempotencyRecord = {
   key: string
   ownerId: string
@@ -178,12 +158,10 @@ export type MockDb = {
   users: UserRecord[]
   sessions: SessionRecord[]
   carts: CartRecord[]
-  /** userId -> NFT ids. Visitors cannot favourite. */
   favorites: Record<string, string[]>
   orders: OrderRecord[]
   wallets: WalletRecord[]
   quotes: QuoteRecord[]
   idempotency: IdempotencyRecord[]
-  /** Monotonic counter backing every record's `version`. */
   sequence: number
 }

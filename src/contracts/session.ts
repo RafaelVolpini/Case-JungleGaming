@@ -8,7 +8,6 @@ export const userSchema = z.object({
   username: z.string(),
   email: z.email(),
   ensName: z.string().nullable(),
-  /** The Figma uses an emoji picker rather than an image upload. */
   avatarEmoji: z.string(),
   createdAt: timestampSchema,
 })
@@ -19,10 +18,6 @@ export const sessionSchema = z.object({
   expiresAt: timestampSchema,
 })
 export type Session = z.infer<typeof sessionSchema>
-
-/* -------------------------------------------------------------------------- */
-/*  Requests                                                                   */
-/* -------------------------------------------------------------------------- */
 
 const passwordSchema = z
   .string()

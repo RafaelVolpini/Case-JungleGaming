@@ -1,15 +1,10 @@
 import { eth, type EthAmount } from '@/contracts/common'
 
-/**
- * Deterministic coupon scenarios. `KURIO10` is the happy path; `EXPIRADO` and
- * `VENCIDO30` exercise the two rejection branches the challenge calls out.
- */
 export type CouponFixture = {
   code: string
   description: string
   percentOff: number | null
   amountOffEth: EthAmount | null
-  /** Null means it never expires. */
   expiresAt: string | null
 }
 

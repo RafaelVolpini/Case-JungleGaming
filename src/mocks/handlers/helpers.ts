@@ -8,7 +8,6 @@ import { countRequest, getScenario, isInScope, resolveDelay } from '../scenarios
 
 export const API = '/api'
 
-/** Header names shared with the Axios client. */
 export const AUTH_HEADER = 'authorization'
 export const VISITOR_HEADER = 'x-visitor-id'
 
@@ -35,14 +34,6 @@ export function errorResponse(
   )
 }
 
-/**
- * Applies the active network scenario. Returns a response when the request
- * should fail, or null to let the handler proceed.
- *
- * Every handler calls this first. Keeping it here rather than inside each
- * resolver is what lets the whole failure surface be reconfigured from one
- * place — and keeps the business logic free of failure simulation.
- */
 export async function simulateNetwork(request: Request): Promise<Response | null> {
   const config = getScenario()
   const { pathname } = new URL(request.url)
@@ -53,15 +44,12 @@ export async function simulateNetwork(request: Request): Promise<Response | null
 
   switch (config.failure) {
     case 'offline':
-      // A transport-level failure, not an HTTP status: this is what the UI
-      // sees when the connection drops.
       return HttpResponse.error()
 
     case 'server-error':
       return errorResponse('SERVER_ERROR', 'Falha temporária no servidor. Tente novamente.')
 
     case 'timeout':
-      // Never settles; the Axios timeout is what ends the request.
       await delay('infinite')
       return null
 
@@ -78,29 +66,12 @@ export async function simulateNetwork(request: Request): Promise<Response | null
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Identity                                                                   */
-/* -------------------------------------------------------------------------- */
-
 export type Caller = {
   user: UserRecord | null
   session: SessionRecord | null
-  /** Stable id for an anonymous cart. */
   visitorId: string | null
 }
 
-/**
- * Resolves who is calling.
- *
- * The token travels as a bearer header rather than a cookie: MSW's cookie
- * handling differs between the browser worker and Node, and a header behaves
- * identically in both, which matters because the same handlers back the
- * Playwright suite. A production backend should use an httpOnly cookie —
- * noted as a deliberate simplification in ARCHITECTURE.md.
- *
- * An expired session is removed on sight, so expiry behaves the same whether
- * it lapses mid-navigation or between page loads.
- */
 export function resolveCaller(request: Request): Caller {
   const db = getDb()
   const visitorId = request.headers.get(VISITOR_HEADER)
@@ -121,7 +92,6 @@ export function resolveCaller(request: Request): Caller {
   return { user, session, visitorId }
 }
 
-/** Guard for the endpoints the challenge requires to be authenticated. */
 export function requireUser(
   caller: Caller,
 ): { ok: true; user: UserRecord } | { ok: false; response: Response } {
@@ -134,11 +104,6 @@ export function requireUser(
   return { ok: true, user: caller.user }
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Parsing                                                                    */
-/* -------------------------------------------------------------------------- */
-
-/** Collapses Zod issues into the `fields` map the error envelope carries. */
 export function fieldErrors(
   issues: Array<{ path: PropertyKey[]; message: string }>,
 ): Record<string, string> {

@@ -3,13 +3,6 @@ import type { NftDetail, NftSummary } from '@/contracts/nft'
 import { getDb } from './store'
 import type { NftRecord } from './types'
 
-/**
- * Records in, contract shapes out. All derived values — availability, image
- * URL, alt text — are computed here, so no handler has to remember to do it
- * and no two handlers can derive them differently.
- */
-
-/** Artwork is generated into public/nft at fixture time. */
 export function imageFor(nft: NftRecord) {
   const collection = getDb().collections.find((item) => item.id === nft.collectionId)
   return {
@@ -56,9 +49,6 @@ export function toNftDetail(nft: NftRecord, favoriteIds: Set<string>): NftDetail
   return {
     ...toNftSummary(nft, favoriteIds),
     description: nft.description,
-    // The detail gallery reuses the single artwork at different crops; the
-    // Figma shows four thumbnails, and inventing four distinct files per NFT
-    // would bloat the repo without changing what is being evaluated.
     images: [imageFor(nft)],
     editions: nft.editions.map((edition) => ({ ...edition })),
     attributes: nft.attributes.map((attribute) => ({ ...attribute })),
@@ -69,7 +59,6 @@ export function toNftDetail(nft: NftRecord, favoriteIds: Set<string>): NftDetail
   }
 }
 
-/** Favourites are per-user; a visitor simply has none. */
 export function favoriteIdsFor(userId: string | null): Set<string> {
   if (!userId) return new Set()
   return new Set(getDb().favorites[userId] ?? [])

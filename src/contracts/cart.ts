@@ -3,10 +3,6 @@ import { z } from 'zod'
 import { ethAmountSchema, networkSchema, timestampSchema, versionSchema } from './common'
 import { nftImageSchema } from './nft'
 
-/**
- * Items are keyed by NFT *and* edition: stock is tracked per edition, so the
- * same NFT in two editions is two independent lines.
- */
 export const cartItemSchema = z.object({
   id: z.string(),
   nftId: z.string(),
@@ -23,9 +19,7 @@ export const cartItemSchema = z.object({
   }),
   quantity: z.number().int().positive(),
   unitPriceEth: ethAmountSchema,
-  /** `unitPriceEth * quantity`, computed server-side so the UI never derives money. */
   subtotalEth: ethAmountSchema,
-  /** Current stock for this edition. Drives the quantity stepper's ceiling. */
   availableQuantity: z.number().int().nonnegative(),
 })
 export type CartItem = z.infer<typeof cartItemSchema>
@@ -54,10 +48,6 @@ export const cartSchema = z.object({
   version: versionSchema,
 })
 export type Cart = z.infer<typeof cartSchema>
-
-/* -------------------------------------------------------------------------- */
-/*  Requests                                                                   */
-/* -------------------------------------------------------------------------- */
 
 export const addCartItemSchema = z.object({
   nftId: z.string(),

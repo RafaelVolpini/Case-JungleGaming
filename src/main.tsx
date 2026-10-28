@@ -7,12 +7,6 @@ import { createAppRouter } from '@/app/router'
 import '@/app/styles/globals.css'
 import { createQueryClient } from '@/lib/query/client'
 
-/**
- * Mocks must finish starting before any module that touches `socket.io-client`
- * is evaluated: engine.io-client captures `globalThis.WebSocket` at module
- * scope, and MSW patches that global inside `worker.start()`. Route components
- * are code-split, so they load after this resolves. See ARCHITECTURE.md.
- */
 async function enableMocking() {
   if (import.meta.env.VITE_ENABLE_MOCKS === 'false') return
   const { startMockWorker } = await import('@/mocks/browser')

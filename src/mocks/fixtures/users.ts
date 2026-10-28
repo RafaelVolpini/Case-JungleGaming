@@ -1,15 +1,6 @@
 import type { Network } from '@/contracts/common'
 import type { WalletKind, WalletType } from '@/contracts/wallet'
 
-/**
- * Two accounts, as the challenge requires, with disjoint carts, favourites,
- * wallets and orders — they are what the "no data leaks between users" and
- * "switching user clears private cache" scenarios are tested against.
- *
- * Passwords are fictitious and live in plaintext only here, in the seed. The
- * mock database hashes them on load and never stores or returns the original
- * (see src/mocks/db). Credentials are documented in the project README.
- */
 export type WalletSeed = {
   id: string
   kind: WalletKind
@@ -31,7 +22,6 @@ export type UserSeed = {
   ensName: string | null
   avatarEmoji: string
   createdAt: string
-  /** Slugs, resolved to NFT ids when the database is seeded. */
   favoriteSlugs: string[]
   wallets: WalletSeed[]
 }
@@ -98,7 +88,6 @@ export const USER_SEEDS: UserSeed[] = [
   },
 ]
 
-/** Network fee applied to every quote, per chain. Flat for determinism. */
 export const NETWORK_FEES: Record<Network, string> = {
   ethereum: '0.0042',
   polygon: '0.0008',

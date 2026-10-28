@@ -9,16 +9,6 @@ import { imageFor } from './projections'
 import { getDb, nextVersion } from './store'
 import type { CartRecord, NftRecord } from './types'
 
-/**
- * Cart logic.
- *
- * The single most important property here: a cart line stores only
- * `nftId + editionId + quantity`. Unit price, subtotal and availability are
- * read from the NFT every time the cart is projected. A `nft.updated` event
- * therefore shows up in the cart summary with no synchronisation code, and it
- * is impossible for the cart to hold a price the catalog no longer offers.
- */
-
 const ZERO = eth('0')
 
 export function findCoupon(code: string): CouponFixture | undefined {
@@ -31,10 +21,6 @@ export function isCouponExpired(coupon: CouponFixture, now = new Date()): boolea
   return coupon.expiresAt !== null && new Date(coupon.expiresAt) <= now
 }
 
-/**
- * One fee per distinct chain in the cart: buying across two networks means two
- * on-chain transactions, so charging a single fee would understate the total.
- */
 function networkFeeFor(networks: Set<Network>): EthAmount {
   return addEth(...[...networks].map((network) => eth(NETWORK_FEES[network])))
 }
@@ -42,10 +28,6 @@ function networkFeeFor(networks: Set<Network>): EthAmount {
 function availableFor(nft: NftRecord, editionId: string): number {
   return nft.editions.find((edition) => edition.id === editionId)?.available ?? 0
 }
-
-/* -------------------------------------------------------------------------- */
-/*  Lookup                                                                     */
-/* -------------------------------------------------------------------------- */
 
 export function getOrCreateCart(ownerId: string | null, visitorId: string | null): CartRecord {
   const db = getDb()
@@ -68,11 +50,6 @@ export function getOrCreateCart(ownerId: string | null, visitorId: string | null
   return cart
 }
 
-/**
- * Folds a visitor's cart into the account's on login. Quantities that no
- * longer fit the available stock are clamped rather than rejected — losing the
- * whole line because one edition sold out would be worse than buying fewer.
- */
 export function mergeVisitorCart(visitorId: string | null, userId: string): CartRecord {
   const db = getDb()
   const target = getOrCreateCart(userId, null)
@@ -110,10 +87,6 @@ export function mergeVisitorCart(visitorId: string | null, userId: string): Cart
   db.carts = db.carts.filter((cart) => cart.id !== source.id)
   return target
 }
-
-/* -------------------------------------------------------------------------- */
-/*  Projection                                                                 */
-/* -------------------------------------------------------------------------- */
 
 export function projectCartItems(cart: CartRecord): CartItem[] {
   const items: CartItem[] = []
@@ -164,7 +137,6 @@ export function computeTotals(
     const raw = found.percentOff
       ? percentOfEth(subtotalEth, found.percentOff)
       : (found.amountOffEth ?? ZERO)
-    // A fixed-amount coupon must never exceed the subtotal.
     discountEth = minEth(raw, subtotalEth)
     coupon = { code: found.code, description: found.description, discountEth }
   }

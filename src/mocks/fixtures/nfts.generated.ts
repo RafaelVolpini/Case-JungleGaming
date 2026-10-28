@@ -1,6 +1,3 @@
-// GENERATED FILE - do not edit by hand.
-// Produced by scripts/generate-fixtures.mjs (seed 20261027). Run `npm run fixtures`.
-
 import type { NftSeed } from './types'
 
 export const NFT_SEEDS: NftSeed[] = [

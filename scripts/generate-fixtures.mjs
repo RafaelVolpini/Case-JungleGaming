@@ -1,10 +1,3 @@
-/**
- * Deterministic fixture generator.
- *
- * Emits src/mocks/fixtures/nfts.generated.ts and public/nft/*.svg from a fixed
- * seed, so a clean checkout, a demo build and a Playwright run all see exactly
- * the same catalog. Run with `npm run fixtures`.
- */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,7 +6,6 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const SEED = 20261027
 const TOTAL = 36
 
-/* ----------------------------- deterministic RNG -------------------------- */
 function mulberry32(seed) {
   let a = seed >>> 0
   return () => {
@@ -27,7 +19,6 @@ const rand = mulberry32(SEED)
 const pick = (arr) => arr[Math.floor(rand() * arr.length)]
 const int = (min, max) => min + Math.floor(rand() * (max - min + 1))
 
-/* --------------------------------- seeds ---------------------------------- */
 const ADJECTIVES = [
   'Emerald', 'Sage', 'Neon', 'Cosmic', 'Violet', 'Ivory', 'Golden', 'Crimson',
   'Obsidian', 'Azure', 'Amber', 'Jade',
@@ -49,7 +40,6 @@ const TRAITS = [
   ['Expressão', ['Serena', 'Altiva', 'Curiosa', 'Impassível']],
 ]
 
-/* -------------------------------- generation ------------------------------ */
 const used = new Set()
 const nfts = []
 
@@ -64,18 +54,14 @@ for (let i = 0; i < TOTAL; i++) {
 
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
-  // Price spread matches the Figma filter range: 0.02 - 12.30 ETH.
   const priceCents = int(2, 1230)
   const priceEth = (priceCents / 100).toFixed(2)
 
-  // Every 9th item carries a previous price (strikethrough in the Figma).
   const hasDiscount = i % 9 === 2
   const previousPriceEth = hasDiscount ? ((priceCents * 1.18) / 100).toFixed(2) : null
 
-  // Deterministic rarity: 2 legendary, several rare, rest common.
   const rarity = i % 18 === 5 ? 'legendary' : i % 6 === 3 ? 'rare' : 'common'
 
-  // Two NFTs are sold out so the UI has a real "esgotado" case to render.
   const soldOut = i === 7 || i === 23
   const editionTotal = pick([10, 25, 50, 100])
   const editionCount = int(2, 3)
@@ -88,19 +74,16 @@ for (let i = 0; i < TOTAL; i++) {
       index,
       total: editionTotal,
       available: soldOut ? 0 : int(0, 6),
-      // Later editions cost slightly more.
       priceEth: ((priceCents * (1 + e * 0.04)) / 100).toFixed(2),
     }
   })
 
-  // Guarantee at least one buyable edition unless the NFT is meant to be sold out.
   if (!soldOut && editions.every((e) => e.available === 0)) {
     editions[0].available = 3
   }
 
   const attributes = TRAITS.map(([trait, values]) => ({ trait, value: pick(values) }))
 
-  // Fixed base date keeps `listedAt` stable across runs.
   const listedAt = new Date(Date.UTC(2026, 8, 30) - i * 36e5 * 7).toISOString()
 
   const contractAddress =
@@ -130,13 +113,6 @@ for (let i = 0; i < TOTAL; i++) {
   })
 }
 
-/* --------------------------------- artwork -------------------------------- */
-/**
- * Placeholder artwork, generated locally so the app has no external image
- * dependency (Lighthouse and offline runs both need that) and visual
- * regression baselines stay byte-stable. Documented as an asset substitution
- * in ARCHITECTURE.md - swap in the Figma exports by replacing these files.
- */
 const BACKDROPS = ['#C9D7C2', '#F0EDE2', '#CFE3DE', '#D8CEE9', '#E8DCC8']
 const INKS = ['#D28A4C', '#2F5D4A', '#6B5B8A', '#8A5A3C', '#3F4A52']
 
@@ -180,7 +156,6 @@ for (const nft of nfts) {
   writeFileSync(join(ROOT, 'public', 'nft', `${nft.slug}.svg`), artwork(nft.slug))
 }
 
-/* --------------------------------- emit TS -------------------------------- */
 const header =
   '// GENERATED FILE - do not edit by hand.\n' +
   `// Produced by scripts/generate-fixtures.mjs (seed ${SEED}). Run \`npm run fixtures\`.\n\n` +

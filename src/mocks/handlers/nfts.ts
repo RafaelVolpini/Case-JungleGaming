@@ -15,11 +15,6 @@ import { getDb } from '../db/store'
 import { API, errorResponse, resolveCaller, simulateNetwork } from './helpers'
 
 export const nftHandlers = [
-  /**
-   * The catalog. Filters, sort and page all come from the URL and are parsed
-   * by the same module the router uses, so what the address bar says and what
-   * the API receives cannot drift apart.
-   */
   http.get(`${API}/nfts`, async ({ request }) => {
     const failure = await simulateNetwork(request)
     if (failure) return failure
@@ -51,11 +46,6 @@ export const nftHandlers = [
     return HttpResponse.json(toNftDetail(nft, favoriteIdsFor(caller.user?.id ?? null)))
   }),
 
-  /**
-   * Collections carry their own counts so the sidebar never has to derive them
-   * from a page of results — which would show the count of the current page
-   * rather than of the collection.
-   */
   http.get(`${API}/collections`, async ({ request }) => {
     const failure = await simulateNetwork(request)
     if (failure) return failure

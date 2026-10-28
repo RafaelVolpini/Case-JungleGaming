@@ -11,15 +11,6 @@ import {
 } from '../scenarios/config'
 import { API } from './helpers'
 
-/**
- * Control plane for the simulation.
- *
- * These routes deliberately skip `simulateNetwork`: you must be able to reset
- * the database or switch off a failure while the "offline" scenario is active,
- * otherwise the only way out of a broken state would be clearing storage by
- * hand. They are also what each Playwright test calls to start from a known
- * state.
- */
 export const devHandlers = [
   http.post(`${API}/__mock__/reset`, async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as {
@@ -41,11 +32,6 @@ export const devHandlers = [
 
   http.get(`${API}/__mock__/scenario`, () => HttpResponse.json(getScenario())),
 
-  /**
-   * Forces every session to expire immediately. Waiting out a real TTL would
-   * make the session-expiry test slow and timing-dependent; this makes it
-   * instant and deterministic, including expiry *during* checkout.
-   */
   http.post(`${API}/__mock__/expire-sessions`, () => {
     const db = getDb()
     const expiredAt = new Date(Date.now() - 1000).toISOString()
@@ -63,7 +49,6 @@ export const devHandlers = [
     HttpResponse.json(loadScenario()),
   ),
 
-  /** Snapshot used by the E2E suite to assert on server-side state. */
   http.get(`${API}/__mock__/state`, () => {
     const db = getDb()
     return HttpResponse.json({

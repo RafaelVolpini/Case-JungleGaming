@@ -1,11 +1,5 @@
 import type { Collection } from '@/contracts/nft'
 
-/**
- * Names and ordering come from the Figma sidebar. `nftCount` is derived from
- * the generated NFTs rather than hard-coded, so filter counts always match the
- * rows the catalog actually returns. (The Figma's own numbers are decorative:
- * its collection totals and network totals do not add up to the same figure.)
- */
 export const COLLECTION_SEEDS = [
   { id: 'col-arte-digital', slug: 'arte-digital', name: 'Arte digital' },
   { id: 'col-fotografia', slug: 'fotografia', name: 'Fotografia' },

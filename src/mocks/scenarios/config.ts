@@ -1,14 +1,3 @@
-/**
- * Network condition scenarios.
- *
- * Everything here is deterministic on purpose: the challenge asks for
- * "cenários configuráveis e reproduzíveis", and a `Math.random()` failure rate
- * would make a Playwright run flaky instead of reproducible. Variable latency
- * is driven by a seeded generator and intermittent failures by a request
- * counter, so the same sequence of requests always produces the same sequence
- * of outcomes.
- */
-
 export const LATENCY_PROFILES = [
   'none',
   'fast',
@@ -31,15 +20,8 @@ export type FailureMode = (typeof FAILURE_MODES)[number]
 export type ScenarioConfig = {
   latency: LatencyProfile
   failure: FailureMode
-  /**
-   * Path prefixes the failure applies to, e.g. `['/api/cart']`. Empty means
-   * every request — useful for an offline simulation, too blunt for anything
-   * else.
-   */
   scope: string[]
-  /** For `intermittent`: fail one request in every N. */
   failEvery: number
-  /** Seeds the variable-latency generator. */
   seed: number
 }
 
@@ -66,7 +48,7 @@ export function setScenario(patch: Partial<ScenarioConfig>): ScenarioConfig {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(current))
   } catch {
-    // Non-persisted scenario still applies for this session.
+    return
   }
   return current
 }
@@ -75,7 +57,7 @@ export function resetScenario(): ScenarioConfig {
   try {
     window.localStorage.removeItem(STORAGE_KEY)
   } catch {
-    // ignore
+    return
   }
   current = { ...DEFAULT_SCENARIO }
   requestCounts.clear()
@@ -83,10 +65,6 @@ export function resetScenario(): ScenarioConfig {
   return current
 }
 
-/**
- * Resolution order: URL query wins over persisted value, so a Playwright test
- * or a demo link can pin a scenario without clearing anyone's storage first.
- */
 export function loadScenario(search = window.location.search): ScenarioConfig {
   let next: ScenarioConfig = { ...DEFAULT_SCENARIO }
 
@@ -94,7 +72,7 @@ export function loadScenario(search = window.location.search): ScenarioConfig {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (raw) next = { ...next, ...(JSON.parse(raw) as Partial<ScenarioConfig>) }
   } catch {
-    // ignore
+    return
   }
 
   const params = new URLSearchParams(search)
@@ -118,14 +96,9 @@ export function loadScenario(search = window.location.search): ScenarioConfig {
   return current
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Deterministic helpers                                                      */
-/* -------------------------------------------------------------------------- */
-
 const requestCounts = new Map<string, number>()
 let latencyCursor = 0
 
-/** Counts requests per path so `intermittent` fails a predictable one. */
 export function countRequest(pathname: string): number {
   const next = (requestCounts.get(pathname) ?? 0) + 1
   requestCounts.set(pathname, next)
@@ -142,12 +115,6 @@ function mulberry32(seed: number): () => number {
   }
 }
 
-/**
- * Successive requests resolve *faster* than their predecessors, so a later
- * request can overtake an earlier one. This is what exercises the
- * "respostas fora de ordem" requirement — without it, a race condition in the
- * query layer would simply never show up locally.
- */
 const OUT_OF_ORDER_DELAYS = [1400, 1050, 700, 350, 60]
 
 export function resolveDelay(config: ScenarioConfig): number {

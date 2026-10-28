@@ -5,11 +5,6 @@ import { favoriteIdsFor, toNftSummary } from '../db/projections'
 import { getDb, mutate, nextVersion } from '../db/store'
 import { API, errorResponse, requireUser, resolveCaller, simulateNetwork } from './helpers'
 
-/**
- * Favourites are per-user and require a session. A visitor gets 401 rather
- * than a silently empty list, because the UI needs to know to send them to
- * login and come back to where they were.
- */
 export const favoriteHandlers = [
   http.get(`${API}/favorites/ids`, async ({ request }) => {
     const failure = await simulateNetwork(request)
@@ -60,8 +55,6 @@ export const favoriteHandlers = [
         const ids = db.favorites[userId] ?? []
         if (!ids.includes(nftId)) {
           db.favorites[userId] = [...ids, nftId]
-          // The counter feeds the "Em alta" feed and the `popular` sort, so it
-          // is real state, not decoration — hence the version bump and event.
           nft.favoritesCount += 1
           nft.version = nextVersion()
         }

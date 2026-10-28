@@ -40,3 +40,6 @@ dist-ssr
 # Tooling
 .tanstack/
 .claude/
+
+# Local design reference
+/design/

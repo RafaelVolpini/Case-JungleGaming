@@ -15,12 +15,9 @@ import {
   VISITOR_HEADER,
 } from './helpers'
 
-/** Short enough that expiry is reachable in a demo, long enough to work in. */
 const SESSION_TTL_MS = 30 * 60 * 1000
 
 function toUser(user: UserRecord) {
-  // The hash and salt exist only inside the database; they never cross the
-  // network, not even to the account that owns them.
   const { passwordHash: _hash, passwordSalt: _salt, ...safe } = user
   return safe
 }
@@ -54,8 +51,6 @@ export const authHandlers = [
     const { username, email, password } = parsed.data
     const normalizedEmail = email.toLowerCase()
 
-    // Conflicts are reported per field so the form can mark the right input,
-    // which is what "tratamento de conflito" asks for.
     const conflicts: Record<string, string> = {}
     if (db.users.some((user) => user.email.toLowerCase() === normalizedEmail)) {
       conflicts['email'] = 'Este e-mail já está cadastrado.'
@@ -111,8 +106,6 @@ export const authHandlers = [
       (candidate) => candidate.email.toLowerCase() === parsed.data.email.toLowerCase(),
     )
 
-    // Same response whether the account is unknown or the password is wrong:
-    // distinguishing them would turn the login form into an account oracle.
     const valid =
       user !== undefined &&
       (await verifyPassword(parsed.data.password, user.passwordSalt, user.passwordHash))

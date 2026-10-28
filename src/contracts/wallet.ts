@@ -11,14 +11,12 @@ export const WALLET_TYPE_LABELS: Record<WalletType, string> = {
   coinbase: 'Coinbase Wallet',
 }
 
-/** The Figma models exactly two slots: "Carteira principal" and "secundária". */
 export const walletKindSchema = z.enum(['primary', 'secondary'])
 export type WalletKind = z.infer<typeof walletKindSchema>
 
 export const walletSchema = z.object({
   id: z.string(),
   kind: walletKindSchema,
-  /** "Apelida da carteira" in the Figma. */
   label: z.string(),
   address: z.string(),
   network: networkSchema,
@@ -30,7 +28,6 @@ export const walletSchema = z.object({
 })
 export type Wallet = z.infer<typeof walletSchema>
 
-/** Address format differs per chain; validating generically would accept junk. */
 const ADDRESS_PATTERNS = {
   ethereum: /^0x[a-fA-F0-9]{40}$/,
   polygon: /^0x[a-fA-F0-9]{40}$/,

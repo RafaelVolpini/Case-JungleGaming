@@ -8,11 +8,6 @@ export const Route = createFileRoute('/spike/realtime')({
   component: RealtimeSpikePage,
 })
 
-/**
- * Transport smoke test for the MSW × Socket.IO bridge (ARCHITECTURE.md §3).
- * It uses its own event map rather than the application contracts, because the
- * events it exercises are diagnostics and have no place in the real API.
- */
 type SpikeServerEvents = {
   'spike:pong': (payload: unknown) => void
   'nft.updated': (payload: { id: string; version: number; available: number }) => void
@@ -23,11 +18,6 @@ type SpikeClientEvents = {
 }
 type SpikeSocket = Socket<SpikeServerEvents, SpikeClientEvents>
 
-/**
- * Drives a REST mutation and lets the page observe the Socket.IO event it
- * produces — the end-to-end check that the database, the handlers and the
- * gateway agree.
- */
 async function toggleFavoriteViaRest(): Promise<string> {
   const headers = { 'content-type': 'application/json' }
 

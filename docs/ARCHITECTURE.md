@@ -254,3 +254,52 @@ Dois usuários (`ana@kurio.test`, `bruno@kurio.test`) com carrinhos, favoritos,
 carteiras e pedidos disjuntos sustentam os cenários de isolamento entre contas.
 As senhas são fictícias, existem em texto apenas no seed e são guardadas com
 hash na base simulada. Credenciais documentadas no README do projeto.
+
+## 7. Decisões de código
+
+O código não carrega comentários; o "porquê" não-óbvio mora aqui.
+
+### 7.1 Dinheiro
+
+- Valores em ETH são `EthAmount`, uma string decimal com brand do Zod. Uma string qualquer não
+  é aceita onde se espera um valor, e toda aritmética passa por `lib/money/eth.ts`.
+- `big.js` é configurado com `NE = -21` e `PE = 40`: sem isso `toString()` produz notação
+  exponencial (`1e-7`) para valores pequenos, que não passa no regex do schema e quebraria o
+  round-trip. `DP = 18` (precisão de wei) com arredondamento para baixo.
+- `subtractEth` trava em zero: um desconto nunca produz total negativo.
+- `formatEth` usa sempre ponto como separador e remove zeros à direita com piso de duas casas,
+  igual ao Figma (`1.19 ETH`, `8.936 ETH`).
+
+### 7.2 Catálogo
+
+- A consulta aplica filtros, depois ordenação, depois paginação. Paginar um conjunto ainda não
+  ordenado tornaria a página 2 inalcançável.
+- Todo comparador tem desempate por `id`. Sem ele, dois NFTs com o mesmo preço trocariam de lugar
+  entre requisições, o que faria a paginação pular itens e as baselines visuais oscilarem.
+- O feed `new` usa uma data fixa (`2026-10-01`) em vez do relógio, para o catálogo ser
+  determinístico. `trending` é `favoritesCount >= 100`.
+- Serialização dos parâmetros vive em `lib/url/catalog-params.ts` e é usada pela rota e pelo
+  handler. Só valores fora do padrão entram na URL, então `/` e `/?feed=all&page=1` resolvem para
+  a mesma query key.
+
+### 7.3 Carrinho
+
+- Uma taxa de rede por cadeia distinta no carrinho: comprar em duas redes são duas transações
+  on-chain, então cobrar uma só subestimaria o total.
+- No login, o carrinho do visitante é fundido ao da conta. Quantidades que não cabem mais no
+  estoque são reduzidas ao possível em vez de rejeitadas: perder a linha inteira por uma edição
+  esgotada seria pior do que comprar menos.
+- Cupom de valor fixo nunca excede o subtotal. Carrinho vazio não carrega cupom.
+
+### 7.4 Base simulada
+
+- A base persiste em `localStorage` com `schemaVersion`. Um payload de versão diferente é
+  descartado e a base é semeada de novo, porque um mock migrado pela metade é pior que um novo.
+- `mutate()` persiste e só depois emite eventos, então nenhum evento sai antes de o estado estar
+  consistente.
+- Senhas usam SHA-256 com salt por usuário. Não é o que um backend real usaria (precisaria de
+  Argon2 ou bcrypt), mas mantém o seed reprodutível, o que um hash lento não permitiria.
+- A chave de idempotência compara o hash de um JSON com chaves ordenadas, de modo que a ordem
+  das chaves do corpo não transforma a mesma tentativa em conflito.
+- Sessões expiradas são removidas na primeira leitura, então a expiração se comporta igual
+  tanto no meio da navegação quanto entre carregamentos de página.

@@ -4,15 +4,6 @@ import {
   type CatalogQueryInput,
 } from '@/contracts/nft'
 
-/**
- * One serialiser for the catalog query, used by the router AND by the MSW
- * handler. Sharing it is the point: if the URL and the API ever disagreed
- * about how `collections` is encoded, filters would silently stop applying.
- *
- * Arrays are comma-separated rather than repeated keys — shorter URLs, and
- * what the Figma's filter combinations would produce is readable by a human.
- */
-
 function list(value: string | null): string[] {
   return value ? value.split(',').filter(Boolean) : []
 }
@@ -30,17 +21,10 @@ export function parseCatalogParams(params: URLSearchParams): CatalogQuery {
     page: params.get('page') ? Number(params.get('page')) : undefined,
   }
 
-  // Unknown or malformed values fall back to the defaults rather than throwing:
-  // a hand-edited URL should degrade to a sane catalog, not a crash.
   const result = catalogQuerySchema.safeParse(raw)
   return result.success ? result.data : catalogQuerySchema.parse({})
 }
 
-/**
- * Only non-default values are written, so the canonical browsing URL stays
- * clean (`/` rather than `/?feed=all&sort=recent&page=1`) and two routes to
- * the same state produce the same query key.
- */
 export function serializeCatalogParams(query: Partial<CatalogQuery>): URLSearchParams {
   const params = new URLSearchParams()
 
