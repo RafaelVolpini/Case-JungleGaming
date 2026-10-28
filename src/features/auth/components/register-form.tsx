@@ -10,7 +10,7 @@ import { registerSchema, type RegisterInput } from '@/contracts/session'
 import { useAuthActions } from '../hooks/use-auth-actions'
 import { applyApiErrors } from '../lib/apply-api-errors'
 import { AuthDivider } from './auth-divider'
-import { PasswordInput } from './password-input'
+import { PasswordInput } from '@/components/shared/password-input'
 import { SocialLoginButtons } from './social-login-buttons'
 
 const HIDDEN_LABEL = { labelClassName: 'sr-only', controlClassName: 'mt-0' }

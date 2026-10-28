@@ -11,7 +11,7 @@ import { loginSchema, type LoginInput } from '@/contracts/session'
 import { useAuthActions } from '../hooks/use-auth-actions'
 import { applyApiErrors } from '../lib/apply-api-errors'
 import { AuthDivider } from './auth-divider'
-import { PasswordInput } from './password-input'
+import { PasswordInput } from '@/components/shared/password-input'
 import { SocialLoginButtons } from './social-login-buttons'
 
 export function LoginForm() {

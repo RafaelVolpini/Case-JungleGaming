@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { PagePlaceholder } from '@/components/feedback/page-placeholder'
+import { ProfilePage } from '@/features/profile/pages/profile-page'
 
 export const Route = createFileRoute('/_shell/_authed/perfil/')({
-  component: () => <PagePlaceholder title="Dados do perfil" />,
+  component: ProfilePage,
 })

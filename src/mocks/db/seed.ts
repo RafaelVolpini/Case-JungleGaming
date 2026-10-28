@@ -70,6 +70,7 @@ export function createSeed(): MockDb {
   const wallets: WalletRecord[] = USER_SEEDS.flatMap((user) =>
     user.wallets.map((wallet) => ({
       ...wallet,
+      linkedReference: null,
       ownerId: user.id,
       createdAt: user.createdAt,
     })),

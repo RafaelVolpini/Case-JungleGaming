@@ -30,5 +30,6 @@ export type WalletRecord = {
   ensName: string | null
   profileName: string | null
   referralCode: string | null
+  linkedReference: string | null
   createdAt: string
 }

@@ -36,7 +36,7 @@ export const USER_SEEDS: UserSeed[] = [
     ensName: 'anaribeiro.eth',
     avatarEmoji: '🦧',
     createdAt: '2026-02-11T14:20:00.000Z',
-    favoriteSlugs: ['azure-signal-417'],
+    favoriteSlugs: ['emerald-ape-042', 'golden-beat-207', 'cosmic-bloom-118'],
     wallets: [
       {
         id: 'wallet-ana-primary',

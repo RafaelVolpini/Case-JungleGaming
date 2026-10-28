@@ -7,12 +7,16 @@ const itemClassName = 'relative flex h-[45px] items-start text-base leading-6 tr
 const activeClassName =
   'text-primary-light font-bold after:bg-primary after:absolute after:inset-x-0 after:bottom-0 after:h-[3px]'
 const idleClassName = 'text-cream hover:text-primary-light'
+const MARKET_PATHS = ['/nft', '/carrinho', '/pagamento', '/pedido']
 
 export function PrimaryNav() {
   const { pathname, hash } = useRouterState({
     select: (state) => ({ pathname: state.location.pathname, hash: state.location.hash }),
   })
-  const onHome = pathname === '/' && hash !== 'catalogo'
+  const onMarket =
+    (pathname === '/' && hash === 'catalogo') ||
+    MARKET_PATHS.some((path) => pathname.startsWith(path))
+  const onHome = !onMarket
 
   return (
     <nav aria-label="Principal" className="flex items-start gap-10">

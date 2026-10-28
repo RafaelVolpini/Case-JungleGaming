@@ -13,6 +13,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { NETWORK_LABELS, networkSchema } from '@/contracts/common'
 import type { CollectorDetails } from '@/contracts/order'
+import { ENS_SUFFIXES } from '@/lib/ens'
 import { WALLET_TYPE_LABELS, walletTypeSchema, type Wallet } from '@/contracts/wallet'
 
 type CollectorFieldsProps = {
@@ -22,8 +23,6 @@ type CollectorFieldsProps = {
   usingOther: boolean
   onToggleWallet: (checked: boolean) => void
 }
-
-const ENS_SUFFIXES = ['.eth'] as const
 
 export function CollectorFields({
   form,

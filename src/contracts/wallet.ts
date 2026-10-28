@@ -24,6 +24,7 @@ export const walletSchema = z.object({
   ensName: z.string().nullable(),
   profileName: z.string().nullable(),
   referralCode: z.string().nullable(),
+  linkedReference: z.string().nullable(),
   createdAt: timestampSchema,
 })
 export type Wallet = z.infer<typeof walletSchema>
@@ -33,6 +34,21 @@ const ADDRESS_PATTERNS = {
   polygon: /^0x[a-fA-F0-9]{40}$/,
   solana: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
 } as const
+
+export function validateWalletAddress(
+  data: { network: keyof typeof ADDRESS_PATTERNS; address: string },
+  ctx: z.RefinementCtx,
+): void {
+  if (ADDRESS_PATTERNS[data.network].test(data.address)) return
+  ctx.addIssue({
+    code: 'custom',
+    path: ['address'],
+    message:
+      data.network === 'solana'
+        ? 'Endereço Solana inválido (32-44 caracteres base58)'
+        : 'Endereço inválido (deve começar com 0x e ter 40 caracteres hex)',
+  })
+}
 
 export const walletInputSchema = z
   .object({
@@ -44,17 +60,7 @@ export const walletInputSchema = z
     ensName: z.string().trim().nullable().default(null),
     profileName: z.string().trim().nullable().default(null),
     referralCode: z.string().trim().nullable().default(null),
+    linkedReference: z.string().trim().nullable().default(null),
   })
-  .superRefine((data, ctx) => {
-    if (!ADDRESS_PATTERNS[data.network].test(data.address)) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['address'],
-        message:
-          data.network === 'solana'
-            ? 'Endereço Solana inválido (32-44 caracteres base58)'
-            : 'Endereço inválido (deve começar com 0x e ter 40 caracteres hex)',
-      })
-    }
-  })
+  .superRefine(validateWalletAddress)
 export type WalletInput = z.infer<typeof walletInputSchema>
