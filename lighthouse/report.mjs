@@ -38,6 +38,12 @@ const runs = summary.results.flatMap((result) =>
 const header = `| ${Object.values(CATEGORY_LABELS).join(' | ')} | LCP | CLS | TBT |`
 const separator = `| ${[...Object.values(CATEGORY_LABELS), 'LCP', 'CLS', 'TBT'].map(() => '---:').join(' | ')} |`
 const environment = summary.environment ?? {}
+const benchmarks = summary.results
+  .flatMap((result) => result.runs.map((run) => run.benchmark))
+  .filter(Boolean)
+const benchmarkLine = benchmarks.length
+  ? `- Índice de benchmark da CPU do host (Lighthouse): ${Math.min(...benchmarks)} a ${Math.max(...benchmarks)}. Quanto menor, mais lenta a máquina e maior o TBT medido.`
+  : ''
 
 const text = `# Resultados do Lighthouse
 
@@ -64,6 +70,7 @@ ${runs.join('\n')}
 - Lighthouse: ${environment.lighthouse}
 - Servidor: ${environment.server}
 - Navegador: Chromium do Playwright, headless
+${benchmarkLine}
 - Node: ${environment.node}
 - Plataforma: ${environment.platform}
 - Perfil mobile: emulação 390×844, DPR 2, throttling simulado do Lighthouse (4G lenta, CPU 4×)

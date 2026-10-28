@@ -6,3 +6,9 @@ package-lock.json
 public
 assets
 design
+lighthouse/reports
+lighthouse/RESULTS.md
+lighthouse/.tmp
+playwright-report
+test-results
+e2e/__screenshots__
