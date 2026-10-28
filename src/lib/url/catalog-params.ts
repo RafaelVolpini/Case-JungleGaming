@@ -1,8 +1,4 @@
-import {
-  catalogQuerySchema,
-  type CatalogQuery,
-  type CatalogQueryInput,
-} from '@/contracts/nft'
+import { catalogQuerySchema, type CatalogQuery, type CatalogQueryInput } from '@/contracts/nft'
 
 function list(value: string | null): string[] {
   return value ? value.split(',').filter(Boolean) : []

@@ -61,7 +61,13 @@ export type QuoteRecord = {
   id: string
   ownerId: string
   cartVersion: number
-  lines: Array<{ itemId: string; nftId: string; editionId: string; quantity: number; unitPriceEth: EthAmount }>
+  lines: Array<{
+    itemId: string
+    nftId: string
+    editionId: string
+    quantity: number
+    unitPriceEth: EthAmount
+  }>
   subtotalEth: EthAmount
   discountEth: EthAmount
   networkFeeEth: EthAmount
@@ -79,4 +85,3 @@ export type IdempotencyRecord = {
   requestHash: string
   orderId: string
 }
-

@@ -49,8 +49,7 @@ function RealtimeSpikePage() {
   const [uptime, setUptime] = useState(0)
   const socketRef = useRef<SpikeSocket | null>(null)
 
-  const heartbeatOff =
-    new URLSearchParams(window.location.search).get('heartbeat') === '0'
+  const heartbeatOff = new URLSearchParams(window.location.search).get('heartbeat') === '0'
 
   useEffect(() => {
     const started = Date.now()
@@ -92,8 +91,7 @@ function RealtimeSpikePage() {
       <header className="space-y-1">
         <h1 className="text-cream text-xl font-bold">Spike — MSW × Socket.IO</h1>
         <p className="text-muted-foreground text-sm">
-          Heartbeat{' '}
-          {heartbeatOff ? 'DESLIGADO (esperado: ping timeout aos ~30s)' : 'LIGADO'}
+          Heartbeat {heartbeatOff ? 'DESLIGADO (esperado: ping timeout aos ~30s)' : 'LIGADO'}
         </p>
       </header>
 

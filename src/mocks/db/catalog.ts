@@ -40,10 +40,7 @@ export function filterNfts(query: CatalogQuery): NftRecord[] {
   })
 }
 
-const COMPARATORS: Record<
-  CatalogQuery['sort'],
-  (a: NftRecord, b: NftRecord) => number
-> = {
+const COMPARATORS: Record<CatalogQuery['sort'], (a: NftRecord, b: NftRecord) => number> = {
   recent: (a, b) => Date.parse(b.listedAt) - Date.parse(a.listedAt),
   'price-asc': (a, b) => compareEth(a.priceEth, b.priceEth),
   'price-desc': (a, b) => compareEth(b.priceEth, a.priceEth),

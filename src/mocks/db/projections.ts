@@ -1,6 +1,13 @@
 import type { NftDetail, NftSummary } from '@/contracts/nft'
 
-import { artAlt, contractNote, networkNote, royaltyNote, shortDescription, storyParagraphs } from './copy'
+import {
+  artAlt,
+  contractNote,
+  networkNote,
+  royaltyNote,
+  shortDescription,
+  storyParagraphs,
+} from './copy'
 import { getDb } from './store'
 import type { NftRecord } from './types'
 

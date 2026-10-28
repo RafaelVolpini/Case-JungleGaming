@@ -1,10 +1,4 @@
-export const LATENCY_PROFILES = [
-  'none',
-  'fast',
-  'slow',
-  'variable',
-  'out-of-order',
-] as const
+export const LATENCY_PROFILES = ['none', 'fast', 'slow', 'variable', 'out-of-order'] as const
 export type LatencyProfile = (typeof LATENCY_PROFILES)[number]
 
 export const FAILURE_MODES = [

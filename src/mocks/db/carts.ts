@@ -42,8 +42,7 @@ export function mergeVisitorCart(visitorId: string | null, userId: string): Cart
     if (capacity === 0) continue
 
     const existing = target.items.find(
-      (candidate) =>
-        candidate.nftId === item.nftId && candidate.editionId === item.editionId,
+      (candidate) => candidate.nftId === item.nftId && candidate.editionId === item.editionId,
     )
 
     if (existing) {

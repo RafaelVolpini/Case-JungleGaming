@@ -40,9 +40,7 @@ export const devHandlers = [
     return HttpResponse.json(setScenario(patch))
   }),
 
-  http.post(`${API}/__mock__/scenario/reload`, () =>
-    HttpResponse.json(loadScenario()),
-  ),
+  http.post(`${API}/__mock__/scenario/reload`, () => HttpResponse.json(loadScenario())),
 
   http.get(`${API}/__mock__/state`, () => {
     const db = getDb()

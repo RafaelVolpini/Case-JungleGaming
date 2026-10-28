@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 @import './fonts.css';
 
 :root {
@@ -73,6 +74,7 @@
   --color-surface-raised: var(--kurio-surface-raised);
   --color-success: var(--kurio-success);
   --color-warning: var(--kurio-warning);
+  --color-primary-hover: var(--kurio-orange-hover);
 
   --font-sans: 'Space Mono', 'IBM Plex Mono', ui-monospace, monospace;
   --font-mono: 'Space Mono', 'IBM Plex Mono', ui-monospace, monospace;
@@ -94,6 +96,18 @@
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 4px);
   --radius-xl: calc(var(--radius) + 8px);
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
 }
 
 @layer base {

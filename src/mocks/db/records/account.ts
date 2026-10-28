@@ -32,4 +32,3 @@ export type WalletRecord = {
   referralCode: string | null
   createdAt: string
 }
-

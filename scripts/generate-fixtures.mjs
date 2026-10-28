@@ -43,8 +43,22 @@ const ART_BY_ADJECTIVE = {
 }
 
 const NOUNS = [
-  'Ape', 'Nomad', 'Vessel', 'Bloom', 'Baron', 'Beat', 'Signal', 'Oracle',
-  'Relic', 'Cipher', 'Drift', 'Ember', 'Echo', 'Muse', 'Prism', 'Atlas',
+  'Ape',
+  'Nomad',
+  'Vessel',
+  'Bloom',
+  'Baron',
+  'Beat',
+  'Signal',
+  'Oracle',
+  'Relic',
+  'Cipher',
+  'Drift',
+  'Ember',
+  'Echo',
+  'Muse',
+  'Prism',
+  'Atlas',
 ]
 
 const SERIES = ['Kurio Apes', 'Kurio Nomads', 'Kurio Editions']
@@ -64,15 +78,91 @@ const ACCESSORY_BY_ART = {
 }
 
 const FIGMA_NFTS = [
-  { name: 'Emerald Ape', token: '042', price: '1.19', art: 'emerald', rarity: 'rare', network: 'ethereum', series: 'Kurio Apes', rating: [4.8, 19], contract: '0x7a42c9d81f3b60e5a2d74c1b8e09f35a6d2c19e8', favorites: 214 },
-  { name: 'Sage Nomad', token: '009', price: '1.69', art: 'sage', rarity: 'common', series: 'Kurio Nomads', favorites: 180 },
-  { name: 'Neon Vessel', token: '552', price: '1.99', previous: '2.29', art: 'ivory', rarity: 'rare', series: 'Kurio Editions', favorites: 160 },
-  { name: 'Cosmic Bloom', token: '118', price: '1.29', art: 'sage', rarity: 'common', series: 'Kurio Apes', favorites: 120 },
-  { name: 'Violet Nomad', token: '314', price: '1.39', art: 'sage', rarity: 'common', series: 'Kurio Nomads', favorites: 105 },
-  { name: 'Ivory Baron', token: '088', price: '1.79', art: 'ivory', rarity: 'rare', series: 'Kurio Editions', favorites: 142 },
-  { name: 'Golden Beat', token: '207', price: '0.99', art: 'golden', rarity: 'common', series: 'Kurio Apes', favorites: 133 },
-  { name: 'Golden Echo', token: '233', price: '0.59', art: 'golden', rarity: 'common', series: 'Kurio Apes', favorites: 70 },
-  { name: 'Golden Signal', token: '160', price: '0.39', art: 'golden', rarity: 'common', series: 'Kurio Apes', favorites: 96 },
+  {
+    name: 'Emerald Ape',
+    token: '042',
+    price: '1.19',
+    art: 'emerald',
+    rarity: 'rare',
+    network: 'ethereum',
+    series: 'Kurio Apes',
+    rating: [4.8, 19],
+    contract: '0x7a42c9d81f3b60e5a2d74c1b8e09f35a6d2c19e8',
+    favorites: 214,
+  },
+  {
+    name: 'Sage Nomad',
+    token: '009',
+    price: '1.69',
+    art: 'sage',
+    rarity: 'common',
+    series: 'Kurio Nomads',
+    favorites: 180,
+  },
+  {
+    name: 'Neon Vessel',
+    token: '552',
+    price: '1.99',
+    previous: '2.29',
+    art: 'ivory',
+    rarity: 'rare',
+    series: 'Kurio Editions',
+    favorites: 160,
+  },
+  {
+    name: 'Cosmic Bloom',
+    token: '118',
+    price: '1.29',
+    art: 'sage',
+    rarity: 'common',
+    series: 'Kurio Apes',
+    favorites: 120,
+  },
+  {
+    name: 'Violet Nomad',
+    token: '314',
+    price: '1.39',
+    art: 'sage',
+    rarity: 'common',
+    series: 'Kurio Nomads',
+    favorites: 105,
+  },
+  {
+    name: 'Ivory Baron',
+    token: '088',
+    price: '1.79',
+    art: 'ivory',
+    rarity: 'rare',
+    series: 'Kurio Editions',
+    favorites: 142,
+  },
+  {
+    name: 'Golden Beat',
+    token: '207',
+    price: '0.99',
+    art: 'golden',
+    rarity: 'common',
+    series: 'Kurio Apes',
+    favorites: 133,
+  },
+  {
+    name: 'Golden Echo',
+    token: '233',
+    price: '0.59',
+    art: 'golden',
+    rarity: 'common',
+    series: 'Kurio Apes',
+    favorites: 70,
+  },
+  {
+    name: 'Golden Signal',
+    token: '160',
+    price: '0.39',
+    art: 'golden',
+    rarity: 'common',
+    series: 'Kurio Apes',
+    favorites: 96,
+  },
 ]
 
 function mulberry32(seed) {
@@ -103,7 +193,10 @@ function expand(counts) {
 }
 
 function slugify(text) {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 }
 
 const collections = expand(COLLECTION_COUNTS)
@@ -201,7 +294,8 @@ for (let i = 0; i < TOTAL; i++) {
       count: spec.rating ? spec.rating[1] : int(4, 180),
     },
     contractAddress:
-      spec.contract ?? '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[int(0, 15)]).join(''),
+      spec.contract ??
+      '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[int(0, 15)]).join(''),
     maxPerOrder: isFigma ? 10 : pick([3, 5, 10]),
     listedAt: new Date(Date.UTC(2026, 8, 30, 12) - i * 36e5 * 7).toISOString(),
     favoritesCount: spec.favorites,
