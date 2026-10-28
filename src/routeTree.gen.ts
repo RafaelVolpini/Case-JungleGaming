@@ -15,7 +15,6 @@ import { Route as ShellAuthedRouteImport } from './routes/_shell/_authed'
 import { Route as ShellCarrinhoRouteImport } from './routes/_shell/carrinho'
 import { Route as ShellCriarContaRouteImport } from './routes/_shell/criar-conta'
 import { Route as ShellEntrarRouteImport } from './routes/_shell/entrar'
-import { Route as SpikeRealtimeRouteImport } from './routes/spike.realtime'
 import { Route as ShellAuthedFavoritosRouteImport } from './routes/_shell/_authed/favoritos'
 import { Route as ShellAuthedPagamentoRouteImport } from './routes/_shell/_authed/pagamento'
 import { Route as ShellAuthedPerfilRouteImport } from './routes/_shell/_authed/perfil'
@@ -51,11 +50,6 @@ const ShellEntrarRoute = ShellEntrarRouteImport.update({
   id: '/entrar',
   path: '/entrar',
   getParentRoute: () => ShellRoute,
-} as any)
-const SpikeRealtimeRoute = SpikeRealtimeRouteImport.update({
-  id: '/spike/realtime',
-  path: '/spike/realtime',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ShellAuthedFavoritosRoute = ShellAuthedFavoritosRouteImport.update({
   id: '/favoritos',
@@ -100,7 +94,6 @@ export interface FileRoutesByFullPath {
   '/carrinho': typeof ShellCarrinhoRoute
   '/criar-conta': typeof ShellCriarContaRoute
   '/entrar': typeof ShellEntrarRoute
-  '/spike/realtime': typeof SpikeRealtimeRoute
   '/favoritos': typeof ShellAuthedFavoritosRoute
   '/pagamento': typeof ShellAuthedPagamentoRoute
   '/perfil': typeof ShellAuthedPerfilRouteWithChildren
@@ -114,7 +107,6 @@ export interface FileRoutesByTo {
   '/carrinho': typeof ShellCarrinhoRoute
   '/criar-conta': typeof ShellCriarContaRoute
   '/entrar': typeof ShellEntrarRoute
-  '/spike/realtime': typeof SpikeRealtimeRoute
   '/favoritos': typeof ShellAuthedFavoritosRoute
   '/pagamento': typeof ShellAuthedPagamentoRoute
   '/nft/$slug': typeof ShellNftSlugRoute
@@ -129,7 +121,6 @@ export interface FileRoutesById {
   '/_shell/carrinho': typeof ShellCarrinhoRoute
   '/_shell/criar-conta': typeof ShellCriarContaRoute
   '/_shell/entrar': typeof ShellEntrarRoute
-  '/spike/realtime': typeof SpikeRealtimeRoute
   '/_shell/': typeof ShellIndexRoute
   '/_shell/_authed/favoritos': typeof ShellAuthedFavoritosRoute
   '/_shell/_authed/pagamento': typeof ShellAuthedPagamentoRoute
@@ -146,7 +137,6 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/criar-conta'
     | '/entrar'
-    | '/spike/realtime'
     | '/favoritos'
     | '/pagamento'
     | '/perfil'
@@ -160,7 +150,6 @@ export interface FileRouteTypes {
     | '/carrinho'
     | '/criar-conta'
     | '/entrar'
-    | '/spike/realtime'
     | '/favoritos'
     | '/pagamento'
     | '/nft/$slug'
@@ -174,7 +163,6 @@ export interface FileRouteTypes {
     | '/_shell/carrinho'
     | '/_shell/criar-conta'
     | '/_shell/entrar'
-    | '/spike/realtime'
     | '/_shell/'
     | '/_shell/_authed/favoritos'
     | '/_shell/_authed/pagamento'
@@ -187,7 +175,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   ShellRoute: typeof ShellRouteWithChildren
-  SpikeRealtimeRoute: typeof SpikeRealtimeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -233,13 +220,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/entrar'
       preLoaderRoute: typeof ShellEntrarRouteImport
       parentRoute: typeof ShellRoute
-    }
-    '/spike/realtime': {
-      id: '/spike/realtime'
-      path: '/spike/realtime'
-      fullPath: '/spike/realtime'
-      preLoaderRoute: typeof SpikeRealtimeRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_shell/_authed/favoritos': {
       id: '/_shell/_authed/favoritos'
@@ -346,7 +326,6 @@ const ShellRouteWithChildren = ShellRoute._addFileChildren(ShellRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   ShellRoute: ShellRouteWithChildren,
-  SpikeRealtimeRoute: SpikeRealtimeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

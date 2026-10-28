@@ -4,6 +4,11 @@ import { createSeed } from '../db/seed'
 import { getDb, persist, resetDb } from '../db/store'
 import { getScenario, loadScenario, resetScenario, setScenario } from '../scenarios/state'
 import type { ScenarioConfig } from '../scenarios/types'
+import {
+  connectedClientCount,
+  dropConnectedClients,
+  emitToConnectedClients,
+} from '../socket/gateway'
 import { API } from './constants'
 
 export const devHandlers = [
@@ -41,6 +46,17 @@ export const devHandlers = [
   }),
 
   http.post(`${API}/__mock__/scenario/reload`, () => HttpResponse.json(loadScenario())),
+
+  http.get(`${API}/__mock__/socket`, () => HttpResponse.json({ clients: connectedClientCount() })),
+
+  http.post(`${API}/__mock__/socket/drop`, () =>
+    HttpResponse.json({ dropped: dropConnectedClients() }),
+  ),
+
+  http.post(`${API}/__mock__/socket/emit`, async ({ request }) => {
+    const { event, payload } = (await request.json()) as { event: string; payload: unknown }
+    return HttpResponse.json({ delivered: emitToConnectedClients(event, payload) })
+  }),
 
   http.get(`${API}/__mock__/state`, () => {
     const db = getDb()

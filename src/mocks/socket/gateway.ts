@@ -14,10 +14,26 @@ const HEARTBEAT_INTERVAL_MS = 20_000
 
 type ConnectedClient = {
   emit: (event: string, payload: unknown) => void
+  close: () => void
   userId: string | null
 }
 
 const clients = new Set<ConnectedClient>()
+
+export function connectedClientCount(): number {
+  return clients.size
+}
+
+export function dropConnectedClients(): number {
+  const dropped = clients.size
+  for (const client of [...clients]) client.close()
+  return dropped
+}
+
+export function emitToConnectedClients(event: string, payload: unknown): number {
+  for (const client of clients) client.emit(event, payload)
+  return clients.size
+}
 
 export type SocketGatewayOptions = {
   heartbeat?: boolean
@@ -89,6 +105,7 @@ export function createSocketGateway({
 
     const client: ConnectedClient = {
       emit: (event, payload) => io.client.emit(event, payload),
+      close: () => connection.client.close(),
       userId: null,
     }
     clients.add(client)
@@ -111,10 +128,6 @@ export function createSocketGateway({
       const userId = (payload as { userId?: string | null } | undefined)?.userId ?? null
       client.userId = userId
       onLog(`identified as ${userId ?? 'visitante'}`)
-    })
-
-    io.client.on('spike:ping', (_event, payload: unknown) => {
-      io.client.emit('spike:pong', { echo: payload, at: Date.now() })
     })
   })
 }
