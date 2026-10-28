@@ -22,7 +22,7 @@ export function PasswordInput({
       <Input
         {...props}
         type={visible ? 'text' : 'password'}
-        className="h-[50px] rounded-xl px-4 pr-11 md:h-10 md:rounded"
+        className="h-[50px] rounded-xl px-4 pr-11 xl:h-10 xl:rounded"
       />
       {onToggleVisible && (
         <button
@@ -31,8 +31,8 @@ export function PasswordInput({
           aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
           aria-pressed={visible}
           className={cn(
-            'text-[#55321f] md:text-placeholder focus-visible:ring-ring absolute top-1/2 right-[11px] grid size-6 -translate-y-1/2 place-items-center rounded-sm outline-none focus-visible:ring-2',
-            mobileOnlyToggle && 'md:hidden',
+            'text-[#55321f] xl:text-placeholder focus-visible:ring-ring absolute top-1/2 right-[11px] grid size-6 -translate-y-1/2 place-items-center rounded-sm outline-none focus-visible:ring-2',
+            mobileOnlyToggle && 'xl:hidden',
           )}
         >
           {visible ? (

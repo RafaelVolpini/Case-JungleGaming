@@ -48,7 +48,7 @@ export function LoginForm() {
               type="email"
               autoComplete="email"
               placeholder="contato@email.com"
-              className="h-[50px] rounded-xl px-4 md:h-10 md:rounded"
+              className="h-[50px] rounded-xl px-4 xl:h-10 xl:rounded"
               {...register('email')}
             />
           )}
@@ -73,7 +73,7 @@ export function LoginForm() {
       </div>
       <UnavailableAction
         subject="A recuperação de senha"
-        className="text-primary-light ml-auto mt-2.5 block text-sm leading-6 hover:underline md:mt-2"
+        className="text-primary-light ml-auto mt-2.5 block text-sm leading-6 hover:underline xl:mt-2"
       >
         Esqueceu a senha?
       </UnavailableAction>
@@ -85,7 +85,7 @@ export function LoginForm() {
       <Button
         type="submit"
         disabled={login.isPending}
-        className="mt-[34.5px] h-[60px] w-full rounded-xl text-base md:mt-5 md:h-[44.5px] md:rounded"
+        className="mt-[34.5px] h-[60px] w-full rounded-xl text-base xl:mt-5 xl:h-[44.5px] xl:rounded"
       >
         Entrar
       </Button>

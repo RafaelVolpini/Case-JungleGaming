@@ -29,7 +29,7 @@ export function AuthScreen({ mode, redirect, expired, children }: AuthScreenProp
   const copy = COPY[mode]
 
   return (
-    <div className="bg-background min-h-dvh px-7 pt-[130px] pb-10">
+    <div className="bg-background mx-auto min-h-dvh max-w-[460px] px-7 pt-[130px] pb-10">
       <Link
         to="/"
         aria-label="Kurio, página inicial"

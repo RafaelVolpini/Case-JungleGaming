@@ -30,7 +30,7 @@ export function MobileCartSummary({ cart }: { cart: Cart }) {
   return (
     <aside
       aria-label="Resumo da carteira"
-      className="bg-card fixed inset-x-0 bottom-0 z-40 rounded-t-[36px] px-6 pt-6 pb-9 shadow-[0_-10px_24px_rgba(0,0,0,0.35)]"
+      className="bg-card fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[640px] rounded-t-[36px] px-6 pt-6 pb-9 shadow-[0_-10px_24px_rgba(0,0,0,0.35)]"
     >
       <MobileCouponForm coupon={cart.coupon} />
       <dl className="mt-[9px] flex flex-col gap-[8.5px]">

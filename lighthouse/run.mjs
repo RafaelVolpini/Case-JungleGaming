@@ -7,7 +7,8 @@ import { chromium } from '@playwright/test'
 import * as chromeLauncher from 'chrome-launcher'
 import lighthouse from 'lighthouse'
 
-import { BASE_URL, CATEGORIES, PAGES, PROFILES, RUNS, TARGETS } from './config.mjs'
+import { CATEGORIES, PAGES, PROFILES, RUNS, SERVERS, TARGETS } from './config.mjs'
+import { startServer } from './serve.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = process.env.LH_OUT ?? 'reports'
@@ -15,6 +16,8 @@ const REPORTS = join(ROOT, 'lighthouse', OUT)
 const ONLY_PAGE = process.env.LH_PAGE
 const ONLY_PROFILE = process.env.LH_PROFILE
 const RUN_COUNT = Number(process.env.LH_RUNS ?? RUNS)
+const SERVER = process.env.LH_SERVER ?? 'h2'
+const BASE_URL = SERVERS[SERVER]
 const PORT = new URL(BASE_URL).port
 
 function median(values) {
@@ -24,6 +27,7 @@ function median(values) {
 }
 
 async function waitForServer() {
+  if (SERVER === 'h2') return
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
       const response = await fetch(BASE_URL)
@@ -33,6 +37,14 @@ async function waitForServer() {
     }
   }
   throw new Error('Servidor de preview não respondeu')
+}
+
+async function startHost() {
+  if (SERVER === 'h2') {
+    const server = await startServer(Number(PORT))
+    return { kill: () => server.close() }
+  }
+  return startPreview()
 }
 
 function startPreview() {
@@ -59,14 +71,19 @@ async function audit(chrome, page, profileName) {
 
 async function main() {
   mkdirSync(REPORTS, { recursive: true })
-  const preview = startPreview()
+  const preview = await startHost()
   const summary = { generatedAt: new Date().toISOString(), runs: RUN_COUNT, results: [] }
 
   try {
     await waitForServer()
     const chrome = await chromeLauncher.launch({
       chromePath: chromium.executablePath(),
-      chromeFlags: ['--headless=new', '--no-sandbox', '--disable-gpu'],
+      chromeFlags: [
+        '--headless=new',
+        '--no-sandbox',
+        '--disable-gpu',
+        '--ignore-certificate-errors',
+      ],
     })
 
     try {
@@ -115,6 +132,8 @@ async function main() {
         lighthouse: (await import('lighthouse/package.json', { with: { type: 'json' } })).default
           .version,
         chrome: (await chrome.process?.pid) ? 'Chromium do Playwright' : 'desconhecido',
+        server:
+          SERVER === 'h2' ? 'HTTP/2 + Brotli (lighthouse/serve.mjs)' : 'vite preview (HTTP/1.1)',
         node: process.version,
         platform: `${process.platform} ${process.arch}`,
         targets: TARGETS,
@@ -128,6 +147,7 @@ async function main() {
 
   writeFileSync(join(REPORTS, 'summary.json'), JSON.stringify(summary, null, 2))
   console.log('Resumo salvo em', join(REPORTS, 'summary.json'))
+  await import('./report.mjs')
 }
 
 await main()

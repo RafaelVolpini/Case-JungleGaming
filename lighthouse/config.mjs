@@ -1,4 +1,7 @@
-export const BASE_URL = 'http://localhost:4174'
+export const SERVERS = {
+  h2: 'https://localhost:4443',
+  preview: 'http://localhost:4174',
+}
 export const RUNS = 3
 
 export const PAGES = [

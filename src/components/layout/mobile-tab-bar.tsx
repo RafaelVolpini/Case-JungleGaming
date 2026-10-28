@@ -18,7 +18,7 @@ export function MobileTabBar() {
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 bottom-0 z-40 h-[95px] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto h-[95px] max-w-[640px] xl:hidden"
     >
       <span
         aria-hidden="true"

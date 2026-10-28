@@ -45,7 +45,7 @@ export function RegisterForm() {
               {...control}
               autoComplete="username"
               placeholder="Nome de usuário"
-              className="h-[50px] rounded-xl px-4 md:h-10 md:rounded"
+              className="h-[50px] rounded-xl px-4 xl:h-10 xl:rounded"
               {...register('username')}
             />
           )}
@@ -57,7 +57,7 @@ export function RegisterForm() {
               type="email"
               autoComplete="email"
               placeholder="Digite seu e-mail"
-              className="h-[50px] rounded-xl px-4 md:h-10 md:rounded"
+              className="h-[50px] rounded-xl px-4 xl:h-10 xl:rounded"
               {...register('email')}
             />
           )}
@@ -96,10 +96,10 @@ export function RegisterForm() {
       <Button
         type="submit"
         disabled={createAccount.isPending}
-        className="mt-[40.5px] h-[60px] w-full rounded-xl text-base md:mt-6 md:h-[44.5px] md:rounded"
+        className="mt-[40.5px] h-[60px] w-full rounded-xl text-base xl:mt-6 xl:h-[44.5px] xl:rounded"
       >
-        <span className="md:hidden">Criar perfil</span>
-        <span className="hidden md:inline">Criar conta</span>
+        <span className="xl:hidden">Criar perfil</span>
+        <span className="hidden xl:inline">Criar conta</span>
       </Button>
       <AuthDivider />
       <SocialLoginButtons spacious />

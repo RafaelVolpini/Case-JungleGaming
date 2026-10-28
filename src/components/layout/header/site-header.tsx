@@ -7,7 +7,7 @@ import { PrimaryNav } from './primary-nav'
 
 export function SiteHeader() {
   return (
-    <header className="border-primary/50 bg-background sticky top-0 z-40 hidden border-b md:block">
+    <header className="border-primary/50 bg-background sticky top-0 z-40 hidden border-b xl:block">
       <div className="page-container grid h-[68px] grid-cols-[1fr_auto_1fr] items-start gap-6">
         <div className="pt-7">
           <Logo />

@@ -21,7 +21,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <SiteHeader />
       <main
         id="conteudo"
-        className={cn('flex-1 outline-none md:pb-0', tabBarVisible && 'pb-28')}
+        className={cn(
+          'mx-auto w-full max-w-[640px] flex-1 outline-none xl:max-w-none xl:pb-0',
+          tabBarVisible && 'pb-28',
+        )}
         tabIndex={-1}
       >
         {children}

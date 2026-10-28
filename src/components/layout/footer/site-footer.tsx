@@ -6,7 +6,7 @@ import { LinkColumns } from './link-columns'
 
 export function SiteFooter() {
   return (
-    <footer className="page-container mt-24 hidden md:block">
+    <footer className="page-container mt-24 hidden xl:block">
       <FeatureBand />
       <ContactStrip />
       <LinkColumns />

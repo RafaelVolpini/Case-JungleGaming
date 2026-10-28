@@ -1,0 +1,251 @@
+{
+  "generatedAt": "2026-10-28T06:30:26.251Z",
+  "runs": 3,
+  "results": [
+    {
+      "page": "inicio",
+      "profile": "mobile",
+      "runs": [
+        {
+          "scores": {
+            "performance": 89,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2919.422,
+          "cls": 0,
+          "tbt": 290.5,
+          "fcp": 975.422,
+          "si": 1376.7681307389526
+        },
+        {
+          "scores": {
+            "performance": 88,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2707.0231,
+          "cls": 0,
+          "tbt": 338.5,
+          "fcp": 789.0231,
+          "si": 886.9189999900364
+        },
+        {
+          "scores": {
+            "performance": 90,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2702.4775,
+          "cls": 0,
+          "tbt": 303,
+          "fcp": 761.4775,
+          "si": 859.1775206932057
+        }
+      ],
+      "median": {
+        "scores": {
+          "performance": 89,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 2707.0231,
+        "cls": 0,
+        "tbt": 303,
+        "fcp": 789.0231,
+        "si": 886.9189999900364
+      }
+    },
+    {
+      "page": "inicio",
+      "profile": "desktop",
+      "runs": [
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 590.4857,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 225.4857,
+          "si": 444.77393933450014
+        },
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 569.2570000000001,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 203.257,
+          "si": 478.82186294031305
+        },
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 570.3722,
+          "cls": 0,
+          "tbt": 4,
+          "fcp": 203.3722,
+          "si": 490.55146483166357
+        }
+      ],
+      "median": {
+        "scores": {
+          "performance": 100,
+          "accessibility": 97,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 570.3722,
+        "cls": 0,
+        "tbt": 0,
+        "fcp": 203.3722,
+        "si": 478.82186294031305
+      }
+    },
+    {
+      "page": "detalhe",
+      "profile": "mobile",
+      "runs": [
+        {
+          "scores": {
+            "performance": 90,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2758.0592,
+          "cls": 0,
+          "tbt": 297.5,
+          "fcp": 762.0592,
+          "si": 1650.1305117746513
+        },
+        {
+          "scores": {
+            "performance": 87,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2743.2347,
+          "cls": 0,
+          "tbt": 376.5,
+          "fcp": 761.2347,
+          "si": 1652.1942484500719
+        },
+        {
+          "scores": {
+            "performance": 88,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2760.2512,
+          "cls": 0,
+          "tbt": 347.5,
+          "fcp": 763.2512,
+          "si": 1402.6340696395762
+        }
+      ],
+      "median": {
+        "scores": {
+          "performance": 88,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 2758.0592,
+        "cls": 0,
+        "tbt": 347.5,
+        "fcp": 762.0592,
+        "si": 1650.1305117746513
+      }
+    },
+    {
+      "page": "detalhe",
+      "profile": "desktop",
+      "runs": [
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 558.6103,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 204.1103,
+          "si": 432.4806638989102
+        },
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 568.4137000000001,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 202.9137,
+          "si": 481.02326913696845
+        },
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 552.4588,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 204.4588,
+          "si": 397.7384463547171
+        }
+      ],
+      "median": {
+        "scores": {
+          "performance": 100,
+          "accessibility": 100,
+          "best-practices": 100,
+          "seo": 100
+        },
+        "lcp": 558.6103,
+        "cls": 0,
+        "tbt": 0,
+        "fcp": 204.1103,
+        "si": 432.4806638989102
+      }
+    }
+  ],
+  "environment": {
+    "lighthouse": "13.6.0",
+    "chrome": "Chromium do Playwright",
+    "server": "HTTP/2 + Brotli (lighthouse/serve.mjs)",
+    "node": "v24.21.0",
+    "platform": "win32 x64",
+    "targets": {
+      "performance": 90,
+      "accessibility": 95,
+      "best-practices": 95,
+      "seo": 90
+    }
+  }
+}

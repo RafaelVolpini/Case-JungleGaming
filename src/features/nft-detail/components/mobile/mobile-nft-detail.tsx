@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 
 import { NftImage } from '@/components/nft/nft-image'
 import { BackButton } from '@/components/shared/back-button'
@@ -6,10 +6,15 @@ import type { NftDetail } from '@/contracts/nft'
 import { FavoriteButton } from '@/features/favorites/components/favorite-button'
 
 import { pickDefaultEdition } from '../../lib/default-edition'
-import { DetailTabs } from '../detail-tabs'
-import { RelatedNfts } from '../related-nfts'
 import { MobileBuyBar } from './mobile-buy-bar'
 import { MobileDetailSheet } from './mobile-detail-sheet'
+
+const DetailTabs = lazy(() =>
+  import('../detail-tabs').then((module) => ({ default: module.DetailTabs })),
+)
+const RelatedNfts = lazy(() =>
+  import('../related-nfts').then((module) => ({ default: module.RelatedNfts })),
+)
 
 export function MobileNftDetail({ nft }: { nft: NftDetail }) {
   const [editionId, setEditionId] = useState(() => pickDefaultEdition(nft.editions).id)
@@ -29,8 +34,8 @@ export function MobileNftDetail({ nft }: { nft: NftDetail }) {
         />
       </div>
       {cover && (
-        <div className="mx-7 mt-2 h-[326px] overflow-hidden rounded-t-[30px]">
-          <NftImage image={cover} priority sizes="361px" className="size-[361px]" />
+        <div className="mt-2 ml-7 mr-[25px] aspect-[361/326] overflow-hidden rounded-t-[30px]">
+          <NftImage image={cover} priority sizes="361px" className="aspect-square w-full" />
         </div>
       )}
       <MobileDetailSheet
@@ -39,9 +44,11 @@ export function MobileNftDetail({ nft }: { nft: NftDetail }) {
         editionId={edition.id}
         onEditionChange={setEditionId}
       />
-      <div className="bg-card px-6">
-        <DetailTabs nft={nft} />
-        <RelatedNfts slug={nft.slug} />
+      <div className="bg-card min-h-[600px] px-6">
+        <Suspense fallback={null}>
+          <DetailTabs nft={nft} />
+          <RelatedNfts slug={nft.slug} />
+        </Suspense>
       </div>
       <MobileBuyBar key={edition.id} nft={nft} edition={edition} />
     </div>

@@ -19,7 +19,7 @@ function DesktopDetailPage({ slug }: { slug: string }) {
   const notFound = error instanceof ApiRequestError && error.status === 404
 
   return (
-    <div className="page-container pt-4 md:pt-[28px]">
+    <div className="page-container min-h-dvh pt-4 md:pt-[28px]">
       <Breadcrumbs
         items={[
           { label: 'Início', to: '/' },

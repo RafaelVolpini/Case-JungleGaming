@@ -81,7 +81,7 @@ export function MobileCheckout({
           {formatEth(quote.totals.totalEth)}
         </span>
       </p>
-      <div className="fixed inset-x-0 bottom-0 z-40 px-6 pb-[33px]">
+      <div className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[640px] px-6 pb-[33px]">
         <button
           type="button"
           onClick={() => {

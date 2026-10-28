@@ -33,7 +33,7 @@ export function MobileBuyBar({ nft, edition }: MobileBuyBarProps) {
   }
 
   return (
-    <div className="bg-card fixed inset-x-0 bottom-0 z-40 rounded-t-[28px] px-6 pt-5 pb-[34px] shadow-[0_-10px_24px_rgba(0,0,0,0.3)]">
+    <div className="bg-card fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[640px] rounded-t-[28px] px-6 pt-5 pb-[34px] shadow-[0_-10px_24px_rgba(0,0,0,0.3)]">
       <div className="flex h-[30px] items-center justify-between">
         <div className="flex items-center gap-[13px]">
           <span className="text-foreground text-[15px] font-bold">Qtd.</span>

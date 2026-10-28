@@ -24,15 +24,15 @@ export function MobileNftCard({ nft, imageAlign, priority = false }: MobileNftCa
       >
         <div
           className={cn(
-            'bg-card relative h-[200px] rounded-[20px] px-1',
-            imageAlign === 'top' ? 'pt-3' : 'pt-5',
+            'bg-card relative rounded-[20px] px-1',
+            imageAlign === 'top' ? 'pt-3 pb-5' : 'pt-5 pb-3',
           )}
         >
           <NftImage
             image={nft.image}
             priority={priority}
             sizes="168px"
-            className="size-[168px] rounded-2xl"
+            className="aspect-square w-full rounded-2xl"
           />
           {nft.rarity === 'rare' && nft.previousPriceEth !== null && (
             <span className="bg-primary text-primary-foreground absolute top-4 left-0 flex h-8 w-[68px] items-center px-2 text-xs leading-4 uppercase">

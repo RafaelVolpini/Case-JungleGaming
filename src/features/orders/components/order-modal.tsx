@@ -22,8 +22,10 @@ export function OrderModal({ title, onClose, children }: OrderModalProps) {
             <XIcon className="size-6" strokeWidth={1.25} />
             <span className="sr-only">Fechar</span>
           </DialogPrimitive.Close>
-          {children}
-          <div className="bg-primary mt-auto h-2.5 shrink-0" />
+          <div className="mx-auto flex w-full max-w-[578px] flex-1 flex-col">
+            {children}
+            <div className="bg-primary mt-auto h-2.5 shrink-0" />
+          </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
