@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { PagePlaceholder } from '@/components/feedback/page-placeholder'
+import { HomePage } from '@/features/catalog/pages/home-page'
 import { parseCatalogSearch } from '@/features/catalog/search'
 
 export const Route = createFileRoute('/_shell/')({
   validateSearch: parseCatalogSearch,
-  component: () => <PagePlaceholder title="Início" />,
+  component: HomePage,
 })

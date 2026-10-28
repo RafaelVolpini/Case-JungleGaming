@@ -12,6 +12,7 @@ import {
 } from '../db/catalog'
 import { favoriteIdsFor, toNftDetail, toNftSummary } from '../db/projections'
 import { getDb } from '../db/store'
+import { FEATURED_HERO_SLUGS, FEATURED_SPOTLIGHT_SLUG } from '../fixtures/featured'
 import { API } from './constants'
 import { errorResponse } from './errors'
 import { resolveCaller } from './identity'
@@ -56,6 +57,23 @@ export const nftHandlers = [
           nftCount: counts[collection.id] ?? 0,
         })),
       )
+    }),
+  ),
+
+  http.get(
+    `${API}/featured`,
+    simulated(({ request }) => {
+      const favorites = favoriteIdsFor(resolveCaller(request).user?.id ?? null)
+      const summarize = (slug: string) => {
+        const nft = findNftBySlug(slug)
+        return nft ? toNftSummary(nft, favorites) : null
+      }
+      const spotlight = summarize(FEATURED_SPOTLIGHT_SLUG)
+      const hero = FEATURED_HERO_SLUGS.map(summarize).filter((item) => item !== null)
+      if (!spotlight || hero.length === 0) {
+        return errorResponse('NOT_FOUND', 'Destaques indisponíveis no momento.')
+      }
+      return HttpResponse.json({ hero, spotlight })
     }),
   ),
 

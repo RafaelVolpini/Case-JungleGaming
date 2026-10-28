@@ -1,7 +1,9 @@
 import type { EthAmount, Network } from '@/contracts/common'
 import type { Rarity } from '@/contracts/nft'
 
-export type NftArt = 'golden' | 'ivory' | 'emerald' | 'sage'
+import type { ArtId } from '@/lib/format/image'
+
+export type NftArt = ArtId
 
 export type EditionRecord = {
   id: string

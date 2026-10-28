@@ -15,6 +15,7 @@ export const queryKeys = {
 
   favorites: {
     ids: (scope: string) => ['private', scope, 'favorites', 'ids'] as const,
+    list: (scope: string, page: number) => ['private', scope, 'favorites', 'list', page] as const,
   },
 
   cart: (scope: string) => ['private', scope, 'cart'] as const,

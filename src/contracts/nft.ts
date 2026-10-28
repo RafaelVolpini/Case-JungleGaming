@@ -110,3 +110,15 @@ export const catalogQuerySchema = z.object({
 
 export type CatalogQuery = z.infer<typeof catalogQuerySchema>
 export type CatalogQueryInput = z.input<typeof catalogQuerySchema>
+
+export const networkOptionSchema = z.object({
+  id: networkSchema,
+  nftCount: z.number().int().nonnegative(),
+})
+export type NetworkOption = z.infer<typeof networkOptionSchema>
+
+export const featuredSchema = z.object({
+  hero: z.array(nftSummarySchema).min(1),
+  spotlight: nftSummarySchema,
+})
+export type Featured = z.infer<typeof featuredSchema>
