@@ -1,3 +1,5 @@
+import { readJsonStorage, writeJsonStorage } from '@/lib/storage'
+
 import type { MockDb } from './types'
 
 export const SCHEMA_VERSION = 1
@@ -45,24 +47,13 @@ export function nextVersion(): number {
 }
 
 function readPersisted(): MockDb | null {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as Partial<MockDb>
-    if (parsed.schemaVersion !== SCHEMA_VERSION) return null
-    return parsed as MockDb
-  } catch {
-    return null
-  }
+  const parsed = readJsonStorage<Partial<MockDb>>(STORAGE_KEY)
+  if (!parsed || parsed.schemaVersion !== SCHEMA_VERSION) return null
+  return parsed as MockDb
 }
 
 export function persist(): void {
-  if (!db) return
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(db))
-  } catch {
-    return
-  }
+  if (db) writeJsonStorage(STORAGE_KEY, db)
 }
 
 export function mutate<T>(fn: (current: MockDb) => T, events: DbEvent[] = []): T {

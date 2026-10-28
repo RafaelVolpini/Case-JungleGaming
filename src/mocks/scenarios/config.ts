@@ -1,3 +1,5 @@
+import { readJsonStorage, removeStorage, writeJsonStorage } from '@/lib/storage'
+
 export const LATENCY_PROFILES = [
   'none',
   'fast',
@@ -45,20 +47,12 @@ export function setScenario(patch: Partial<ScenarioConfig>): ScenarioConfig {
   current = { ...current, ...patch }
   requestCounts.clear()
   latencyCursor = 0
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(current))
-  } catch {
-    return
-  }
+  writeJsonStorage(STORAGE_KEY, current)
   return current
 }
 
 export function resetScenario(): ScenarioConfig {
-  try {
-    window.localStorage.removeItem(STORAGE_KEY)
-  } catch {
-    return
-  }
+  removeStorage(STORAGE_KEY)
   current = { ...DEFAULT_SCENARIO }
   requestCounts.clear()
   latencyCursor = 0
@@ -68,12 +62,8 @@ export function resetScenario(): ScenarioConfig {
 export function loadScenario(search = window.location.search): ScenarioConfig {
   let next: ScenarioConfig = { ...DEFAULT_SCENARIO }
 
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (raw) next = { ...next, ...(JSON.parse(raw) as Partial<ScenarioConfig>) }
-  } catch {
-    return
-  }
+  const stored = readJsonStorage<Partial<ScenarioConfig>>(STORAGE_KEY)
+  if (stored) next = { ...next, ...stored }
 
   const params = new URLSearchParams(search)
   const latency = params.get('latency')
