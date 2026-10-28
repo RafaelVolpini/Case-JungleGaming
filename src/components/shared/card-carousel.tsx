@@ -69,7 +69,7 @@ export function CardCarousel<T>({
               aria-current={index === selected}
               onClick={() => api?.scrollTo(index)}
               className={cn(
-                'size-3 rounded-full border transition-colors outline-none focus-visible:ring-ring focus-visible:ring-2',
+                'size-3 rounded-full border transition-colors outline-none focus-visible:ring-ring focus-visible:ring-2 mx-1',
                 index === selected ? 'bg-primary border-primary' : 'border-primary',
               )}
             />

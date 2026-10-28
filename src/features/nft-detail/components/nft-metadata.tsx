@@ -29,19 +29,23 @@ export function NftMetadata({ nft }: { nft: NftDetail }) {
   ]
 
   return (
-    <dl className="mt-[14px] flex flex-col gap-2">
-      <div className={rowClassName}>
-        <dt className="inline">ID do token: </dt>
-        <dd className="inline">{formatTokenId(nft.tokenId)}</dd>
-      </div>
-      <div className={rowClassName}>
-        <dt className="inline">Coleção: </dt>
-        <dd className="inline">{nft.series}</dd>
-      </div>
-      <div className={rowClassName}>
-        <dt className="inline">Atributos: </dt>
-        <dd className="inline">{nft.attributes.map((attribute) => attribute.value).join(', ')}</dd>
-      </div>
+    <div className="mt-[14px] flex flex-col gap-2">
+      <dl className="flex flex-col gap-2">
+        <div className={rowClassName}>
+          <dt className="inline">ID do token: </dt>
+          <dd className="inline">{formatTokenId(nft.tokenId)}</dd>
+        </div>
+        <div className={rowClassName}>
+          <dt className="inline">Coleção: </dt>
+          <dd className="inline">{nft.series}</dd>
+        </div>
+        <div className={rowClassName}>
+          <dt className="inline">Atributos: </dt>
+          <dd className="inline">
+            {nft.attributes.map((attribute) => attribute.value).join(', ')}
+          </dd>
+        </div>
+      </dl>
       <div className="text-cream flex items-center gap-2 text-[15px] leading-6 font-bold">
         Compartilhar este NFT:
         <span className="flex items-center gap-2 font-normal">
@@ -59,6 +63,6 @@ export function NftMetadata({ nft }: { nft: NftDetail }) {
           ))}
         </span>
       </div>
-    </dl>
+    </div>
   )
 }

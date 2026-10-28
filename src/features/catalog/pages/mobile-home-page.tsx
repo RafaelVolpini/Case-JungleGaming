@@ -14,6 +14,7 @@ export function MobileHomePage() {
       <MobileSearchBar onOpenFilters={() => setFiltersOpen(true)} />
       <MobileHeroBanner />
       <section id="catalogo" aria-label="Catálogo de NFTs" className="scroll-mt-4">
+        <h2 className="sr-only">Catálogo de NFTs</h2>
         <MobileFeedTabs />
         <MobileCatalogGrid />
       </section>

@@ -28,7 +28,12 @@ export function CatalogToolbar() {
       >
         <TabsList aria-label="Tipo de listagem" className="gap-5 border-b-0">
           {FEED_TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className={tabClassName}>
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              aria-controls={undefined}
+              className={tabClassName}
+            >
               {tab.label}
             </TabsTrigger>
           ))}

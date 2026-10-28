@@ -31,7 +31,7 @@ dist-ssr
 /e2e/**/*-diff.png
 
 # Lighthouse
-/lighthouse/reports/
+/lighthouse/.tmp/
 
 # Local env
 .env

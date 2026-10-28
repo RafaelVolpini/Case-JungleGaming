@@ -20,6 +20,7 @@ export function MobileFeedTabs() {
           <TabsTrigger
             key={tab.value}
             value={tab.value}
+            aria-controls={undefined}
             className={`${TAB} ${index === 2 ? 'ml-3' : ''}`}
           >
             {tab.label}

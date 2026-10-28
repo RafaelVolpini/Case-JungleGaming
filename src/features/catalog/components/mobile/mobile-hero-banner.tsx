@@ -49,7 +49,8 @@ export function MobileHeroBanner() {
           count={slides.length}
           active={active}
           onSelect={setActive}
-          className="absolute bottom-[9px] left-1/2 -translate-x-1/2 gap-1.5"
+          dotClassName="size-[7px]"
+          className="absolute bottom-[9px] left-1/2 -translate-x-1/2 gap-[17px]"
         />
       )}
     </section>
