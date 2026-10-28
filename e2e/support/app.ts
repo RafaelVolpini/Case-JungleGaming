@@ -62,11 +62,10 @@ export async function waitForImages(page: Page): Promise<void> {
       await new Promise((resolve) => setTimeout(resolve, 60))
     }
     window.scrollTo(0, 0)
-    await Promise.all(
-      [...document.images]
-        .filter((image) => !image.complete)
-        .map((image) => new Promise((resolve) => (image.onload = image.onerror = resolve))),
-    )
+    const pending = [...document.images]
+      .filter((image) => !image.complete)
+      .map((image) => new Promise((resolve) => (image.onload = image.onerror = resolve)))
+    await Promise.race([Promise.all(pending), new Promise((resolve) => setTimeout(resolve, 2500))])
   })
 }
 
