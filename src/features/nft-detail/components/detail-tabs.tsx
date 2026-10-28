@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { NftDetail } from '@/contracts/nft'
 
 const triggerClassName =
-  'text-cream pb-1 text-[17px] md:text-[17px] data-[state=active]:border-b-[3px] data-[state=active]:text-primary-light'
+  'text-cream pb-1 text-[15px] md:text-[17px] data-[state=active]:border-b-[3px] data-[state=active]:text-primary-light'
 
 const sectionTitleClassName = 'text-cream mt-3 text-[15px] leading-6 font-bold'
 const bodyClassName = 'text-foreground text-sm leading-6'
@@ -11,12 +11,12 @@ const bodyClassName = 'text-foreground text-sm leading-6'
 export function DetailTabs({ nft }: { nft: NftDetail }) {
   return (
     <Tabs defaultValue="details" className="gap-0">
-      <TabsList className="border-primary/50 gap-9 border-b">
+      <TabsList className="border-primary/50 gap-x-6 gap-y-1 border-b md:gap-x-9">
         <TabsTrigger value="details" className={triggerClassName}>
           Detalhes do NFT
         </TabsTrigger>
         <TabsTrigger value="reviews" className={triggerClassName}>
-          Avaliações de colecionadores ({nft.rating.count})
+          Avaliações<span className="max-md:hidden"> de colecionadores</span> ({nft.rating.count})
         </TabsTrigger>
       </TabsList>
 

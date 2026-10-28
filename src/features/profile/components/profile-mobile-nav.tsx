@@ -4,7 +4,7 @@ import { useAuthActions } from '@/features/auth/hooks/use-auth-actions'
 import { cn } from '@/lib/utils'
 
 const PILL =
-  'focus-visible:ring-ring shrink-0 rounded-full border px-4 py-2 text-sm whitespace-nowrap outline-none focus-visible:ring-2'
+  'focus-visible:ring-ring rounded-full border px-4 py-2 text-sm outline-none focus-visible:ring-2'
 const IDLE =
   'border-input text-primary-light data-[status=active]:border-primary data-[status=active]:bg-primary data-[status=active]:text-primary-foreground data-[status=active]:font-bold'
 
@@ -18,7 +18,7 @@ export function ProfileMobileNav() {
   const { logout } = useAuthActions()
 
   return (
-    <nav aria-label="Menu do perfil" className="-mx-6 mt-5 flex gap-2 overflow-x-auto px-6 pb-1">
+    <nav aria-label="Menu do perfil" className="mt-5 flex flex-wrap gap-2">
       {LINKS.map((link) => (
         <Link
           key={link.to}
