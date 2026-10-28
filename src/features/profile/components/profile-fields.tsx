@@ -5,9 +5,8 @@ import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 
 import type { ProfileFormValues } from '../lib/profile-form'
+import { PAGE_FIELD } from '../lib/field-props'
 import { AvatarField } from './avatar-field'
-
-export const PAGE_FIELD = { labelClassName: 'text-[15px]/6', controlClassName: 'mt-[14px]' }
 
 type ProfileFieldsProps = { form: UseFormReturn<ProfileFormValues>; hasWallet: boolean }
 

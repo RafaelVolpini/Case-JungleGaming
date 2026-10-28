@@ -5,7 +5,7 @@ import { PasswordInput } from '@/components/shared/password-input'
 import { Field } from '@/components/ui/field'
 import type { ChangePasswordInput } from '@/contracts/session'
 
-import { PAGE_FIELD } from './profile-fields'
+import { PAGE_FIELD } from '../lib/field-props'
 
 const PASSWORD_FIELD = { ...PAGE_FIELD, controlClassName: 'mt-2' }
 
