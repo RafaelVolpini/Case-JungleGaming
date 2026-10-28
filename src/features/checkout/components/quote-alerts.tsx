@@ -40,6 +40,7 @@ export function QuoteAlerts({
           </ul>
         )}
         <Button
+          type="button"
           size="sm"
           className="mt-3"
           disabled={acknowledging || refreshing}

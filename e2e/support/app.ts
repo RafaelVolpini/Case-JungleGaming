@@ -7,6 +7,7 @@ export type UserKey = keyof typeof USERS
 export async function openApp(page: Page, path = '/'): Promise<void> {
   await page.goto(path)
   await page.waitForLoadState('networkidle')
+  await page.waitForFunction(() => Boolean(navigator.serviceWorker?.controller))
 }
 
 export async function loginViaUi(page: Page, who: UserKey, redirect?: string): Promise<void> {
