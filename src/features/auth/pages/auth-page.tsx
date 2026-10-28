@@ -1,11 +1,13 @@
 import { useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
-import { cn } from '@/lib/utils'
 import { sanitizeRedirect } from '@/lib/url/safe-redirect'
+import { useIsDesktop } from '@/lib/use-media-query'
+import { cn } from '@/lib/utils'
 
 import { AuthIntro } from '../components/auth-intro'
 import { AuthModal } from '../components/auth-modal'
+import { AuthScreen } from '../components/auth-screen'
 import { AuthTabs } from '../components/auth-tabs'
 import { LoginForm } from '../components/login-form'
 import { RegisterForm } from '../components/register-form'
@@ -32,13 +34,23 @@ const COPY = {
 
 export function AuthPage({ mode, redirect, expired = false }: AuthPageProps) {
   const router = useRouter()
+  const isDesktop = useIsDesktop()
   const { isAuthenticated } = useSession()
   const target = sanitizeRedirect(redirect)
   const copy = COPY[mode]
+  const form = mode === 'login' ? <LoginForm /> : <RegisterForm />
 
   useEffect(() => {
     if (isAuthenticated) router.history.replace(target)
   }, [isAuthenticated, target, router])
+
+  if (!isDesktop) {
+    return (
+      <AuthScreen mode={mode} redirect={redirect} expired={expired}>
+        {form}
+      </AuthScreen>
+    )
+  }
 
   return (
     <AuthModal
@@ -53,7 +65,7 @@ export function AuthPage({ mode, redirect, expired = false }: AuthPageProps) {
           Sua sessão expirou. Entre novamente para continuar.
         </p>
       )}
-      {mode === 'login' ? <LoginForm /> : <RegisterForm />}
+      <div className="mx-auto mt-[24.5px] w-full max-w-[340px] px-4 md:px-0">{form}</div>
     </AuthModal>
   )
 }

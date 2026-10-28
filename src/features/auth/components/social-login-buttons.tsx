@@ -7,7 +7,12 @@ const BUTTON =
 
 export function SocialLoginButtons({ spacious = false }: { spacious?: boolean }) {
   return (
-    <div className={cn('flex flex-col', spacious ? 'mt-3.5 gap-4' : 'mt-[10.5px] gap-3')}>
+    <div
+      className={cn(
+        'flex flex-col',
+        spacious ? 'mt-2.5 gap-4 md:mt-3.5' : 'mt-2.5 gap-4 md:mt-[10.5px] md:gap-3',
+      )}
+    >
       <UnavailableAction subject="O login com Google" className={BUTTON}>
         <GoogleIcon className="size-5" />
         Continuar com Google

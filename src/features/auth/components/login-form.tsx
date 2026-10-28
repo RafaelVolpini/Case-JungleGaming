@@ -34,11 +34,7 @@ export function LoginForm() {
   })
 
   return (
-    <form
-      noValidate
-      onSubmit={submit}
-      className="mx-auto mt-[24.5px] w-full max-w-[340px] px-4 md:px-0"
-    >
+    <form noValidate onSubmit={submit} className="w-full">
       <div className="flex flex-col gap-3">
         <Field
           label="E-mail"
@@ -52,7 +48,7 @@ export function LoginForm() {
               type="email"
               autoComplete="email"
               placeholder="contato@email.com"
-              className="px-4"
+              className="h-[50px] rounded-xl px-4 md:h-10 md:rounded"
               {...register('email')}
             />
           )}
@@ -77,7 +73,7 @@ export function LoginForm() {
       </div>
       <UnavailableAction
         subject="A recuperação de senha"
-        className="text-primary-light mt-2 ml-auto block text-sm leading-6 hover:underline"
+        className="text-primary-light ml-auto mt-2.5 block text-sm leading-6 hover:underline md:mt-2"
       >
         Esqueceu a senha?
       </UnavailableAction>
@@ -89,7 +85,7 @@ export function LoginForm() {
       <Button
         type="submit"
         disabled={login.isPending}
-        className="mt-5 h-[44.5px] w-full text-base md:rounded"
+        className="mt-[34.5px] h-[60px] w-full rounded-xl text-base md:mt-5 md:h-[44.5px] md:rounded"
       >
         Entrar
       </Button>

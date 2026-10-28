@@ -37,11 +37,7 @@ export function RegisterForm() {
   })
 
   return (
-    <form
-      noValidate
-      onSubmit={submit}
-      className="mx-auto mt-[24.5px] w-full max-w-[340px] px-4 md:px-0"
-    >
+    <form noValidate onSubmit={submit} className="w-full">
       <div className="flex flex-col gap-3">
         <Field label="Nome de usuário" error={errors.username?.message} {...HIDDEN_LABEL}>
           {(control) => (
@@ -49,7 +45,7 @@ export function RegisterForm() {
               {...control}
               autoComplete="username"
               placeholder="Nome de usuário"
-              className="px-4"
+              className="h-[50px] rounded-xl px-4 md:h-10 md:rounded"
               {...register('username')}
             />
           )}
@@ -61,7 +57,7 @@ export function RegisterForm() {
               type="email"
               autoComplete="email"
               placeholder="Digite seu e-mail"
-              className="px-4"
+              className="h-[50px] rounded-xl px-4 md:h-10 md:rounded"
               {...register('email')}
             />
           )}
@@ -83,6 +79,8 @@ export function RegisterForm() {
             <PasswordInput
               {...control}
               visible={visible}
+              onToggleVisible={() => setVisible((current) => !current)}
+              mobileOnlyToggle
               autoComplete="new-password"
               placeholder="Confirmar senha"
               {...register('confirmPassword')}
@@ -98,9 +96,10 @@ export function RegisterForm() {
       <Button
         type="submit"
         disabled={createAccount.isPending}
-        className="mt-6 h-[44.5px] w-full text-base md:rounded"
+        className="mt-[40.5px] h-[60px] w-full rounded-xl text-base md:mt-6 md:h-[44.5px] md:rounded"
       >
-        Criar conta
+        <span className="md:hidden">Criar perfil</span>
+        <span className="hidden md:inline">Criar conta</span>
       </Button>
       <AuthDivider />
       <SocialLoginButtons spacious />
