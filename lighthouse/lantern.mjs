@@ -75,30 +75,63 @@ async function gather() {
   server.close()
 }
 
-if (process.env.LANTERN_REUSE !== '1' || !existsSync(ARTIFACTS)) await gather()
-
-const artifacts = JSON.parse(readFileSync(join(ARTIFACTS, 'artifacts.json'), 'utf8'))
-const files = readdirSync(ARTIFACTS)
-const traceFile = files.find((file) => /trace/i.test(file))
-const logFile = files.find((file) => /devtoolslog/i.test(file))
-const trace = JSON.parse(readFileSync(join(ARTIFACTS, traceFile), 'utf8'))
-const devtoolsLog = JSON.parse(readFileSync(join(ARTIFACTS, logFile), 'utf8'))
-const context = { computedCache: new Map() }
-const data = {
-  trace,
-  devtoolsLog,
-  gatherContext: artifacts.GatherContext ?? { gatherMode: 'navigation' },
-  settings: artifacts.settings,
-  URL: artifacts.URL,
-  SourceMaps: artifacts.SourceMaps ?? [],
-  HostDPR: artifacts.HostDPR ?? 1,
+async function compute() {
+  const artifacts = JSON.parse(readFileSync(join(ARTIFACTS, 'artifacts.json'), 'utf8'))
+  const files = readdirSync(ARTIFACTS)
+  const trace = JSON.parse(
+    readFileSync(
+      join(
+        ARTIFACTS,
+        files.find((file) => /trace/i.test(file)),
+      ),
+      'utf8',
+    ),
+  )
+  const devtoolsLog = JSON.parse(
+    readFileSync(
+      join(
+        ARTIFACTS,
+        files.find((file) => /devtoolslog/i.test(file)),
+      ),
+      'utf8',
+    ),
+  )
+  const context = { computedCache: new Map() }
+  const data = {
+    trace,
+    devtoolsLog,
+    gatherContext: artifacts.GatherContext ?? { gatherMode: 'navigation' },
+    settings: artifacts.settings,
+    URL: artifacts.URL,
+    SourceMaps: artifacts.SourceMaps ?? [],
+    HostDPR: artifacts.HostDPR ?? 1,
+  }
+  const lcp = await LanternLargestContentfulPaint.request(data, context)
+  const tbt = await LanternTotalBlockingTime.request(data, context)
+  return { lcp, tbt, bench: Math.round(artifacts.BenchmarkIndex ?? 0) }
 }
 
-const lcp = await LanternLargestContentfulPaint.request(data, context)
-console.log(
-  `LCP simulated ${Math.round(lcp.timing)} ms (optimistic ${Math.round(lcp.optimisticEstimate.timeInMs)}, pessimistic ${Math.round(lcp.pessimisticEstimate.timeInMs)})`,
-)
-if (SHOW === 'both' || SHOW === 'optimistic') printTimeline('optimistic', lcp.optimisticEstimate)
-if (SHOW === 'both' || SHOW === 'pessimistic') printTimeline('pessimistic', lcp.pessimisticEstimate)
-const tbt = await LanternTotalBlockingTime.request(data, context)
-console.log(`\nTBT simulated ${Math.round(tbt.timing)} ms`)
+const median = (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)]
+const RUNS = Number(process.env.LANTERN_RUNS ?? 1)
+const reuse = process.env.LANTERN_REUSE === '1' && existsSync(ARTIFACTS)
+const results = []
+
+for (let run = 0; run < RUNS; run += 1) {
+  if (!reuse) await gather()
+  const { lcp, tbt, bench } = await compute()
+  results.push({ lcp: lcp.timing, tbt: tbt.timing, bench })
+  console.log(
+    `run ${run + 1}: LCP ${Math.round(lcp.timing)} (opt ${Math.round(lcp.optimisticEstimate.timeInMs)} / pess ${Math.round(lcp.pessimisticEstimate.timeInMs)}) | TBT ${Math.round(tbt.timing)} | bench ${bench}`,
+  )
+  if (RUNS === 1) {
+    if (SHOW === 'both' || SHOW === 'optimistic')
+      printTimeline('optimistic', lcp.optimisticEstimate)
+    if (SHOW === 'both' || SHOW === 'pessimistic')
+      printTimeline('pessimistic', lcp.pessimisticEstimate)
+  }
+}
+if (RUNS > 1) {
+  console.log(
+    `MEDIAN of ${RUNS}: LCP ${Math.round(median(results.map((r) => r.lcp)))} | TBT ${Math.round(median(results.map((r) => r.tbt)))}`,
+  )
+}
