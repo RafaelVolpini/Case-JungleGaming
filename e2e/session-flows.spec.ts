@@ -4,8 +4,10 @@ import { addToCart, loginViaApi, openApp } from './support/app'
 import { api, mock, USERS } from './support/mock-api'
 
 async function signInAgain(page: Page) {
+  const password = page.getByLabel('Senha', { exact: true })
+  await expect(password).toBeVisible()
   await page.getByRole('textbox', { name: 'E-mail' }).fill(USERS.ana.email)
-  await page.getByLabel('Senha', { exact: true }).fill(USERS.ana.password)
+  await password.fill(USERS.ana.password)
   await page.getByRole('button', { name: 'Entrar', exact: true }).first().click()
 }
 
