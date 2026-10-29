@@ -314,3 +314,30 @@ test.describe('revisão de design: paginação no mobile', () => {
     expect(bottom(pagination)).toBeLessThanOrEqual(scan.y - 8)
   })
 })
+
+test.describe('revisão de design: cabeçalho', () => {
+  test('logo, menu, busca, carrinho e botão Entrar ficam na mesma linha central', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'o cabeçalho é exclusivo do desktop')
+    await openApp(page)
+    const header = page.locator('header')
+    const nav = header.getByRole('navigation', { name: 'Principal' }).getByRole('link').first()
+    const menuCenter = await nav.evaluate((link) => {
+      const range = document.createRange()
+      range.selectNodeContents(link)
+      const rect = range.getBoundingClientRect()
+      return rect.y + rect.height / 2
+    })
+    const centers = await Promise.all([
+      box(header.getByRole('link', { name: 'Kurio, página inicial' })),
+      box(header.getByRole('button', { name: 'Buscar NFTs' })),
+      box(header.getByRole('link', { name: /Carrinho/ })),
+      box(header.getByRole('link', { name: 'Entrar' })),
+    ])
+    for (const item of centers) {
+      expect(Math.abs(centerY(item) - menuCenter)).toBeLessThanOrEqual(1)
+    }
+  })
+})
