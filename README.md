@@ -85,7 +85,29 @@ página.
 Um detalhe que costuma pegar de surpresa: **cada aba do navegador tem a sua própria base**. Se você mudar um preço pelo
 simulador numa aba, o app aberto em outra aba não fica sabendo. Use o simulador e o app na mesma aba.
 
-### 5.1 Selecionar o cenário
+### 5.1 O caminho mais curto: o simulador (`Ctrl+Alt+M`)
+
+Para testar qualquer cenário sem decorar rota nenhuma, abra o app e aperte **`Ctrl+Alt+M`**. O painel **Simulador de mercado**
+aparece no canto da tela (aperte de novo, `Esc` ou o X para fechar). Se preferir, acrescente `?simulador=1` à URL, por
+exemplo `/pagamento?simulador=1`.
+
+![Simulador de mercado aberto na tela de pagamento](assets/cenarios/01-simulador.webp)
+
+Pelo painel você consegue, sem sair da página em que está:
+
+- **mudar o preço** de um NFT (−10%, −5%, +5%, +10% ou um valor exato) e **definir ou esgotar** a disponibilidade;
+- enviar um **evento duplicado** ou um **evento antigo** pelo Socket.IO, para ver o app ignorá-los;
+- **derrubar a conexão** em tempo real (`Derrubar`, `Segurar 5 s`, `Segurar 20 s`) e depois reconectar;
+- trocar o **cenário de rede**: latência, tipo de falha, escopo da falha, pagamento recusado e timeout após criar o pedido;
+- **restaurar** os dados e o cenário.
+
+Tudo que o painel faz passa pelo MSW e chega ao app pelo Socket.IO, como aconteceria com um servidor de verdade. A seção 6
+tem o passo a passo do preço mudando durante uma compra.
+
+Os mesmos cenários também podem ser acionados **pela URL e pelo console do navegador**, que é o que as próximas subseções
+descrevem. Isso é útil para testes automatizados e para compartilhar um link que já abre o app com uma falha ligada.
+
+### 5.2 Selecionar o cenário pela URL ou pelo console
 
 Pela query string (vale só para aquele carregamento):
 
@@ -102,8 +124,8 @@ Pela query string (vale só para aquele carregamento):
 
 Exemplos: `/?latency=slow` · `/?failure=server-error&failScope=/api/nfts` · `/pagamento?payment=decline`.
 
-Em tempo de execução, pelo **simulador de mercado** (seção 6) ou pelo console do navegador. As rotas de controle ignoram a
-simulação de rede e funcionam com a aplicação aberta:
+Com o app já aberto, as mesmas mudanças podem ser feitas chamando as **rotas de controle** do MSW pelo console do navegador
+(é o que o simulador faz por baixo). Elas ignoram a simulação de rede, então funcionam mesmo com uma falha ligada:
 
 ```js
 const post = (path, body = {}) =>
@@ -119,7 +141,7 @@ post('/api/__mock__/socket/reconnect')                                 // encerr
 post('/api/__mock__/socket/replay', { slug: 'emerald-ape-042', mode: 'duplicate' }) // ou 'stale'
 ```
 
-### 5.2 Reset
+### 5.3 Reset
 
 - **Reset completo:** `POST /api/__mock__/reset` (ou o botão "Restaurar dados e cenário" do simulador) restaura o cenário
   semeado de forma íntegra: catálogo de 239 NFTs, usuários, carrinhos, pedidos e cenário. O contador de versões nunca
@@ -128,24 +150,104 @@ post('/api/__mock__/socket/replay', { slug: 'emerald-ape-042', mode: 'duplicate'
 - Os dados são determinísticos: a latência variável vem de um gerador semeado e os ids de cotação, pedido e evento
   seguem um contador persistido.
 
-### 5.3 Reproduzir os fluxos de falha
+### 5.4 Reproduzir cada cenário (com prints)
 
-| Fluxo | Como reproduzir |
-| --- | --- |
-| Lentidão e skeletons | `/?latency=slow` |
-| Respostas fora de ordem | `/?latency=out-of-order` e trocar de aba do catálogo rápido |
-| Erro HTTP e nova tentativa | `/?failure=server-error&failScope=/api/nfts`; depois `post('/api/__mock__/scenario', { failure: 'none', scope: [] })` e **Tentar novamente** |
-| Sem conexão | `/?failure=offline` |
-| Sessão expirada | Entre, rode `expire-sessions` e navegue, recarregue ou confirme um pedido |
-| Conflito de cadastro | Cadastre `ana@kurio.test` em `/criar-conta` |
-| Resultado vazio | Busque `zzz` no catálogo |
-| Cupom inválido ou expirado | Use `NAOEXISTE` e `EXPIRADO` no carrinho |
-| Pagamento recusado | `post('/api/__mock__/scenario', { payment: 'decline' })` e conclua a compra |
-| Carteira recusa a conexão | `post('/api/__mock__/scenario', { wallet: 'reject' })` |
-| Timeout após criar o pedido | `post('/api/__mock__/scenario', { orderTimeout: true })`; após ~8 s use **Tentar novamente** ou **Verificar pedido**: volta o mesmo pedido, sem segunda compra |
-| Preço mudou durante o checkout | Simulador (seção 6) ou `post('/api/__mock__/nfts/<slug>', { priceEth: '3.00' })` com o checkout aberto |
-| Edição esgotada durante a compra | `post('/api/__mock__/nfts/<slug>', { edition: '1/50', available: 0 })` |
-| Queda do tempo real | `post('/api/__mock__/socket/drop', { holdMs: 5000 })`: o cliente reconecta e reconcilia pela API |
+Para cada situação abaixo há o caminho mais curto e o print de como o app deve ficar. Onde o simulador (`Ctrl+Alt+M`) tem
+o controle, ele é o jeito mais fácil; o console e a URL funcionam em todos os casos. Nos exemplos de console, `post` é o
+helper definido na seção 5.2.
+
+#### Lentidão e skeletons
+
+Abra `/?latency=slow` (ou escolha a latência no simulador). Enquanto as respostas não chegam, a página mostra os
+skeletons no lugar do conteúdo, sem pulo de layout.
+
+![Página inicial com skeletons durante a latência lenta](assets/cenarios/02-lentidao.webp)
+
+#### Respostas fora de ordem
+
+Abra `/?latency=out-of-order` e troque rápido de aba do catálogo. As respostas chegam embaralhadas, mas o app mostra
+sempre a lista da última aba escolhida. Não há print porque o resultado correto parece uma tela normal.
+
+#### Erro HTTP e nova tentativa
+
+Abra `/nft/emerald-ape-042?failure=server-error&failScope=/api/nfts`. Para recuperar, rode
+`post('/api/__mock__/scenario', { failure: 'none', scope: [] })` e clique em **Tentar novamente**.
+
+![Detalhe do NFT com erro do servidor e botão de nova tentativa](assets/cenarios/03-erro-http.webp)
+
+#### Sem conexão
+
+Abra `/?failure=offline`. O catálogo explica que não foi possível conectar e oferece **Tentar novamente**.
+
+![Catálogo sem conexão](assets/cenarios/04-sem-conexao.webp)
+
+#### Sessão expirada
+
+Entre, rode `post('/api/__mock__/expire-sessions')` e navegue, recarregue ou confirme um pedido. O app avisa, abre o login
+e, depois de entrar, volta para onde você estava.
+
+![Aviso de sessão expirada com o login aberto](assets/cenarios/05-sessao-expirada.webp)
+
+#### Conflito de cadastro
+
+Em `/criar-conta`, cadastre o e-mail `ana@kurio.test`, que já existe.
+
+![Cadastro com e-mail já usado](assets/cenarios/06-conflito-cadastro.webp)
+
+#### Resultado vazio
+
+Busque `zzz` no catálogo. A tela explica o que houve e **Limpar filtros** restaura a lista.
+
+![Catálogo sem resultados para a busca](assets/cenarios/07-resultado-vazio.webp)
+
+#### Cupom inválido ou expirado
+
+No carrinho, aplique `NAOEXISTE` e depois `EXPIRADO`.
+
+![Cupom que não existe](assets/cenarios/08-cupom-invalido.webp)
+
+![Cupom expirado](assets/cenarios/09-cupom-expirado.webp)
+
+#### Pagamento recusado
+
+Marque **Pagamento recusado** no simulador (ou rode `post('/api/__mock__/scenario', { payment: 'decline' })`) e conclua a
+compra. O carrinho é preservado e dá para tentar de novo.
+
+![Pagamento recusado com opção de tentar novamente](assets/cenarios/10-pagamento-recusado.webp)
+
+#### Carteira recusa a conexão
+
+Rode `post('/api/__mock__/scenario', { wallet: 'reject' })` e clique em **Confirmar compra**. Depois de voltar para
+`{ wallet: 'accept' }`, **Conectar novamente** funciona.
+
+![A carteira recusou a conexão](assets/cenarios/11-carteira-recusa.webp)
+
+#### Timeout depois de criar o pedido
+
+Marque **Timeout após criar o pedido** no simulador (ou `post('/api/__mock__/scenario', { orderTimeout: true })`). Passados
+uns 8 segundos, use **Tentar novamente** ou **Verificar pedido**: volta o mesmo pedido, sem uma segunda compra.
+
+![Timeout após criar o pedido: o app oferece verificar o pedido](assets/cenarios/12-timeout-pedido.webp)
+
+#### Preço mudou durante o checkout
+
+No simulador, clique em **+10%** com o checkout aberto (ou `post('/api/__mock__/nfts/<slug>', { priceEth: '3.00' })`). O
+alerta aparece, o resumo se atualiza e **Confirmar compra** fica bloqueado até você aceitar as alterações.
+
+![Alerta de preço alterado no checkout, com o simulador aberto](assets/cenarios/13-preco-mudou.webp)
+
+#### Edição esgotada durante a compra
+
+No simulador, clique em **Esgotar** (ou `post('/api/__mock__/nfts/<slug>', { edition: '1/50', available: 0 })`).
+
+![Aviso de que a edição esgotou durante o checkout](assets/cenarios/14-edicao-esgotada.webp)
+
+#### Queda do tempo real
+
+No simulador, clique em **Segurar 20 s** (ou `post('/api/__mock__/socket/drop', { holdMs: 20000 })`). O cliente tenta
+reconectar e, ao voltar, reconcilia o estado pela API.
+
+![Simulador mostrando a queda simulada da conexão](assets/cenarios/15-queda-tempo-real.webp)
 
 ## 6. Testar o tempo real (preço mudando durante a compra)
 
