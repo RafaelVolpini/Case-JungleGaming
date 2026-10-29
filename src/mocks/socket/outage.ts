@@ -15,3 +15,11 @@ export function outageRemainingMs(): number {
 export function isOutageActive(): boolean {
   return outageRemainingMs() > 0
 }
+
+type RefusableClient = { close: (code?: number, reason?: string) => void }
+
+export function refuseConnection(client: RefusableClient): void {
+  const { socket } = client as { socket?: EventTarget }
+  socket?.dispatchEvent(new Event('error'))
+  client.close(1006, 'Simulated outage')
+}

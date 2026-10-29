@@ -5,6 +5,7 @@ import type { RouterContext } from '@/app/router-context'
 import { RouteAnnouncer } from '@/components/layout/route-announcer'
 import { Toaster } from '@/components/ui/sonner'
 import { useSessionExpiry } from '@/features/auth/hooks/use-session-expiry'
+import { SimulatorHost } from '@/features/market-simulator/simulator-host'
 
 const RealtimeBridge = lazy(() =>
   import('@/features/realtime/realtime-bridge').then((module) => ({
@@ -22,6 +23,7 @@ function RootLayout() {
     <>
       <Outlet />
       <RouteAnnouncer />
+      <SimulatorHost />
       <Toaster position="bottom-right" />
       <Suspense fallback={null}>
         <RealtimeBridge />

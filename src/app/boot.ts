@@ -1,7 +1,8 @@
+import { MOCKS_ENABLED } from '@/lib/mocks-enabled'
 import { yieldToMain } from '@/lib/yield-to-main'
 
 async function startMocks(): Promise<void> {
-  if (import.meta.env.VITE_ENABLE_MOCKS === 'false') return
+  if (!MOCKS_ENABLED) return
   const { startMockWorker } = await import('@/mocks/browser')
   await yieldToMain()
   const heartbeat = new URLSearchParams(window.location.search).get('heartbeat') !== '0'

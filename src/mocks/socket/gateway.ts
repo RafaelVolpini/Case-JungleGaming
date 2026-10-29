@@ -10,7 +10,7 @@ import { getDb, isDbReady, onDbEvent, type DbEvent } from '../db/store'
 import { connectedClients, registerClient, unregisterClient, type ConnectedClient } from './clients'
 import { rememberNftEvent } from './event-log'
 import { buildNftPayload } from './nft-payload'
-import { isOutageActive } from './outage'
+import { isOutageActive, refuseConnection } from './outage'
 
 export const socketLink = ws.link(socketUrlFromOrigin(window.location.origin))
 
@@ -72,7 +72,7 @@ export function createSocketGateway({
 
   return socketLink.addEventListener('connection', (connection) => {
     if (isOutageActive()) {
-      connection.client.close()
+      refuseConnection(connection.client)
       onLog('connection refused during outage')
       return
     }
