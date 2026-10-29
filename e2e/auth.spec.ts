@@ -96,4 +96,22 @@ test.describe('conta e sessão', () => {
     await expect(page.getByText('Você ainda não favoritou nenhum NFT')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Emerald Ape #042' })).toHaveCount(0)
   })
+
+  test('falha transitória ao validar a sessão não expira o login @mobile', async ({ page }) => {
+    await loginViaApi(page, 'ana', '/')
+    await mock.scenario(page, { failure: 'server-error', scope: ['/api/auth/session'] })
+
+    await openApp(page, '/perfil')
+    await expect(
+      page.getByRole('alert').getByText('Não foi possível abrir esta página'),
+    ).toBeVisible()
+    await expect(page).toHaveURL(/\/perfil$/)
+
+    await mock.scenario(page, { failure: 'none', scope: [] })
+    await page.getByRole('button', { name: 'Tentar novamente' }).click()
+    await expect(
+      page.getByRole('heading', { name: /Ana Ribeiro|Meu perfil|Perfil/ }).first(),
+    ).toBeVisible()
+    await expect(page).not.toHaveURL(/entrar/)
+  })
 })

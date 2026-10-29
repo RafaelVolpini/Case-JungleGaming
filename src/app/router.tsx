@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { createRouter, parseSearchWith, stringifySearchWith } from '@tanstack/react-router'
 
 import { NotFoundScreen } from '@/components/feedback/not-found-screen'
+import { RouteErrorScreen } from '@/components/feedback/route-error-screen'
 import { routeTree } from '@/routeTree.gen'
 
 export function createAppRouter(queryClient: QueryClient) {
@@ -14,6 +15,7 @@ export function createAppRouter(queryClient: QueryClient) {
     parseSearch: parseSearchWith((value) => value),
     stringifySearch: stringifySearchWith((value) => String(value)),
     defaultNotFoundComponent: NotFoundScreen,
+    defaultErrorComponent: RouteErrorScreen,
   })
 }
 
