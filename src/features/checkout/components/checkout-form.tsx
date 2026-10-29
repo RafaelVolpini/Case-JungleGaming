@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { Cart } from '@/contracts/cart'
 import type { Quote } from '@/contracts/quote'
@@ -42,6 +42,10 @@ export function CheckoutForm({
   const expired = useIsExpired(quote.expiresAt)
   const blocked = quote.issues.length > 0 || expired
 
+  useEffect(() => {
+    if (blocked) setDialogOpen(false)
+  }, [blocked])
+
   const confirm = () =>
     placeOrder.mutate({
       quoteId: quote.id,
@@ -50,10 +54,7 @@ export function CheckoutForm({
       collector: form.getValues(),
     })
 
-  const placeError =
-    placeOrder.error instanceof ApiRequestError && placeOrder.error.code !== 'QUOTE_STALE'
-      ? placeOrder.error.message
-      : null
+  const placeError = placeOrder.error instanceof ApiRequestError ? placeOrder.error.message : null
 
   function toggleWallet(checked: boolean) {
     const target = checked ? secondary : primary
@@ -103,6 +104,7 @@ export function CheckoutForm({
         wallet={wallet}
         placing={placeOrder.isPending}
         placeError={placeError}
+        blocked={blocked || quoteQuery.isFetching}
         onOpenChange={setDialogOpen}
         onConfirm={confirm}
       />

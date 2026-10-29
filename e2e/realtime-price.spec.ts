@@ -27,7 +27,7 @@ test.describe('tempo real: preço e disponibilidade', () => {
     await expect(page.getByText(/disponibilidade de Emerald Ape #042 foi reduzida/)).toBeVisible()
   })
 
-  test('checkout bloqueia a confirmação com cotação desatualizada até aceitar', async ({
+  test('checkout bloqueia a confirmação com cotação desatualizada até aceitar @mobile', async ({
     page,
   }) => {
     await loginViaApi(page, 'ana', '/')
@@ -76,5 +76,50 @@ test.describe('tempo real: preço e disponibilidade', () => {
     await page.getByRole('button', { name: 'Aceitar alterações e atualizar' }).click()
     await expect(alert).toHaveCount(0)
     await expect(confirm).toBeEnabled()
+  })
+
+  test('preço alterado com o diálogo de confirmação aberto fecha o diálogo e exige novo aceite @mobile', async ({
+    page,
+  }) => {
+    await loginViaApi(page, 'ana', '/')
+    await addToCart(page, SLUG, { auth: true })
+    await openApp(page, '/pagamento')
+    await page.getByRole('button', { name: 'Confirmar compra' }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(page.getByRole('button', { name: 'Confirmar e enviar' })).toBeEnabled()
+
+    await mock.changeNft(page, SLUG, { priceEth: '3.00' })
+    await expect(dialog).toBeHidden()
+    const alert = page.getByRole('alert').filter({ hasText: 'o preço mudou' })
+    await expect(alert).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Confirmar compra' })).toBeDisabled()
+
+    await page.getByRole('button', { name: 'Aceitar alterações e atualizar' }).click()
+    await page.getByRole('button', { name: 'Confirmar compra' }).click()
+    await page.getByRole('button', { name: 'Confirmar e enviar' }).click()
+    await expect(page.getByText('Seus NFTs agora estão na sua carteira')).toBeVisible({
+      timeout: 20_000,
+    })
+    await expect(page.getByText('3.00 ETH').first()).toBeVisible()
+  })
+
+  test('disponibilidade reduzida no checkout bloqueia, atualiza o total e libera após aceitar @mobile', async ({
+    page,
+  }) => {
+    await loginViaApi(page, 'ana', '/')
+    await addToCart(page, SLUG, { quantity: 2, auth: true })
+    await openApp(page, '/pagamento')
+    const total = page.getByTestId('checkout-total')
+    await expect(total).toHaveText('2.396 ETH')
+    const confirm = page.getByRole('button', { name: 'Confirmar compra' })
+    await expect(confirm).toBeEnabled()
+
+    await mock.changeNft(page, SLUG, { edition: '1/50', available: 1 })
+    await expect(page.getByRole('alert').filter({ hasText: 'restam apenas 1' })).toBeVisible()
+    await expect(confirm).toBeDisabled()
+
+    await page.getByRole('button', { name: 'Aceitar alterações e atualizar' }).click()
+    await expect(confirm).toBeEnabled()
+    await expect(total).not.toHaveText('2.396 ETH')
   })
 })

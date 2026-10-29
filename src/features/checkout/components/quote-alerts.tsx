@@ -1,4 +1,5 @@
 import { TriangleAlert } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
 import { Button } from '@/components/ui/button'
 import type { Quote } from '@/contracts/quote'
@@ -20,10 +21,18 @@ export function QuoteAlerts({
   onAcknowledge,
   onRefresh,
 }: QuoteAlertsProps) {
-  if (!expired && quote.issues.length === 0) return null
+  const visible = expired || quote.issues.length > 0
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (visible) ref.current?.scrollIntoView({ block: 'nearest' })
+  }, [visible])
+
+  if (!visible) return null
 
   return (
     <div
+      ref={ref}
       role="alert"
       className="border-warning/60 bg-warning/10 mb-6 flex gap-3 rounded-lg border p-4"
     >

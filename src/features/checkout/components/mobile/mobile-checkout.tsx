@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { Cart } from '@/contracts/cart'
@@ -49,10 +49,11 @@ export function MobileCheckout({
   const missing = collectorDetailsSchema.safeParse(collector).error?.issues[0]?.message ?? null
   const blocked = quote.issues.length > 0 || expired || missing !== null
 
-  const placeError =
-    placeOrder.error instanceof ApiRequestError && placeOrder.error.code !== 'QUOTE_STALE'
-      ? placeOrder.error.message
-      : null
+  useEffect(() => {
+    if (blocked) setDialogOpen(false)
+  }, [blocked])
+
+  const placeError = placeOrder.error instanceof ApiRequestError ? placeOrder.error.message : null
 
   const confirm = () =>
     placeOrder.mutate({
@@ -122,6 +123,7 @@ export function MobileCheckout({
         wallet={wallet}
         placing={placeOrder.isPending}
         placeError={placeError}
+        blocked={blocked || quoteQuery.isFetching}
         onOpenChange={setDialogOpen}
         onConfirm={confirm}
         review={<MobileOrderReview items={items} totals={quote.totals} />}

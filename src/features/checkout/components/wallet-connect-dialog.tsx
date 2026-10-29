@@ -15,6 +15,7 @@ type WalletConnectDialogProps = {
   wallet: Wallet
   placing: boolean
   placeError: string | null
+  blocked?: boolean
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
   review?: ReactNode
@@ -25,6 +26,7 @@ export function WalletConnectDialog({
   wallet,
   placing,
   placeError,
+  blocked = false,
   onOpenChange,
   onConfirm,
   review,
@@ -98,7 +100,11 @@ export function WalletConnectDialog({
 
         <div className="flex flex-wrap gap-3">
           {connected && (
-            <Button className="h-10 rounded-md text-base" disabled={placing} onClick={onConfirm}>
+            <Button
+              className="h-10 rounded-md text-base"
+              disabled={placing || blocked}
+              onClick={onConfirm}
+            >
               {placeError ? 'Tentar novamente' : 'Confirmar e enviar'}
             </Button>
           )}
