@@ -75,9 +75,6 @@ mocks é o `boot.ts`; `features/` e `lib/` **nunca** importam de `mocks/`.
 | Mocks            | MSW 2.15 + `@mswjs/socket.io-binding` 0.2 | Ver seção 3                             |
 | Testes           | Playwright                                |                                         |
 
-O MSW fica na linha 2.x porque o `@mswjs/socket.io-binding@0.2.0` declara `msw: ^2.10.2` como dependência de par. Subir
-para o MSW 3 quebraria o tempo real.
-
 ## 3. O backend que não existe
 
 O desafio pede API, autenticação, pagamentos e tempo real sem backend. A solução: o **MSW intercepta as requisições no
