@@ -1,14 +1,20 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { addToCart, loginViaApi, openApp, settleFrames, waitForImages } from './support/app'
+import { baselineMissing, MISSING_BASELINE_MESSAGE } from './support/baselines'
 
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready)
   await waitForImages(page)
+  await page.waitForLoadState('networkidle')
   await settleFrames(page)
 }
 
 test.describe('regressão visual @mobile', () => {
+  test.beforeEach(({}, testInfo) => {
+    test.skip(baselineMissing(testInfo), MISSING_BASELINE_MESSAGE)
+  })
+
   test('início', async ({ page }) => {
     await openApp(page)
     await settle(page)

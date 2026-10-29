@@ -648,8 +648,7 @@ cada execução e por isso não são versionados.
 - Login social, recuperação de senha, Atividade, Ofertas, Arquivos baixados, Suporte, Criadores e Aprenda não existem; os
   controles correspondentes avisam que estão fora do escopo.
 - O avatar é um seletor de emoji (não há upload) e não existe tela de histórico de pedidos (§4).
-- A interface não faz cálculo monetário; o servidor é a referência. A apresentação arredonda a quatro casas decimais, e o
-  filtro de preço do catálogo usa vírgula como no Figma, enquanto o restante usa ponto.
+- A interface não faz cálculo monetário; o servidor é a referência. A apresentação arredonda a quatro casas decimais.
 - Em desenvolvimento (`npm run dev`) o `StrictMode` abre duas conexões Socket.IO por montagem; uma é encerrada antes do
   handshake. Não ocorre no build.
 - Os resultados do Lighthouse mobile dependem da CPU do host (§13.3): o índice de benchmark é registrado a cada execução.

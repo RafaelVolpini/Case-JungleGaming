@@ -9,7 +9,7 @@ import { useCatalogFilters } from '../../hooks/use-catalog-filters'
 
 type Apply = ReturnType<typeof useCatalogFilters>['update']
 
-const formatBound = (value: number) => value.toFixed(2).replace('.', ',')
+const formatBound = (value: number) => value.toFixed(2)
 
 export function PriceFilter() {
   const { query, update } = useCatalogFilters()
