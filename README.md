@@ -1,4 +1,4 @@
-# Kurio — Marketplace de NFTs
+# Kurio Marketplace de NFTs
 
 A Kurio é um marketplace de NFTs: você descobre obras, monta um carrinho, paga com uma carteira e acompanha o pedido até
 o recibo, no desktop, no tablet e no celular. Não existe backend de verdade: a API, o login, as carteiras, o pagamento e
