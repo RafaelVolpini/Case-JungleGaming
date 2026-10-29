@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react'
 
 import { NftImage } from '@/components/nft/nft-image'
 import { BackButton } from '@/components/shared/back-button'
+import { RenderWhenVisible } from '@/components/shared/render-when-visible'
 import { MOBILE_COVER_SIZES } from '@/lib/format/image'
 import type { NftDetail } from '@/contracts/nft'
 import { FavoriteButton } from '@/features/favorites/components/favorite-button'
@@ -53,7 +54,9 @@ export function MobileNftDetail({ nft }: { nft: NftDetail }) {
       <div className="bg-card min-h-[600px] px-6">
         <Suspense fallback={null}>
           <DetailTabs nft={nft} />
-          <RelatedNfts slug={nft.slug} />
+          <RenderWhenVisible rootMargin="0px">
+            <RelatedNfts slug={nft.slug} />
+          </RenderWhenVisible>
         </Suspense>
       </div>
       <MobileBuyBar key={edition.id} nft={nft} edition={edition} />
