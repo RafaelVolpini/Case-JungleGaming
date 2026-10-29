@@ -18,7 +18,7 @@ test.describe('carrinho', () => {
 
     const before = await amount(page)
     const group = page.getByRole('group', { name: 'Quantidade de Emerald Ape #042' })
-    await expectMinimumBlocked(group, '1')
+    await expectMinimumBlocked(page, group, '1')
     await group.getByRole('button', { name: 'Aumentar quantidade' }).click()
     await expect.poll(() => amount(page)).toBeGreaterThan(before)
 

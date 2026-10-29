@@ -1,6 +1,6 @@
-import { expect, type Locator } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
-export async function expectMinimumBlocked(group: Locator, quantity: string) {
+export async function expectMinimumBlocked(page: Page, group: Locator, quantity: string) {
   const decrease = group.getByRole('button', { name: 'Diminuir quantidade' })
   const increase = group.getByRole('button', { name: 'Aumentar quantidade' })
 
@@ -15,5 +15,6 @@ export async function expectMinimumBlocked(group: Locator, quantity: string) {
   expect(await look(decrease)).not.toBe(await look(increase))
 
   await decrease.click({ force: true })
+  await expect(page.getByText('A quantidade mínima é 1.')).toBeVisible()
   await expect(group.locator('output')).toHaveText(quantity)
 }

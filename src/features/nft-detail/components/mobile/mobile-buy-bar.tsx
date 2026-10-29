@@ -1,6 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
 import { ShoppingCart } from 'lucide-react'
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { QuantityStepper } from '@/components/shared/quantity-stepper'
@@ -9,19 +8,18 @@ import { useCartMutations } from '@/features/cart/hooks/use-cart-mutations'
 import { errorMessage } from '@/lib/http/errors'
 import { formatEth } from '@/lib/money/eth'
 
+import { usePurchaseQuantity } from '../../hooks/use-purchase-quantity'
+
 type MobileBuyBarProps = { nft: NftDetail; edition: Edition }
 
 export function MobileBuyBar({ nft, edition }: MobileBuyBarProps) {
   const navigate = useNavigate()
   const { add } = useCartMutations()
-  const [quantity, setQuantity] = useState(1)
-  const max = Math.max(1, Math.min(edition.available, nft.maxPerOrder))
-  const soldOut = edition.available === 0
-  const safeQuantity = Math.min(quantity, max)
+  const { quantity, setQuantity, max, soldOut, maxMessage } = usePurchaseQuantity(nft, edition)
 
   function addToCart(goToCart: boolean) {
     add.mutate(
-      { nftId: nft.id, editionId: edition.id, quantity: safeQuantity },
+      { nftId: nft.id, editionId: edition.id, quantity },
       {
         onSuccess: () => {
           if (goToCart) void navigate({ to: '/carrinho' })
@@ -39,8 +37,9 @@ export function MobileBuyBar({ nft, edition }: MobileBuyBarProps) {
           <span className="text-foreground text-[15px] font-bold">Qtd.</span>
           <QuantityStepper
             size="compact"
-            value={safeQuantity}
+            value={quantity}
             max={max}
+            maxMessage={maxMessage}
             onChange={setQuantity}
             disabled={soldOut}
             className="gap-[17px]"

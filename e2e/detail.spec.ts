@@ -40,13 +40,14 @@ test.describe('detalhe do NFT', () => {
     await expect(quantity).toHaveText('3')
     await increase.click({ force: true })
     await expect(quantity).toHaveText('3')
+    await expect(page.getByText('Só restam 3 desta edição.')).toBeVisible()
     await expect(increase).toHaveAttribute('aria-disabled', 'true')
   })
 
   test('o botão de diminuir fica bloqueado com uma unidade @mobile', async ({ page }) => {
     await openApp(page, `/nft/${SLUG}`)
     const group = page.getByRole('group', { name: 'Quantidade' })
-    await expectMinimumBlocked(group, '1')
+    await expectMinimumBlocked(page, group, '1')
 
     await group.getByRole('button', { name: 'Aumentar quantidade' }).click()
     await expect(group.locator('output')).toHaveText('2')

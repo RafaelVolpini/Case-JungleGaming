@@ -1,5 +1,4 @@
 import { useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { QuantityStepper } from '@/components/shared/quantity-stepper'
@@ -9,19 +8,18 @@ import { useCartMutations } from '@/features/cart/hooks/use-cart-mutations'
 import { FavoriteAction } from '@/features/favorites/components/favorite-action'
 import { errorMessage } from '@/lib/http/errors'
 
+import { usePurchaseQuantity } from '../hooks/use-purchase-quantity'
+
 type PurchaseActionsProps = { nft: NftDetail; edition: Edition }
 
 export function PurchaseActions({ nft, edition }: PurchaseActionsProps) {
   const navigate = useNavigate()
   const { add } = useCartMutations()
-  const [quantity, setQuantity] = useState(1)
-  const max = Math.max(1, Math.min(edition.available, nft.maxPerOrder))
-  const soldOut = edition.available === 0
-  const safeQuantity = Math.min(quantity, max)
+  const { quantity, setQuantity, max, soldOut, maxMessage } = usePurchaseQuantity(nft, edition)
 
   function buy() {
     add.mutate(
-      { nftId: nft.id, editionId: edition.id, quantity: safeQuantity },
+      { nftId: nft.id, editionId: edition.id, quantity },
       {
         onSuccess: () => void navigate({ to: '/carrinho' }),
         onError: (error) => toast.error(errorMessage(error)),
@@ -32,7 +30,13 @@ export function PurchaseActions({ nft, edition }: PurchaseActionsProps) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div>
-        <QuantityStepper value={safeQuantity} max={max} onChange={setQuantity} disabled={soldOut} />
+        <QuantityStepper
+          value={quantity}
+          max={max}
+          maxMessage={maxMessage}
+          onChange={setQuantity}
+          disabled={soldOut}
+        />
       </div>
       <div className="flex gap-[30px]">
         <Button

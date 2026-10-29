@@ -1,6 +1,10 @@
+import { toast } from 'sonner'
+
 import { cn } from '@/lib/utils'
 
 import { StepperButton, type StepperSize } from './stepper-button'
+
+const notifyLimit = (message: string) => toast.info(message, { id: 'quantity-limit' })
 
 type QuantityStepperProps = {
   value: number
@@ -9,6 +13,7 @@ type QuantityStepperProps = {
   onChange: (value: number) => void
   disabled?: boolean
   size?: StepperSize
+  maxMessage?: string
   label?: string
   className?: string
 }
@@ -20,6 +25,7 @@ export function QuantityStepper({
   onChange,
   disabled = false,
   size = 'lg',
+  maxMessage,
   label = 'Quantidade',
   className,
 }: QuantityStepperProps) {
@@ -31,7 +37,9 @@ export function QuantityStepper({
         disabled={disabled}
         atLimit={value <= min}
         limitHint={`Quantidade mínima: ${min}`}
-        onClick={() => value > min && onChange(value - 1)}
+        onClick={() =>
+          value > min ? onChange(value - 1) : notifyLimit(`A quantidade mínima é ${min}.`)
+        }
       />
       <output
         aria-live="polite"
@@ -48,7 +56,11 @@ export function QuantityStepper({
         disabled={disabled}
         atLimit={value >= max}
         limitHint={`Quantidade máxima: ${max}`}
-        onClick={() => value < max && onChange(value + 1)}
+        onClick={() =>
+          value < max
+            ? onChange(value + 1)
+            : notifyLimit(maxMessage ?? `A quantidade máxima é ${max}.`)
+        }
       />
     </div>
   )
