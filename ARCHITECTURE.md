@@ -631,9 +631,9 @@ todos os diálogos, falha e nova tentativa em detalhe, carrinho e pagamento, e a
 skeletons.
 
 **Regressão visual.** `visual.spec.ts` compara início, detalhe, carrinho e pagamento em 1440 e 390 px com
-`maxDiffPixelRatio` de 2%, animações desativadas, relógio e dados fixos. As baselines (`e2e/__screenshots__/{projeto}/`)
-foram geradas no Chromium do Playwright em Windows. Em outro sistema a renderização de texto pode diferir; revise o
-diff do relatório e, se for só renderização, `npm run test:e2e:update`.
+`maxDiffPixelRatio` de 2%, animações desativadas, relógio e dados fixos. As baselines (`e2e/__screenshots__/{projeto}/{sistema}/`)
+existem para Windows e para Linux (esta gerada na imagem oficial do Playwright, porque a renderização de texto muda a altura
+das páginas entre sistemas); em outro sistema os testes visuais são pulados com instrução para gerar as próprias baselines.
 
 Relatório HTML em `playwright-report/` e traces das falhas em `test-results/` (`trace: retain-on-failure`); ambos são gerados a
 cada execução e por isso não são versionados.

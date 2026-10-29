@@ -208,10 +208,16 @@ horizontal em 320, 390, 768 e 1440), `hero`, `tab-bar`, `modal-fit`, `fixtures-r
 
 ### 7.2 Regressão visual e baselines
 
-As baselines ficam em `e2e/__screenshots__/{projeto}/` e são versionadas (tolerância de 2% dos pixels, animações desativadas,
-dados e relógio fixos). Foram geradas no Windows; fontes e imagens são locais, então a diferença entre sistemas tende a
-ser pequena. Se uma máquina diferente reprovar só a regressão visual, revise as imagens do relatório e, se a diferença for
-só de renderização, rode `npm run test:e2e:update`.
+As baselines ficam em `e2e/__screenshots__/{projeto}/{sistema}/` e são versionadas (tolerância de 2% dos pixels, animações
+desativadas, dados e relógio fixos). A renderização de texto difere entre sistemas operacionais (as alturas das páginas
+variam alguns pixels), então há um conjunto para **Windows (`win32`)** e outro para **Linux (`linux`)**, este gerado com a
+imagem oficial `mcr.microsoft.com/playwright` da mesma versão do `@playwright/test`. Em outro sistema (macOS, por exemplo)
+os testes visuais são **pulados com uma mensagem** em vez de falhar; gere o seu conjunto com `npm run test:e2e:update`,
+revise as imagens e, se quiser, versione-o. Para reproduzir as baselines Linux em qualquer máquina com Docker:
+
+```bash
+docker run --rm -v "$PWD":/src:ro mcr.microsoft.com/playwright:v1.64.1-noble bash -c 'cp -r /src /work && cd /work && npm ci && npx playwright test e2e/visual.spec.ts'
+```
 
 ## 8. Auditoria Lighthouse
 
