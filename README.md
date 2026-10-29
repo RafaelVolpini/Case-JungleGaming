@@ -94,7 +94,7 @@ Há um `.env.example` na raiz. Nenhuma outra variável é necessária.
 
 ## 4. Credenciais e cupons fictícios
 
-Você pode tanto criar um usuário pela tela de entrar, selecionando a opção 'Criar Conta' quanto logar com algum usuário já cadastrado como os abaixos:
+É possível criar um usuário novo pela tela de entrada (opção **Criar conta**) ou entrar com uma das contas de teste abaixo:
 
 | Usuário | E-mail | Senha |
 | --- | --- | --- |
@@ -102,7 +102,7 @@ Você pode tanto criar um usuário pela tela de entrar, selecionando a opção '
 | Bruno Carvalho (sem favoritos) | `bruno@kurio.test` | `kurio-bruno-2026` |
 
 Cupons: `KURIO10` (10%), `PRIMEIRACUNHAGEM` (0.05 ETH), `EXPIRADO` e `VENCIDO30` (vencidos). Qualquer outro código é
-inválido. 
+inválido.
 
 ## 5. Mocks: cenários, reset e falhas
 
@@ -316,9 +316,9 @@ npm run test:e2e:report       # relatório HTML (playwright-report/)
 npx playwright show-trace test-results/<pasta-da-falha>/trace.zip   # trace de uma falha
 ```
 
-- **Projetos:** `desktop` (Chromium, 1440×900) roda tudo (131 testes); `mobile` (Chromium, 390×844) roda os testes marcados
-  com `@mobile` (92 testes). São 31 arquivos e 223 execuções; 5 delas são puladas de propósito, por serem exclusivas de um
-  layout. O resultado esperado é **218 passaram, 5 puladas**.
+- **Projetos:** `desktop` (Chromium, 1440×900) roda tudo (137 testes); `mobile` (Chromium, 390×844) roda os testes marcados
+  com `@mobile` (97 testes). São 31 arquivos e 234 execuções; 10 delas são puladas de propósito, por serem exclusivas de um
+  layout. O resultado esperado é **224 passaram, 10 puladas**.
 - **Estado isolado:** cada teste usa um contexto novo (armazenamento vazio, base semeada). Relógio, latência, falhas e eventos
   de tempo real são controlados por `page.clock`, pelos cenários e pelas rotas de controle do MSW; os eventos passam pelo
   `socket.io-client`, nunca por setters ou pelo cache.

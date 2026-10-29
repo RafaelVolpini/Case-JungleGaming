@@ -65,7 +65,7 @@ mocks é o `boot.ts`; `features/` e `lib/` **nunca** importam de `mocks/`.
 | Responsabilidade | Escolha                                   | Observação                              |
 | ---------------- | ----------------------------------------- | --------------------------------------- |
 | Build            | Vite 8                                    | Deploy na Vercel                        |
-| Interface        | React 19.3                                | Versão sem a falha de segurança da 19.2 |
+| Interface        | React 19.3                                | Versão corrigida; sem Server Components |
 | Linguagem        | TypeScript 5.9                            | `strict` + `noUncheckedIndexedAccess`   |
 | Roteamento       | TanStack Router                           | Baseado em arquivos, code splitting     |
 | Estado remoto    | TanStack Query v5                         |                                         |
@@ -317,7 +317,7 @@ favoritos e 404 no mobile são derivados do padrão visual, pois o Figma não os
 | Item                       | Decisão                                                                                                                                                             |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Cores                      | Acrescentadas as que o Figma não tem: erro `#E2574C`, sucesso `#5C9E6B`, hover de botão `#C07A3C` e superfície elevada `#2F1D17`                                    |
-| Fonte                      | Iguais as do Figma.                                                                                                                                                 |
+| Fonte                      | Iguais às do Figma.                                                                                                                                                 |
 | Container                  | 1200 px centralizado: a medição dos screenshots mostra o conteúdo começando em x=120 num viewport de 1440, e não 80 px de padding                                   |
 | Separador decimal          | Ponto em todos os valores (`1.19 ETH`); o Figma alterna entre ponto e vírgula                                                                                       |
 | Grade do catálogo (mobile) | Duas colunas **alinhadas** (o Figma escalona a direita), por decisão de produto                                                                                     |
