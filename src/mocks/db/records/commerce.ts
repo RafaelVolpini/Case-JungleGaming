@@ -83,6 +83,7 @@ export type QuoteRecord = {
   issuedAt: string
   expiresAt: string
   issues: QuoteIssue[]
+  acknowledged: boolean
 }
 
 export type IdempotencyRecord = {

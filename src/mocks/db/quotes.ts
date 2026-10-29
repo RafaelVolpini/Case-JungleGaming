@@ -16,9 +16,9 @@ const MAX_QUOTES_PER_OWNER = 20
 type QuoteInput = { ownerId: string; walletId: string; network: Network }
 type QuoteOutcome = { ok: true; quote: QuoteRecord } | { ok: false; reason: 'EMPTY_CART' }
 
-export function latestQuote(ownerId: string): QuoteRecord | undefined {
+export function latestAcknowledgedQuote(ownerId: string): QuoteRecord | undefined {
   return getDb()
-    .quotes.filter((quote) => quote.ownerId === ownerId)
+    .quotes.filter((quote) => quote.ownerId === ownerId && quote.acknowledged)
     .at(-1)
 }
 
@@ -34,6 +34,11 @@ export function createQuote(input: QuoteInput, { compare = true } = {}): QuoteOu
 
   const { totals } = computeTotals(items, cart.couponCode)
   const issuedAt = new Date()
+  const issues = detectIssues(
+    items,
+    cart.couponCode,
+    compare ? latestAcknowledgedQuote(input.ownerId) : undefined,
+  )
   const quote: QuoteRecord = {
     id: `quote-${crypto.randomUUID().slice(0, 8)}`,
     ownerId: input.ownerId,
@@ -51,7 +56,8 @@ export function createQuote(input: QuoteInput, { compare = true } = {}): QuoteOu
     network: input.network,
     issuedAt: issuedAt.toISOString(),
     expiresAt: new Date(issuedAt.getTime() + QUOTE_TTL_MS).toISOString(),
-    issues: detectIssues(items, cart.couponCode, compare ? latestQuote(input.ownerId) : undefined),
+    issues,
+    acknowledged: !compare || issues.length === 0,
   }
 
   db.quotes.push(quote)

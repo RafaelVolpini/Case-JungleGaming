@@ -49,4 +49,32 @@ test.describe('tempo real: preço e disponibilidade', () => {
     })
     await expect(page.getByText('2.50 ETH').first()).toBeVisible()
   })
+
+  test('o alerta da cotação persiste após eventos não relacionados e só some ao aceitar', async ({
+    page,
+  }) => {
+    await loginViaApi(page, 'ana', '/')
+    await addToCart(page, SLUG, { auth: true })
+    await openApp(page, '/pagamento')
+    const confirm = page.getByRole('button', { name: 'Confirmar compra' })
+    const alert = page.getByRole('alert').filter({ hasText: 'o preço mudou' })
+
+    await mock.changeNft(page, SLUG, { priceEth: '2.50' })
+    await expect(alert).toBeVisible()
+
+    const requoted = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        new URL(response.url()).pathname === '/api/quotes',
+    )
+    await mock.changeNft(page, 'golden-beat-207', { priceEth: '1.11' })
+    await requoted
+
+    await expect(alert).toBeVisible()
+    await expect(confirm).toBeDisabled()
+
+    await page.getByRole('button', { name: 'Aceitar alterações e atualizar' }).click()
+    await expect(alert).toHaveCount(0)
+    await expect(confirm).toBeEnabled()
+  })
 })
