@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { addToCart, loginViaUi, openApp } from './support/app'
+import { mock } from './support/mock-api'
 import { expectMinimumBlocked } from './support/stepper'
 
 const amount = async (page: Page) => {
@@ -42,6 +43,24 @@ test.describe('carrinho', () => {
 
     await page.getByRole('button', { name: 'Remover cupom KURIO10' }).click()
     await expect.poll(() => amount(page)).toBe(before)
+  })
+
+  test('remover o cupom confirma o resultado e informa a falha @mobile', async ({ page }) => {
+    await openApp(page)
+    await addToCart(page, 'emerald-ape-042', { quantity: 2 })
+    await openApp(page, '/carrinho')
+    await page.getByLabel('Código promocional').fill('KURIO10')
+    await page.getByRole('button', { name: 'Aplicar' }).click()
+    await expect(page.getByText(/Cupom KURIO10/).first()).toBeVisible()
+
+    await mock.scenario(page, { failure: 'server-error', scope: ['/api/cart/coupon'] })
+    await page.getByRole('button', { name: 'Remover cupom KURIO10' }).click()
+    await expect(page.getByText('Falha temporária no servidor. Tente novamente.')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Remover cupom KURIO10' })).toBeVisible()
+
+    await mock.scenario(page, { failure: 'none', scope: [] })
+    await page.getByRole('button', { name: 'Remover cupom KURIO10' }).click()
+    await expect(page.getByText('Cupom removido.')).toBeVisible()
   })
 
   test('cupom inválido ou expirado exibe o erro retornado pela API @mobile', async ({ page }) => {

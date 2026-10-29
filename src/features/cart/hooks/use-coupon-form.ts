@@ -31,12 +31,19 @@ export function useCouponForm() {
     )
   }
 
+  function removeCoupon() {
+    removeCode.mutate(undefined, {
+      onSuccess: () => toast.success('Cupom removido.'),
+      onError: (failure) => toast.error(errorMessage(failure)),
+    })
+  }
+
   return {
     code,
     setCode,
     error,
     submit,
     applying: applyCode.isPending,
-    removeCoupon: removeCode.mutate,
+    removeCoupon,
   }
 }

@@ -9,6 +9,7 @@ import type { Wallet } from '@/contracts/wallet'
 import { applyApiErrors } from '@/features/auth/lib/apply-api-errors'
 import { useSaveWallet } from '@/features/wallets/hooks/use-wallet-mutations'
 import { walletToInput } from '@/features/wallets/lib/wallet-input'
+import { ApiRequestError, errorMessage } from '@/lib/http/errors'
 
 import { useProfileMutations } from '../hooks/use-profile-mutations'
 import { profileDefaults, profileFormSchema, type ProfileFormValues } from '../lib/profile-form'
@@ -53,10 +54,19 @@ export function ProfileForm({ user, primary }: { user: User; primary: Wallet | u
       return
     }
     if (primary && walletLabel !== primary.label) {
-      await saveWallet.mutateAsync({
-        id: primary.id,
-        input: walletToInput(primary, { label: walletLabel }),
-      })
+      try {
+        await saveWallet.mutateAsync({
+          id: primary.id,
+          input: walletToInput(primary, { label: walletLabel }),
+        })
+      } catch (error) {
+        const fieldMessage = error instanceof ApiRequestError ? error.fields['label'] : undefined
+        profileForm.setError('walletLabel', {
+          type: 'server',
+          message: fieldMessage ?? errorMessage(error),
+        })
+        return
+      }
     }
     if (wantsPassword) {
       try {

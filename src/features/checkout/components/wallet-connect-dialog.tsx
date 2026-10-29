@@ -80,6 +80,11 @@ export function WalletConnectDialog({
               {placeError}
             </p>
           )}
+          {disconnect.isError && (
+            <p role="alert" className="text-destructive">
+              {errorMessage(disconnect.error)}
+            </p>
+          )}
           {disconnect.isSuccess && (
             <p className="text-foreground">
               Carteira desconectada. Conecte novamente para continuar.

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { loginViaApi, openApp } from './support/app'
-import { api } from './support/mock-api'
+import { api, mock } from './support/mock-api'
 
 const save = (page: Page) => page.getByRole('button', { name: 'Salvar', exact: true }).click()
 
@@ -35,6 +35,18 @@ test.describe('perfil, avatar e senha', () => {
     await page.locator('main').getByLabel('E-mail').fill('bruno@kurio.test')
     await save(page)
     await expect(page.getByText('Este e-mail já está em uso.')).toBeVisible()
+  })
+
+  test('falha ao salvar o apelido da carteira aparece no campo e não anuncia sucesso @mobile', async ({
+    page,
+  }) => {
+    await loginViaApi(page, 'ana', '/perfil')
+    await mock.scenario(page, { failure: 'server-error', scope: ['/api/wallets'] })
+    await page.getByLabel('Apelido da carteira').fill('Carteira nova')
+    await save(page)
+
+    await expect(page.getByText('Falha temporária no servidor. Tente novamente.')).toBeVisible()
+    await expect(page.getByText('Perfil atualizado.')).toHaveCount(0)
   })
 
   test('troca de senha valida a confirmação e a senha atual @mobile', async ({ page }) => {

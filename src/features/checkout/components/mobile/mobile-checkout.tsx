@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import type { Quote } from '@/contracts/quote'
 import type { User } from '@/contracts/session'
 import type { Wallet, WalletType } from '@/contracts/wallet'
 import { useSaveWallet } from '@/features/wallets/hooks/use-wallet-mutations'
 import { walletToInput } from '@/features/wallets/lib/wallet-input'
-import { ApiRequestError } from '@/lib/http/errors'
+import { ApiRequestError, errorMessage } from '@/lib/http/errors'
 import { useIsExpired } from '@/lib/use-is-expired'
 import { formatEth } from '@/lib/money/eth'
 
@@ -54,7 +55,10 @@ export function MobileCheckout({
     })
 
   const changeProvider = (walletType: WalletType) =>
-    saveWallet.mutate({ id: wallet.id, input: walletToInput(wallet, { walletType }) })
+    saveWallet.mutate(
+      { id: wallet.id, input: walletToInput(wallet, { walletType }) },
+      { onError: (failure) => toast.error(errorMessage(failure)) },
+    )
 
   return (
     <div className="pb-[130px]">
