@@ -34,9 +34,7 @@ export function NewsletterForm() {
           Enviar
         </button>
       </div>
-      <p className="text-foreground mt-3 text-sm leading-[22px]">
-        {NEWSLETTER.description}
-      </p>
+      <p className="text-foreground mt-3 text-sm leading-[22px]">{NEWSLETTER.description}</p>
     </form>
   )
 }
