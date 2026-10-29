@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -41,9 +40,9 @@ export function MobileFilterSheet({ open, onOpenChange }: MobileFilterSheetProps
           <Button variant="outline" className="h-12 flex-1 rounded-xl" onClick={reset}>
             Limpar
           </Button>
-          <SheetClose asChild>
-            <Button className="h-12 flex-1 rounded-xl">Ver resultados</Button>
-          </SheetClose>
+          <Button className="h-12 flex-1 rounded-xl" onClick={() => onOpenChange(false)}>
+            Ver resultados
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

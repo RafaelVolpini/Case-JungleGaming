@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
 import { EmptyState } from '@/components/feedback/empty-state'
@@ -44,9 +45,9 @@ export function FavoritesPage() {
             title="Você ainda não favoritou nenhum NFT"
             description="Toque no coração de um NFT para guardá-lo aqui."
             action={
-              <a href="/#catalogo" className={buttonVariants()}>
+              <Link to="/" hash="catalogo" className={buttonVariants()}>
                 Explorar o mercado
-              </a>
+              </Link>
             }
           />
         )}

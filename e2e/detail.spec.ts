@@ -55,4 +55,15 @@ test.describe('detalhe do NFT', () => {
       'true',
     )
   })
+
+  test('ampliar a imagem abre o diálogo e devolve o foco ao fechar', async ({ page }) => {
+    await openApp(page, `/nft/${SLUG}`)
+    const zoom = page.getByRole('button', { name: 'Ampliar imagem' })
+    await zoom.click()
+    const dialog = page.getByRole('dialog', { name: 'Emerald Ape #042' })
+    await expect(dialog).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(zoom).toBeFocused()
+  })
 })

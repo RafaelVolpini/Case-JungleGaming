@@ -2,14 +2,9 @@ import { useNavigate } from '@tanstack/react-router'
 import { Search } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { useReturnFocus } from '@/lib/use-return-focus'
 
 import { catalogSearch } from '../search'
 
@@ -17,6 +12,7 @@ export function SearchDialog() {
   const [open, setOpen] = useState(false)
   const [term, setTerm] = useState('')
   const navigate = useNavigate()
+  const { triggerRef, onCloseAutoFocus } = useReturnFocus<HTMLButtonElement>()
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -27,16 +23,16 @@ export function SearchDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          aria-label="Buscar NFTs"
-          className="text-cream hover:text-primary-light grid size-6 place-items-center transition-colors"
-        >
-          <Search className="size-[23px]" strokeWidth={2.2} />
-        </button>
-      </DialogTrigger>
-      <DialogContent className="top-[22%] max-w-lg gap-3 p-6">
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label="Buscar NFTs"
+        onClick={() => setOpen(true)}
+        className="text-cream hover:text-primary-light grid size-6 place-items-center transition-colors"
+      >
+        <Search className="size-[23px]" strokeWidth={2.2} />
+      </button>
+      <DialogContent onCloseAutoFocus={onCloseAutoFocus} className="top-[22%] max-w-lg gap-3 p-6">
         <DialogTitle className="text-cream text-lg font-bold">Buscar NFTs</DialogTitle>
         <DialogDescription className="sr-only">
           Busque por nome ou número do token.

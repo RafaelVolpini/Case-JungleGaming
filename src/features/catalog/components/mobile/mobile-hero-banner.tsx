@@ -14,49 +14,56 @@ export function MobileHeroBanner() {
   const { active, select, hoverProps, focusProps } = useHeroRotation(slides.length)
 
   return (
-    <section
-      aria-labelledby="hero-title"
-      {...focusProps}
-      className="relative mt-4 h-[190px] overflow-hidden rounded-[20px] bg-[#2a1b12] bg-[radial-gradient(circle_98px_at_118px_98px,rgba(214,150,96,0.2)_0_99%,transparent_100%),radial-gradient(circle_135px_at_215px_130px,rgba(214,150,96,0.1)_0_99%,transparent_100%),radial-gradient(circle_at_26%_50%,#7c5434_0%,#5a3b22_30%,#3a2615_62%,#2a1b12_100%)]"
-    >
-      <div className="absolute top-1.5 left-4 w-[190px]">
-        <p className="text-cream text-xs leading-4">{HERO_COPY_MOBILE.eyebrow}</p>
-        <h1 id="hero-title" className="text-cream mt-[5.5px] text-lg leading-[29px] font-bold">
-          {HERO_COPY_MOBILE.title}
-        </h1>
-        <p className="text-foreground mt-[7px] text-xs leading-[18px]">
-          {HERO_COPY_MOBILE.description}
-        </p>
-      </div>
-      <a
-        href="#catalogo"
-        className="text-primary-light focus-visible:ring-ring absolute top-[145px] left-4 flex items-center gap-[13px] rounded-sm text-sm leading-4 font-bold outline-none focus-visible:ring-2"
+    <div className="@container mt-4 [--u:min(1px,0.2924cqw)]">
+      <section
+        aria-labelledby="hero-title"
+        {...focusProps}
+        className="relative h-[calc(190*var(--u))] overflow-hidden rounded-[20px] bg-[#2a1b12] bg-[radial-gradient(circle_98px_at_118px_98px,rgba(214,150,96,0.2)_0_99%,transparent_100%),radial-gradient(circle_135px_at_215px_130px,rgba(214,150,96,0.1)_0_99%,transparent_100%),radial-gradient(circle_at_26%_50%,#7c5434_0%,#5a3b22_30%,#3a2615_62%,#2a1b12_100%)]"
       >
-        {HERO_COPY_MOBILE.action}
-        <ArrowRight className="size-[18px]" aria-hidden="true" />
-      </a>
-      <HeroSlides
-        slides={slides}
-        active={active}
-        sizes="138px"
-        className="absolute top-[10.5px] right-4 size-[138px] rounded-[18px]"
-        {...hoverProps}
-      />
-      <ArtImage
-        art="sage"
-        alt=""
-        sizes="58px"
-        className="absolute top-[98.5px] left-[226px] size-[58px] rounded-xl object-cover"
-      />
-      {slides.length > 1 && (
-        <HeroDots
-          count={slides.length}
+        <div className="absolute top-[calc(6*var(--u))] left-[calc(16*var(--u))] w-[calc(190*var(--u))]">
+          <p className="text-cream text-[length:calc(12*var(--u))] leading-[calc(16*var(--u))]">
+            {HERO_COPY_MOBILE.eyebrow}
+          </p>
+          <h1
+            id="hero-title"
+            className="text-cream mt-[calc(5.5*var(--u))] text-[length:calc(18*var(--u))] leading-[calc(29*var(--u))] font-bold"
+          >
+            {HERO_COPY_MOBILE.title}
+          </h1>
+          <p className="text-foreground mt-[calc(7*var(--u))] text-[length:calc(12*var(--u))] leading-[calc(18*var(--u))]">
+            {HERO_COPY_MOBILE.description}
+          </p>
+        </div>
+        <a
+          href="#catalogo"
+          className="text-primary-light focus-visible:ring-ring absolute top-[calc(145*var(--u))] left-[calc(16*var(--u))] flex items-center gap-[calc(13*var(--u))] rounded-sm text-[length:calc(14*var(--u))] leading-[calc(16*var(--u))] font-bold outline-none focus-visible:ring-2"
+        >
+          {HERO_COPY_MOBILE.action}
+          <ArrowRight className="size-[calc(18*var(--u))]" aria-hidden="true" />
+        </a>
+        <HeroSlides
+          slides={slides}
           active={active}
-          onSelect={select}
-          dotClassName="size-[7px]"
-          className="absolute bottom-[9px] left-1/2 -translate-x-1/2 gap-[17px]"
+          sizes="138px"
+          className="absolute top-[calc(10.5*var(--u))] right-[calc(16*var(--u))] size-[calc(138*var(--u))] rounded-[calc(18*var(--u))]"
+          {...hoverProps}
         />
-      )}
-    </section>
+        <ArtImage
+          art="sage"
+          alt=""
+          sizes="58px"
+          className="absolute top-[calc(98.5*var(--u))] left-[calc(226*var(--u))] size-[calc(58*var(--u))] rounded-[calc(12*var(--u))] object-cover"
+        />
+        {slides.length > 1 && (
+          <HeroDots
+            count={slides.length}
+            active={active}
+            onSelect={select}
+            dotClassName="size-[calc(7*var(--u))]"
+            className="absolute bottom-[calc(9*var(--u))] left-1/2 -translate-x-1/2 gap-[calc(17*var(--u))]"
+          />
+        )}
+      </section>
+    </div>
   )
 }
