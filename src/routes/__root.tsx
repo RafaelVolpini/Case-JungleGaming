@@ -5,6 +5,7 @@ import type { RouterContext } from '@/app/router-context'
 import { RouteAnnouncer } from '@/components/layout/route-announcer'
 import { Toaster } from '@/components/ui/sonner'
 import { useSessionExpiry } from '@/features/auth/hooks/use-session-expiry'
+import { useIdleReady } from '@/lib/use-idle-ready'
 import { SimulatorHost } from '@/features/market-simulator/simulator-host'
 
 const RealtimeBridge = lazy(() =>
@@ -19,15 +20,18 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootLayout() {
   useSessionExpiry()
+  const realtimeReady = useIdleReady()
   return (
     <>
       <Outlet />
       <RouteAnnouncer />
       <SimulatorHost />
       <Toaster position="bottom-right" />
-      <Suspense fallback={null}>
-        <RealtimeBridge />
-      </Suspense>
+      {realtimeReady && (
+        <Suspense fallback={null}>
+          <RealtimeBridge />
+        </Suspense>
+      )}
     </>
   )
 }

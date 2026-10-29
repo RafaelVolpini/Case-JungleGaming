@@ -3,9 +3,9 @@ import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig } from 'vite'
 
-const BACKSLASH = String.fromCharCode(92)
+import { routePreload } from './build/plugins/route-preload.ts'
 
 const MOCK_PACKAGES = [
   'node_modules/msw/',
@@ -35,63 +35,6 @@ const VENDOR_PACKAGES = [
 
 const matches = (id: string, parts: string[]) => parts.some((part) => id.includes(part))
 
-const CRITICAL_MODULES = [
-  'src/app/mount.tsx',
-  'src/mocks/browser.ts',
-  'src/routes/_shell.tsx',
-  'src/routes/_shell/index.tsx',
-  'src/features/catalog/pages/home-page.tsx',
-]
-
-function preloadCriticalChunks(): Plugin {
-  return {
-    name: 'preload-critical-chunks',
-    apply: 'build',
-    transformIndexHtml: {
-      order: 'post',
-      handler(_html, { bundle }) {
-        if (!bundle) return
-        const wanted = new Set<string>()
-        const preloadedByVite = new Set<string>()
-
-        const markStatic = (fileName: string) => {
-          const chunk = bundle[fileName]
-          if (!chunk || chunk.type !== 'chunk' || preloadedByVite.has(fileName)) return
-          preloadedByVite.add(fileName)
-          chunk.imports.forEach(markStatic)
-        }
-
-        for (const chunk of Object.values(bundle)) {
-          if (chunk.type === 'chunk' && chunk.isEntry) markStatic(chunk.fileName)
-        }
-
-        const collect = (fileName: string) => {
-          const chunk = bundle[fileName]
-          if (!chunk || chunk.type !== 'chunk' || wanted.has(fileName)) return
-          wanted.add(fileName)
-          chunk.imports.forEach(collect)
-        }
-
-        for (const chunk of Object.values(bundle)) {
-          if (chunk.type !== 'chunk' || chunk.isEntry) continue
-          const modules = Object.keys(chunk.modules).map((id) => id.split(BACKSLASH).join('/'))
-          if (modules.some((id) => CRITICAL_MODULES.some((critical) => id.includes(critical)))) {
-            collect(chunk.fileName)
-          }
-        }
-
-        return [...wanted]
-          .filter((fileName) => !preloadedByVite.has(fileName))
-          .map((fileName) => ({
-            tag: 'link',
-            attrs: { rel: 'modulepreload', crossorigin: '', href: `/${fileName}` },
-            injectTo: 'head',
-          }))
-      },
-    },
-  }
-}
-
 export default defineConfig({
   plugins: [
     tanstackRouter({
@@ -102,7 +45,7 @@ export default defineConfig({
     }),
     react(),
     tailwindcss(),
-    preloadCriticalChunks(),
+    routePreload(),
   ],
   build: {
     sourcemap: true,

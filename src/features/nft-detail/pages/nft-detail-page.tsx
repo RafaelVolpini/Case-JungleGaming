@@ -1,54 +1,24 @@
-import { ErrorState } from '@/components/feedback/error-state'
-import { Breadcrumbs } from '@/components/layout/breadcrumbs'
-import { useNftDetail } from '@/features/catalog/hooks/use-catalog-queries'
-import { usePageTitle } from '@/lib/use-page-title'
-import { ApiRequestError } from '@/lib/http/errors'
-import { useIsDesktop } from '@/lib/use-media-query'
+import { lazy, Suspense } from 'react'
 
-import { NftDetailContent } from '../components/nft-detail-content'
-import { NftDetailSkeleton } from '../components/nft-detail-skeleton'
-import { NftNotFound } from '../components/nft-not-found'
+import { useNftDetail } from '@/features/catalog/hooks/use-catalog-queries'
+import { useIsDesktop } from '@/lib/use-media-query'
+import { usePageTitle } from '@/lib/use-page-title'
+
 import { MobileDetailPage } from './mobile-detail-page'
+
+const DesktopDetailPage = lazy(() =>
+  import('./desktop-detail-page').then((module) => ({ default: module.DesktopDetailPage })),
+)
 
 export function NftDetailPage({ slug }: { slug: string }) {
   const isDesktop = useIsDesktop()
   const { data } = useNftDetail(slug)
   usePageTitle(data?.name ?? 'NFT')
-  return isDesktop ? <DesktopDetailPage slug={slug} /> : <MobileDetailPage slug={slug} />
-}
-
-function DesktopDetailPage({ slug }: { slug: string }) {
-  const { data, error, isPending, refetch } = useNftDetail(slug)
-  const notFound = error instanceof ApiRequestError && error.status === 404
+  if (!isDesktop) return <MobileDetailPage slug={slug} />
 
   return (
-    <div className="page-container min-h-dvh pt-4 md:pt-[28px]">
-      <Breadcrumbs
-        items={[
-          { label: 'Início', to: '/' },
-          { label: 'Mercado', to: '/' },
-        ]}
-      />
-      {isPending && (
-        <div className="mt-2">
-          <NftDetailSkeleton />
-        </div>
-      )}
-      {notFound && (
-        <div className="mt-8">
-          <NftNotFound />
-        </div>
-      )}
-      {error && !notFound && !data && (
-        <div className="mt-8">
-          <ErrorState
-            error={error}
-            onRetry={() => void refetch()}
-            title="Não foi possível carregar este NFT"
-          />
-        </div>
-      )}
-      {data && <NftDetailContent key={data.id} nft={data} />}
-    </div>
+    <Suspense fallback={null}>
+      <DesktopDetailPage slug={slug} />
+    </Suspense>
   )
 }

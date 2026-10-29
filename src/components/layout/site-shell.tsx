@@ -3,8 +3,7 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 import { MobileTabBar } from './mobile-tab-bar'
-import { SiteFooter } from './footer/site-footer'
-import { SiteHeader } from './header/site-header'
+import { DesktopFooter, DesktopHeader } from './desktop-chrome'
 import { useTabBarVisible } from './use-tab-bar-visible'
 
 export function SiteShell({ children }: { children: ReactNode }) {
@@ -18,7 +17,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       >
         Pular para o conteúdo
       </a>
-      <SiteHeader />
+      <DesktopHeader />
       <main
         id="conteudo"
         className={cn(
@@ -29,7 +28,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       >
         {children}
       </main>
-      <SiteFooter />
+      <DesktopFooter />
       <MobileTabBar />
     </div>
   )
