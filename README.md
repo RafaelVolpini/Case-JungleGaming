@@ -1,17 +1,47 @@
 # Kurio — Marketplace de NFTs
 
-Solução do desafio de front-end: descoberta, compra e conta do colecionador, em desktop, tablet e mobile, com API,
-autenticação, carteiras, pagamentos e tempo real **simulados na camada de rede** (MSW + Socket.IO). Não há backend,
-serviço privado nem variável de ambiente obrigatória: tudo roda a partir de um checkout limpo.
+A Kurio é um marketplace de NFTs: você descobre obras, monta um carrinho, paga com uma carteira e acompanha o pedido até
+o recibo, no desktop, no tablet e no celular. Não existe backend de verdade: a API, o login, as carteiras, o pagamento e
+até o **tempo real** (o preço de um NFT mudando enquanto você compra) são simulados no próprio navegador, na camada de rede,
+com MSW e Socket.IO. Por isso o projeto roda a partir de um checkout limpo, sem serviço externo e sem variável de ambiente
+obrigatória.
+
+**Versão publicada:** https://case-jungle-gaming.vercel.app
 
 React 19 · TypeScript 5.9 · TanStack Router e Query · Axios · Socket.IO · Tailwind v4 · shadcn/ui (Radix) · MSW ·
 Playwright · Lighthouse.
 
-Decisões de arquitetura, contratos REST e eventos, política de sessão, cache e reconciliação, limitações, decisões de UX
-e desvios do Figma estão em [ARCHITECTURE.md](ARCHITECTURE.md).
+Quer entender _por que_ o projeto foi feito assim? As decisões de arquitetura, os contratos da API, o tempo real, as
+limitações e a revisão de design (com prints de antes e depois) estão no [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Roteiro de 5 minutos
+
+Se você só quer ver o projeto funcionando, siga este caminho. Ele passa pelas partes principais, nesta ordem.
+
+1. **Suba o projeto** (ou abra a [versão publicada](https://case-jungle-gaming.vercel.app) e pule para o passo 2):
+
+   ```bash
+   npm ci
+   npm run dev
+   ```
+
+   Abra http://localhost:5173. Na primeira vez, rode também `npx playwright install chromium` se for usar os testes.
+
+2. **Explore o catálogo.** Filtre por coleção, busque, troque de aba ("Todos", "Novos lançamentos", "Em alta") e ordene.
+   Tudo isso fica na URL, então recarregar a página mantém o que você escolheu.
+3. **Entre como Ana** (`ana@kurio.test`, senha `kurio-ana-2026`) pelo botão **Entrar**. As credenciais estão na [seção
+   4](#4-credenciais-e-cupons-fictícios).
+4. **Adicione um NFT ao carrinho** na página do NFT, abra o carrinho e vá para o pagamento.
+5. **Veja o tempo real.** Aperte **`Ctrl+Alt+M`** para abrir o simulador de mercado e clique em **+10%**. O preço muda na
+   hora, aparece o alerta "o preço mudou" e o botão **Confirmar compra** fica bloqueado até você aceitar as alterações.
+6. **Conclua a compra** e veja o recibo.
+7. **Quebre as coisas de propósito.** O simulador também liga lentidão, erro de servidor, pagamento recusado e queda de
+   conexão. A [seção 5](#5-mocks-cenários-reset-e-falhas) mostra cada cenário com um print.
+8. **Rode os testes** com `npm run test:e2e` (a [seção 7](#7-testes-com-playwright) explica como).
 
 ## Sumário
 
+0. [Roteiro de 5 minutos](#roteiro-de-5-minutos)
 1. [Setup](#1-setup)
 2. [Comandos](#2-comandos)
 3. [Variáveis de ambiente](#3-variáveis-de-ambiente)
@@ -251,17 +281,15 @@ reconectar e, ao voltar, reconcilia o estado pela API.
 
 ## 6. Testar o tempo real (preço mudando durante a compra)
 
-O **Simulador de mercado** é um painel que envia alterações de preço, disponibilidade, eventos duplicados ou antigos,
-quedas de conexão e cenários de rede **pelo MSW**: a alteração muda a base simulada, o servidor Socket.IO simulado emite
-`nft.updated` e o `socket.io-client` do app atualiza catálogo, detalhe, carrinho e checkout. O painel nunca escreve no
-cache do app.
+Este é o ponto central do desafio, então vale entender o caminho do dado. Quando você muda um preço no simulador, a
+alteração entra na base simulada, o servidor Socket.IO simulado emite um evento `nft.updated` e o `socket.io-client` do app
+o recebe e atualiza catálogo, detalhe, carrinho e checkout. O painel **nunca** escreve direto no cache do app: o evento
+percorre o mesmo caminho que percorreria com um servidor de verdade.
 
-Fica oculto por padrão (não altera nenhum pixel do Figma). Para abri-lo:
+O painel fica oculto por padrão (assim não altera nenhum pixel do Figma). Abra-o com `Ctrl+Alt+M` (de novo, `Esc` ou o X
+para fechar) ou acrescentando `?simulador=1` à URL, como em `/pagamento?simulador=1`.
 
-- acrescente `?simulador=1` à URL (por exemplo, `/pagamento?simulador=1`), ou
-- pressione `Ctrl+Alt+M` (de novo para fechar; `Esc` também fecha).
-
-Passo a passo para ver o preço mudar durante uma transação:
+Passo a passo para ver o preço mudar no meio de uma compra:
 
 1. Abra o app, entre como Ana, adicione um NFT ao carrinho e vá para `/pagamento`.
 2. Abra o simulador (`Ctrl+Alt+M`). O NFT do carrinho já vem selecionado.
@@ -286,7 +314,9 @@ npm run test:e2e:report       # relatório HTML (playwright-report/)
 npx playwright show-trace test-results/<pasta-da-falha>/trace.zip   # trace de uma falha
 ```
 
-- **Projetos:** `desktop` (Chromium, 1440×900) roda tudo (128 testes); `mobile` (Chromium, 390×844) roda os testes marcados com `@mobile` (90 testes). São 31 arquivos e 218 execuções, 4 delas puladas por serem exclusivas de um layout.
+- **Projetos:** `desktop` (Chromium, 1440×900) roda tudo (131 testes); `mobile` (Chromium, 390×844) roda os testes marcados
+  com `@mobile` (92 testes). São 31 arquivos e 223 execuções; 5 delas são puladas de propósito, por serem exclusivas de um
+  layout. O resultado esperado é **218 passaram, 5 puladas**.
 - **Estado isolado:** cada teste usa um contexto novo (armazenamento vazio, base semeada). Relógio, latência, falhas e eventos
   de tempo real são controlados por `page.clock`, pelos cenários e pelas rotas de controle do MSW; os eventos passam pelo
   `socket.io-client`, nunca por setters ou pelo cache.
@@ -364,21 +394,25 @@ Metas do enunciado: performance ≥ 90, accessibility ≥ 95, best-practices ≥
 - Cenário dos mocks: padrão (latência `fast`, sem falhas), armazenamento limpo a cada execução
 <!-- lighthouse:end -->
 
-A análise das causas, o que foi otimizado e o que ficou abaixo da meta estão em
-[ARCHITECTURE.md](ARCHITECTURE.md#13-performance-e-auditoria). A auditoria carrega as mesmas imagens, fontes e
-funcionalidades da entrega: nada foi simplificado só para melhorar a pontuação.
+**Uma observação honesta sobre a nota mobile.** O Lighthouse simula o celular reduzindo a CPU em 4× sobre a CPU real da
+máquina, então o resultado depende de quem mede: num notebook que reduz a frequência sob carga, a mesma versão pode dar
+de 79 a 96. Por isso a tabela registra o índice de benchmark de cada medição. O que foi otimizado, o que ainda pesa e o
+que ficou de fora estão em [ARCHITECTURE.md](ARCHITECTURE.md#9-performance). A auditoria carrega as mesmas imagens, fontes
+e funcionalidades da entrega: nada foi simplificado só para melhorar a pontuação.
 
 ## 9. Deploy
 
-Aplicação estática, pronta para a Vercel (framework Vite): `vercel.json` já define o comando de build (`npm run build`), a
-saída (`dist/`), a reescrita de todas as rotas para `index.html` (acesso direto e refresh funcionam) e os cabeçalhos de cache.
+O projeto está publicado em **https://case-jungle-gaming.vercel.app**. É uma aplicação estática, pronta para a Vercel
+(framework Vite): `vercel.json` já define o comando de build (`npm run build`), a saída (`dist/`), a reescrita de todas as
+rotas para `index.html` (acesso direto e refresh funcionam) e os cabeçalhos de cache.
 O service worker do MSW (`/mockServiceWorker.js`) é servido sem cache e foi ajustado para interceptar só `/api/`
 (fontes, imagens e scripts passam direto); por isso o `package.json` não declara `msw.workerDirectory`, o que evita que o
 `postinstall` do MSW sobrescreva o arquivo a cada instalação. Mantenha `VITE_ENABLE_MOCKS=true` (padrão) na
 demonstração.
 
-Depois do deploy, confira: acesso direto a `/nft/emerald-ape-042`, `/carrinho` e `/pagamento` com refresh; uma compra
-completa; e o simulador (`?simulador=1`) alterando o preço com um item no carrinho.
+Depois de cada deploy, vale conferir três coisas: o acesso direto (com refresh) a `/nft/emerald-ape-042`, `/carrinho` e
+`/pagamento`; uma compra completa; e o simulador (`?simulador=1`) alterando o preço com um item no carrinho. Para medir a
+versão publicada com o Lighthouse: `LH_URL=https://case-jungle-gaming.vercel.app npm run lighthouse`.
 
 ## 10. Estrutura do projeto
 

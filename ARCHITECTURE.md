@@ -1,939 +1,620 @@
 # Arquitetura — Kurio NFT Marketplace
 
-> Decisões de arquitetura, contratos REST e eventos, política de sessão, estado do carrinho, estratégia de cache,
-> reconciliação REST ↔ Socket.IO, decisões de UX, desvios do Figma, limitações e como a solução é verificada.
-> Setup, comandos, credenciais, cenários, Playwright e Lighthouse estão no [README](README.md).
+Este documento explica **como o projeto funciona por dentro e por que foi feito assim**. Para instalar, rodar, testar e
+auditar, vá ao [README](README.md). A versão publicada está em https://case-jungle-gaming.vercel.app.
+
+## Por onde começar
+
+| Se você quer saber…                                   | Leia                                                                     |
+| ----------------------------------------------------- | ------------------------------------------------------------------------ |
+| Como o app funciona em uma passada                    | [1. O caminho de uma compra](#1-o-caminho-de-uma-compra)                 |
+| Como existe "backend" e tempo real sem servidor       | [3. O backend que não existe](#3-o-backend-que-não-existe)               |
+| O que acontece quando o preço muda durante a compra   | [6. Tempo real no cliente](#6-tempo-real-no-cliente) e [7.3](#73-pedido) |
+| O que foi corrigido a partir dos comentários do Figma | [8.4 Revisão de design](#84-revisão-de-design-os-comentários-do-figma)   |
+| Por que a nota mobile do Lighthouse é a que é         | [9. Performance](#9-performance)                                         |
+| Os contratos REST e os eventos Socket.IO              | [12. Contratos](#12-contratos-rest-e-eventos)                            |
 
 ## Sumário
 
-1. [Stack](#1-stack)
-2. [Tempo real: Socket.IO sobre MSW](#2-tempo-real-socketio-sobre-msw)
-3. [Verificação](#3-verificação)
-4. [Desvios do Figma e decisões de UX](#4-desvios-do-figma)
-5. [Camada de mocks](#5-camada-de-mocks)
-6. [Fixtures](#6-fixtures)
-7. [Decisões de código](#7-decisões-de-código)
-8. [Estado, cache e sincronização](#8-estado-cache-e-sincronização)
-9. [Tempo real no cliente e reconciliação](#9-tempo-real-no-cliente)
-10. [Sessão, carrinho e pedido](#10-sessão-carrinho-e-pedido)
-11. [Layout responsivo](#11-layout-responsivo)
-12. [Acessibilidade](#12-acessibilidade)
-13. [Performance e auditoria](#13-performance-e-auditoria)
-14. [Testes](#14-testes)
-15. [Limitações assumidas](#15-limitações-assumidas)
-16. [Contratos REST e eventos](#16-contratos-rest-e-eventos)
+1. [O caminho de uma compra](#1-o-caminho-de-uma-compra)
+2. [Stack](#2-stack)
+3. [O backend que não existe](#3-o-backend-que-não-existe)
+4. [Base simulada e cenários](#4-base-simulada-e-cenários)
+5. [Estado, cache e sincronização](#5-estado-cache-e-sincronização)
+6. [Tempo real no cliente](#6-tempo-real-no-cliente)
+7. [Sessão, carrinho e pedido](#7-sessão-carrinho-e-pedido)
+8. [Interface](#8-interface)
+9. [Performance](#9-performance)
+10. [Testes](#10-testes)
+11. [Limitações assumidas](#11-limitações-assumidas)
+12. [Contratos REST e eventos](#12-contratos-rest-e-eventos)
 
-## 1. Stack
+## 1. O caminho de uma compra
 
-| Responsabilidade | Escolha                                       | Observação                            |
-| ---------------- | --------------------------------------------- | ------------------------------------- |
-| Build            | Vite 8                                        | Alvo de deploy: Vercel                |
-| Interface        | React 19.3                                    |                                       |
-| Linguagem        | TypeScript 5.9                                | `strict` + `noUncheckedIndexedAccess` |
-| Roteamento       | TanStack Router                               | File-based, `autoCodeSplitting`       |
-| Estado remoto    | TanStack Query v5                             |                                       |
-| HTTP             | Axios                                         |                                       |
-| Tempo real       | socket.io-client 4.8                          |                                       |
-| Estilização      | Tailwind CSS v4                               | Tokens CSS-first em `@theme`          |
-| Componentes      | shadcn/ui                                     |                                       |
-| Mocking          | **MSW 2.15** + `@mswjs/socket.io-binding` 0.2 | Ver §2.1                              |
-| E2E              | Playwright                                    |                                       |
+A melhor forma de entender o projeto é seguir uma compra do começo ao fim. Cada passo aponta o arquivo onde a coisa
+acontece.
 
-### 1.1 Por que TypeScript 5.9 e não 7.0
+1. **O app sobe.** `src/main.tsx` chama `boot()` (`src/app/boot.ts`), que liga o backend simulado **antes** de desenhar
+   qualquer tela: carrega o MSW, abre o banco simulado e só então monta o React.
+2. **Você abre o catálogo.** A rota `/` (`src/routes/_shell/index.tsx`) pede `GET /api/nfts` pelo hook de catálogo
+   (`src/features/catalog`). O Axios (`src/lib/http/client.ts`) envia a requisição, o MSW a intercepta
+   (`src/mocks/handlers/nfts.ts`) e o resultado é validado por um schema Zod de `src/contracts/` antes de chegar à tela.
+3. **Você adiciona ao carrinho.** O hook de carrinho (`src/features/cart`) chama `POST /api/cart/items`. O servidor
+   simulado guarda só `nftId + editionId + quantity`; o preço é sempre lido do NFT, então o carrinho nunca carrega um
+   preço velho.
+4. **Você vai para o pagamento.** `/pagamento` fica sob o layout `_authed` (`src/routes/_shell/_authed.tsx`): sem sessão,
+   você é mandado para o login e volta depois. O checkout (`src/features/checkout`) pede uma **cotação**
+   (`POST /api/quotes`), que recalcula preços, taxa de rede e cupom.
+5. **O preço muda enquanto você está aqui.** Quem mudou o preço (o simulador, por exemplo) fala com o servidor simulado
+   (`src/mocks/handlers/dev-nft.ts`); a base emite `nft.updated`, o servidor Socket.IO simulado
+   (`src/mocks/socket/gateway.ts`) entrega o evento e o `socket.io-client` do app o recebe
+   (`src/features/realtime`). O cache é corrigido, a cotação é refeita, aparece o alerta "o preço mudou" e **Confirmar
+   compra** fica bloqueado até você clicar em "Aceitar alterações".
+6. **Você confirma.** `POST /api/orders` (`src/features/checkout/hooks/use-place-order.ts`) leva uma chave de
+   idempotência. Se a resposta se perder, repetir usa a **mesma** chave e devolve o **mesmo** pedido: nunca existem duas
+   compras.
+7. **O pedido é liquidado.** O servidor simulado leva cerca de 1,5 s e emite `order.updated`. O cliente confere o dono
+   do evento, aplica a regra de versão e atualiza o recibo (`/pedido/:id`). Pedido confirmado ou recusado nunca volta atrás.
 
-O template atual do Vite entrega TypeScript 7 (port nativo). TanStack Router e
-Zod estão entre as bibliotecas com inferência de tipos mais pesada do
-ecossistema, e um desvio de inferência no meio do projeto custaria mais do que o
-ganho de tempo de compilação. A migração é um número no `package.json`.
+Tudo que é "servidor" mora em `src/mocks/`. Tudo que é "aplicação" mora fora dele, e o único ponto que carrega a camada de
+mocks é o `boot.ts`; `features/` e `lib/` **nunca** importam de `mocks/`.
 
-## 2. Tempo real: Socket.IO sobre MSW
+## 2. Stack
 
-A camada de mocks e a de tempo real compartilham o mesmo transporte: o cliente
-é um `socket.io-client` real e os eventos atravessam um servidor Socket.IO
-simulado dentro do MSW, via `@mswjs/socket.io-binding`.
+| Responsabilidade | Escolha                                   | Observação                            |
+| ---------------- | ----------------------------------------- | ------------------------------------- |
+| Build            | Vite 8                                    | Deploy na Vercel                      |
+| Interface        | React 19.3                                |                                       |
+| Linguagem        | TypeScript 5.9                            | `strict` + `noUncheckedIndexedAccess` |
+| Roteamento       | TanStack Router                           | Baseado em arquivos, code splitting   |
+| Estado remoto    | TanStack Query v5                         |                                       |
+| HTTP             | Axios                                     |                                       |
+| Tempo real       | socket.io-client 4.8                      |                                       |
+| Estilo           | Tailwind CSS v4 + shadcn/ui               | Tokens em `@theme`                    |
+| Mocks            | MSW 2.15 + `@mswjs/socket.io-binding` 0.2 | Ver seção 3                           |
+| Testes           | Playwright                                |                                       |
 
-### 2.1 Restrição de versão
+O MSW fica na linha 2.x porque o `@mswjs/socket.io-binding@0.2.0` declara `msw: ^2.10.2` como dependência de par. Subir
+para o MSW 3 quebraria o tempo real.
 
-`@mswjs/socket.io-binding@0.2.0` declara `peerDependencies: { msw: "^2.10.2" }`.
-**O MSW está fixado na linha 2.x** por causa disso, embora a v3 já seja o
-`latest`. Atualizar o MSW para a v3 quebra o tempo real.
+## 3. O backend que não existe
 
-### 2.2 Três restrições do transporte
+O desafio pede API, autenticação, pagamentos e tempo real sem backend. A solução: o **MSW intercepta as requisições no
+navegador** e responde como um servidor responderia. O tempo real usa o mesmo caminho: existe um servidor Socket.IO
+simulado dentro do MSW, e o app conversa com ele pelo `socket.io-client` de verdade, sem atalhos.
 
-Descobertas no spike e documentadas aqui porque nenhuma é óbvia no código.
+### 3.1 Três pegadinhas do transporte
 
-**a) O cliente precisa falar só WebSocket.**
-O MSW intercepta WebSocket, nunca HTTP long-polling. Como o `socket.io-client`
-usa `['polling', 'websocket']` por padrão e começa no polling, o handshake
-jamais chegaria ao MSW. Daí `transports: ['websocket']` em
-`src/lib/realtime/socket.ts`.
+Foram descobertas num teste de viabilidade. Nenhuma é óbvia no código, por isso ficam registradas.
 
-**b) A barra final do path quebra o matching.**
-O `WebSocketHandler#resolveWebSocketUrl` do MSW remove a barra final do padrão
-registrado (`/socket.io/` vira `/socket.io`), mas compara contra a URL do
-cliente com `getCleanUrl`, que preserva o `pathname` como está. O Engine.IO
-acrescenta `/` ao path por padrão, produzindo `/socket.io/` — que nunca é igual
-ao padrão normalizado. Daí `addTrailingSlash: false` no cliente.
+- **O cliente só pode falar WebSocket.** O MSW intercepta WebSocket, mas não o _long-polling_ HTTP que o Socket.IO usa
+  por padrão. Por isso `transports: ['websocket']` em `src/lib/realtime/socket.ts`.
+- **A barra final do caminho quebra o casamento.** O Engine.IO acrescenta `/` ao caminho (`/socket.io/`), e o MSW compara
+  contra `/socket.io`. A solução é `addTrailingSlash: false` no cliente.
+- **A ordem de carregamento importa.** O `engine.io-client` guarda o `WebSocket` global **no momento em que o módulo é
+  avaliado**, e o MSW troca esse global dentro de `worker.start()`. Se qualquer módulo avaliado antes do `start()`
+  importar o `socket.io-client`, a conexão passa direto, sem erro visível: só um socket que nunca conecta. Duas
+  consequências: `src/mocks/**` nunca importa o `socket.io-client`, e o app só desenha depois de o MSW subir.
 
-**c) A ordem de carregamento dos módulos importa.**
-`engine.io-client/transports/websocket.js` captura
-`const WebSocketCtor = globalThis.WebSocket` **no escopo do módulo**. O MSW
-substitui esse global dentro de `worker.start()`. Portanto, se qualquer módulo
-avaliado antes do `start()` importar `socket.io-client`, o cliente guarda o
-`WebSocket` original e a conexão passa direto, sem interceptação e sem erro
-visível — só um socket que nunca conecta.
+### 3.2 Heartbeat
 
-Duas consequências de projeto:
+No Engine.IO v4 quem envia o `PING` é o servidor. O binding anuncia `pingInterval: 25000, pingTimeout: 5000`, mas nunca
+envia o ping, então o cliente se derrubava sozinho a cada 30 s e reconectava em ciclo. O gateway agora envia o `PING` por
+conta própria a cada 20 s (`src/mocks/socket/gateway.ts`). Com `?heartbeat=0` ele é desligado, o que reproduz o _ping
+timeout_ nos testes.
 
-1. `src/mocks/**` **não pode importar `socket.io-client`**. A constante
-   compartilhada do path vive em `src/lib/realtime/constants.ts`, que não tem
-   esse import.
-2. O `main.tsx` aguarda `enableMocking()` antes de renderizar. Como as rotas
-   são code-split, nenhum componente é avaliado antes disso.
+### 3.3 Worker encerrado pelo navegador
 
-### 2.3 Heartbeat do Engine.IO
+O MSW responde pela rede através de um _service worker_. Quando o navegador o encerra por inatividade, o worker acorda
+sem saber quais abas atender e deixa **todas** as chamadas passarem direto. No Vite e na Vercel (que reescreve tudo para
+`index.html`), um `GET /api/nfts` passa a devolver o HTML do app com status 200, e o catálogo mostrava "Não foi possível
+carregar". A correção tem duas pontas:
 
-No Engine.IO v4 o heartbeat é dirigido pelo servidor: ele envia `PING` ("2") e
-o cliente responde `PONG` ("3"). O `@mswjs/socket.io-binding@0.2.0` completa o
-handshake anunciando `pingInterval: 25000, pingTimeout: 5000`, mas **nunca
-envia o ping**, e descarta todo pacote Engine.IO que não seja `message`.
+- `src/lib/http/client.ts` trata resposta `text/html` numa rota `/api` como falha de rede e dispara um evento; as leituras
+  do Query já tentam de novo.
+- `src/mocks/worker-guard.ts` faz `GET /api/__mock__/ping` ao focar a janela, ao voltar a aba, ao reconectar e a cada 15
+  s; se a resposta não for JSON, reenvia `MOCK_ACTIVATE` ao worker.
 
-Resultado medido no spike, com o heartbeat desligado:
+O arquivo `public/mockServiceWorker.js` também foi ajustado para interceptar **só `/api/`** (fontes, imagens e scripts
+passam direto). Por isso o `package.json` não declara `msw.workerDirectory`: senão o `postinstall` do MSW sobrescreveria
+o ajuste a cada instalação.
 
-```
-000s  connect — id=test transport=websocket
-030s  disconnect — ping timeout
-032s  connect — id=test transport=websocket
-```
+### 3.4 Limites do transporte
 
-O cliente se derruba sozinho em exatamente `pingInterval + pingTimeout` = 30s e
-entra em ciclo de reconexão a cada 30s. Como o desafio exige reconexão,
-reconciliação e pedido pendente sobrevivendo a quedas, um socket que pisca a
-cada 30s contaminaria todos esses cenários.
+Sem namespaces, rooms ou broadcast (o binding não os implementa) e com `sid` fixo (`"test"`). O isolamento entre usuários
+é feito na aplicação: eventos de pedido só vão aos sockets que se identificaram como donos.
 
-**Solução:** o gateway envia o `PING` por conta própria a cada 20s
-(`HEARTBEAT_INTERVAL_MS` em `src/mocks/socket/gateway.ts`) e limpa o timer no
-`close`. Com o heartbeat ligado o spike passou de 76s sem nenhuma desconexão.
+## 4. Base simulada e cenários
 
-A opção `heartbeat: false` fica exposta de propósito: é o gancho para os testes
-E2E reproduzirem queda de conexão sem precisar derrubar o servidor.
+### 4.1 A base
 
-### 2.4 Limitações assumidas
+`src/mocks/db` guarda registros internos que **não** são as formas da API: o "servidor" é dono do hash de senha e das
+referências cruas, e os handlers projetam isso nos contratos. Toda escrita passa por `mutate()`, que persiste e só então
+emite os eventos, então nenhum evento sai antes de o estado estar consistente. O gateway monta cada evento lendo o mesmo
+store que os handlers REST leem, e por isso REST e Socket.IO nunca divergem.
 
-- Sem namespaces, rooms ou broadcasting — o binding não os implementa. Como a
-  aplicação é single-tenant por aba, não há necessidade.
-- O `sid` do handshake é fixo (`"test"`), codificado no binding. O isolamento
-  por usuário é feito na camada de aplicação, não pelo `sid`.
-- Só o transporte WebSocket existe no ambiente de mocks; não há upgrade a
-  partir de polling para exercitar.
+A base persiste no `localStorage` (`kurio:mock-db`, com `schemaVersion`; versão diferente é descartada e semeada de
+novo). Senhas usam SHA-256 com salt por usuário, o que não seria suficiente num backend real (ali seria Argon2 ou bcrypt),
+mas mantém o seed reprodutível. A sessão dura 30 minutos, sem renovação.
 
-## 3. Verificação
+### 4.2 Cenários de rede
 
-O transporte Socket.IO sobre MSW é exercitado pelos testes E2E de tempo real (§14), que passam pelo cliente
-`socket.io-client` real. O parâmetro `?heartbeat=0` desliga o ping do servidor simulado e reproduz o _ping timeout_
-descrito em §2.3.
+Escolhidos por query string, por `POST /api/__mock__/scenario` ou pelo painel do simulador. **Nada usa `Math.random`**: a
+latência variável vem de um gerador semeado e as falhas intermitentes são contadas por requisição, para os testes serem
+determinísticos.
 
-## 4. Desvios do Figma
-
-| Item              | Desvio                           | Motivo                                                                                                                                                                                                                                                                |
-| ----------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cor de erro       | Adicionado `#E2574C`             | O Figma só usa o laranja primário no asterisco de campo obrigatório; não há cor de erro de validação                                                                                                                                                                  |
-| Cor de sucesso    | Adicionado `#5C9E6B`             | Necessária para pedido confirmado; ausente no Figma                                                                                                                                                                                                                   |
-| Hover de botão    | Adicionado `#C07A3C`             | Ausente no Figma                                                                                                                                                                                                                                                      |
-| Surface elevada   | Adicionado `#2F1D17`             | Para estados de hover/accent do shadcn                                                                                                                                                                                                                                |
-| Fonte             | Roboto Mono em vez de Space Mono | A spec gerada a partir dos screenshots indica Space Mono, mas os glifos do Figma (`r` sem pé, `M` com vértice na metade da altura, `c` de terminais retos) correspondem a Roboto Mono; confirmado renderizando as candidatas ao lado do recorte em resolução original |
-| Container         | 1200 px centralizado             | A spec fala em padding lateral de 80 px; a medição dos screenshots (2880 px) mostra o conteúdo começando em x=120 em um viewport de 1440                                                                                                                              |
-| Separador decimal | Ponto em todos os valores        | O Figma alterna entre `1.19 ETH` nos cards e `0,02 - 12,30 ETH` no filtro. ETH é escrito com ponto mundialmente; usar vírgula só no filtro seria inconsistência replicada                                                                                             |
-
-Todos mantêm a família de matiz da paleta e estão definidos como tokens em `src/app/styles/globals.css`.
-
-### 4.1 Assets de NFT
-
-As artes de primata do Figma não acompanham o arquivo exportado, mas três delas foram fornecidas
-(macaco dourado de fones, macaco escuro de blazer, macaco marrom de óculos). O quarto personagem
-que domina o catálogo do layout, o gorila cinza de chapéu e moletom roxo, não veio como arquivo e
-foi recortado do screenshot em resolução original (476 px, recorte com margem para evitar os
-cantos arredondados do card).
-
-Os quatro originais ficam em `assets/nft-source/` e `npm run art` gera as variantes otimizadas em
-`public/nft/` (`{arte}-{160,240,320,480,720,960}.webp`, de 3 a 56 KB cada, contra 140 a 188 KB dos
-originais). Cada slot da interface declara um `sizes` exato (`lib/format/image.ts`), então o navegador baixa a menor
-variante que cobre o tamanho real em pixels do dispositivo (um card mobile de 155 px em tela 2x recebe 320 px, não 960).
-`npm run art:check` é o portão de qualidade: para cada arte, slot e densidade (1x e 2x) a variante escolhida precisa ter
-SSIM de pelo menos 0,97 contra o original no tamanho do slot e não perder mais de 0,016 de SSIM frente à escada anterior
-(480/960 em WebP q80). As mesmas quatro artes são servidas a todos os usuários, sem miniaturas nem placeholders. Há quatro
-personagens para 239 NFTs, então as artes se repetem entre itens: é a mesma repetição que o próprio Figma faz.
-
-O Sage tem origem de 476 px e é ampliado para 960 px, ficando mais suave no detalhe do que os
-outros três. Para trocar por uma arte nativa basta substituir `assets/nft-source/sage.webp`.
-
-### 4.2 Outros desvios e decisões de UX
-
-| Item                                    | Decisão                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pagamento no mobile                     | O frame mobile ("Pagamento com carteira") não tem formulário de colecionador; o pedido usa os dados do perfil e da carteira. Os provedores (WalletConnect, MetaMask, Coinbase) alteram o tipo da carteira selecionada                                                                                                                                                                                                                                                                              |
-| Pagamento no desktop                    | Lista as carteiras cadastradas (o Figma mostra três cartões estáticos) e um cartão que leva ao cadastro de carteiras                                                                                                                                                                                                                                                                                                                                                                               |
-| Campos preenchidos                      | Formulários mostram os dados do usuário; o Figma mostra campos vazios                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Etiqueta RARO                           | No mobile aparece para NFT raro com preço anterior (único caso do frame); o desktop do Figma não mostra a etiqueta                                                                                                                                                                                                                                                                                                                                                                                 |
-| Menu "Meu perfil"                       | "Lista de interesse" aponta para os favoritos reais; Atividade, Ofertas, Arquivos baixados e Suporte avisam que estão fora do escopo                                                                                                                                                                                                                                                                                                                                                               |
-| "Apelido da carteira" no perfil         | Edita o apelido da carteira principal                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| "ENS ou carteira secundária"            | Persistido como `linkedReference` na carteira                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Links "Aplique aqui" e "Crie uma conta" | Sem sublinhado por padrão (como no Figma), sublinham no hover e no foco                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Modal de acesso no desktop              | Sem escurecer o fundo, como no Figma; clicar fora ou `Esc` fecha                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Descrição no detalhe mobile             | Texto derivado (edição, coleção e rede), como no frame, em vez do texto longo do desktop                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Edições                                 | O frame mobile repete `1/10`; a interface mostra as edições reais (1/1, 1/10, 1/50, ABERTA)                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Cabeçalho ativo                         | `Início` em início, acesso e perfil; `Mercado` em detalhe, carrinho, pagamento e pedido (como nos frames)                                                                                                                                                                                                                                                                                                                                                                                          |
-| Tablet                                  | O Figma não tem frame de tablet; usa-se o layout mobile em coluna de 640 px (§11)                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Modais no desktop                       | Sempre no tamanho do Figma (acesso 500 px; recibo 578 px de largura, altura conforme o conteúdo, 821 px com 3 itens). Ficam centralizados na vertical quando cabem e, em janelas mais baixas, a própria sobreposição rola (24 px de respiro em cima e embaixo), sem escala e sem corte. O Figma posiciona o recibo a 166 px do topo de um quadro de 1657 px; aqui a posição é derivada da janela. Clicar fora e `Esc` fecham; trocar entre login e cadastro volta ao topo (`scrollToTopSelectors`) |
-| Cadastro                                | O modal de acesso ganhou o convite "Novo na Kurio? Crie uma conta" / "Já tem uma conta? Entre" (o Figma só tem as abas), igual ao frame mobile                                                                                                                                                                                                                                                                                                                                                     |
-| Destaque da home                        | Ponto ativo em cor cheia com halo e os demais a 55%; o destaque avança sozinho a cada 5 s, pausa com o ponteiro sobre a imagem, com foco por teclado e com a aba oculta, e não avança com "reduzir movimento"                                                                                                                                                                                                                                                                                      |
-| Abas e menus no mobile                  | Nunca rolam para o lado: abas e menu do perfil quebram linha; as abas da home reduzem a fonte (até ~11 px em 320 px) e usam 6 px entre si; "Avaliações de colecionadores" vira "Avaliações" abaixo de 768 px                                                                                                                                                                                                                                                                                       |
-| Barra inferior (mobile)                 | Ícones afastados (Figma: 72 e 62,5 px; aqui até 84 px, encolhendo em telas estreitas para nunca passar da largura) e gradiente de 45% (filtro) e 40% (scan) até a cor cheia, como no frame. O botão central de escanear fica acima dos links para responder em toda a área                                                                                                                                                                                                                         |
-| Grade do catálogo no mobile             | **Desvio pedido pelo produto:** duas colunas alinhadas, com as imagens na mesma linha. O frame do Figma escalona a coluna direita; o alinhamento facilita a leitura e a paginação                                                                                                                                                                                                                                                                                                                  |
-| Abas do catálogo                        | "Todos os NFTs", "Novos lançamentos" e "Em alta" têm espaçamento uniforme entre si e mostram conjuntos de itens diferentes (§7.2)                                                                                                                                                                                                                                                                                                                                                                  |
-| Quantidade (−/+)                        | Com 1 unidade o "−" fica bloqueado de forma visível (fundo apagado, anel, cursor proibido, dica "Quantidade mínima: 1") e continua focável (`aria-disabled`); tocar nele explica o limite. O Figma só mostra o estado ativo. No "+" o limite informa "Só restam N" ou "O limite é de N por pedido"                                                                                                                                                                                                 |
-| Filtros ativos                          | Busca, coleções, redes, raridade e faixa de preço aparecem como chips removíveis com "Limpar filtros", no desktop e no mobile. Não existem no Figma; tornam o estado da URL visível                                                                                                                                                                                                                                                                                                                |
-| Revisão no mobile                       | O frame mobile de pagamento só mostra o total. O diálogo de confirmação lista itens, taxa de rede, desconto e total antes do envio, porque o enunciado exige revisão                                                                                                                                                                                                                                                                                                                               |
-| Avatar                                  | O perfil oferece um seletor de avatares (emoji) em vez de upload de imagem; o contrato de perfil guarda o emoji escolhido (`avatarEmoji`)                                                                                                                                                                                                                                                                                                                                                          |
-| Pedidos                                 | Não há tela de histórico de pedidos (fora do Figma); o recibo é acessado pelo link do pedido, pelo aviso de confirmação ou pelo retorno do checkout                                                                                                                                                                                                                                                                                                                                                |
-| Título e foco por rota                  | Cada rota define o `<title>` (por exemplo "Carrinho · Kurio") e um anúncio educado para leitores de tela ao navegar                                                                                                                                                                                                                                                                                                                                                                                |
-| Destaque da home no mobile              | Abaixo de 390 px o banner escala proporcionalmente (todas as medidas do frame viram frações da largura), em vez de sobrepor texto e imagem                                                                                                                                                                                                                                                                                                                                                         |
-| Simulador de mercado                    | Painel de desenvolvimento/demonstração, oculto por padrão (`?simulador=1` ou `Ctrl+Alt+M`); não aparece no Figma e não altera nenhuma tela quando fechado (§5.4)                                                                                                                                                                                                                                                                                                                                   |
-
-### 4.3 Revisão de design (comentários do Figma)
-
-Os 13 comentários deixados no arquivo do Figma por quem revisou o layout foram tratados um a um. Onde o comentário aponta
-um defeito do próprio layout, a implementação **se afasta do Figma de propósito** e o desvio fica registrado aqui. Cada
-correção tem um teste em `e2e/design-review.spec.ts` que falha no código anterior e passa no atual; o comentário sobre o
-ícone dos selects já estava atendido (medido: 0 px de desvio vertical) e ganhou apenas o teste de regressão.
-
-| #   | Comentário                                                                                        | Correção                                                                                                                                                                                                                                                                                                                                                             | Onde                                                            |
-| --- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| 1   | "As coleções estão fora de ordem alfabética"                                                      | As coleções passam a ser listadas em ordem alfabética (pt-BR: "Arte 3D", "Arte digital", "Assinaturas", "Colecionáveis", "Fotografia", "Generativa", "Jogos", "Música", "Utilidade"). A ordenação é feita pela API (`GET /collections`), então o painel lateral, o filtro do mobile e qualquer outro consumidor recebem a mesma ordem                                | `mocks/handlers/nfts.ts`                                        |
-| 2   | "Selecionador de imagem tá muito próximo à imagem… para evitar que as animações cubram o seletor" | Os pontos do destaque saem do canto da imagem e ficam **abaixo** dela (32 px de folga), centralizados na largura da imagem, fora da área da transição entre slides                                                                                                                                                                                                   | `hero/hero-section.tsx`                                         |
-| 3   | "Falta de uniformidade"                                                                           | O respiro entre a imagem e a moldura do card era de 4 px nas laterais e 25 px em cima e embaixo. Agora é **igual nos quatro lados** (16 px no desktop, 14 px nos carrosséis, 8 px no mobile), o que deixa cada card um bloco regular; os esqueletos usam as mesmas medidas, sem deslocamento de layout                                                               | `nft-card.tsx`, `nft-card-skeleton.tsx`, `mobile-nft-card*.tsx` |
-| 4   | "Faltando margin" (cartões promocionais)                                                          | O botão **Explorar** deixou de ser posicionado em absoluto, onde encostava na descrição e cortava o texto: agora é o último item do fluxo, com 16 px de folga acima, 24 px da borda direita e a mesma distância de baixo. O texto ganhou 16 px de distância da imagem, o limite de linhas foi removido (nada mais é cortado) e a imagem acompanha a altura do cartão | `promo-cards.tsx`                                               |
-| 5   | "Texto muito próximo" (carrinho)                                                                  | O cabeçalho da tabela (NFTs/Preço/Edições/Total) ficava a 4 px do caminho de navegação; agora há 24 px                                                                                                                                                                                                                                                               | `cart-page.tsx`                                                 |
-| 6   | "Falta centralizar o ícone" (lixeira do carrinho)                                                 | A lixeira ficava colada na borda direita da linha (0 px); agora é centralizada na sua coluna, com folga de 8 px, e já estava centralizada na vertical                                                                                                                                                                                                                | `cart-row.tsx`                                                  |
-| 7   | "Falta centralizar esse ícone" (select de carteira)                                               | Medido em todos os selects: o ícone já estava centralizado na vertical (0 px de desvio) e com folga igual à do texto; mantido e protegido por teste                                                                                                                                                                                                                  | `ui/select.tsx`                                                 |
-| 8   | "Faltou deixar os textos mais para a direita" (recibo)                                            | Os rótulos **Taxa de rede**, **Desconto** e **Total** passam a alinhar à direita, colados na coluna de valores (grade de 2 colunas com a mesma largura da coluna Subtotal), em vez de flutuar a 169 px da borda esquerda                                                                                                                                             | `order-fees.tsx`                                                |
-| 9   | "Melhore a tipografia" ("Ordenar por:Listados recentemente")                                      | Faltava espaço depois dos dois-pontos. O rótulo agora usa a cor secundária e o valor escolhido vai em negrito e na cor de destaque, com 8 px entre eles e o ícone do menu visível a 6 px do texto                                                                                                                                                                    | `catalog-toolbar.tsx`                                           |
-| 10  | "O ícone tá desproporcional ao botão" (Entrar)                                                    | O ícone era o de **sair** (`LogOut`) a 16 px num botão de 35 px. Trocado pelo de **entrar** (`LogIn`), com 14 px (40% da altura do botão), traço mais firme e 6 px do texto                                                                                                                                                                                          | `header/account-control.tsx`                                    |
-| 11  | "Esta imagem não deveria estar aqui" (banner mobile)                                              | A miniatura decorativa (arte "sage") que cobria a imagem em destaque foi **removida**: duas imagens sobrepostas não comunicavam nada e escondiam o NFT em destaque                                                                                                                                                                                                   | `mobile-hero-banner.tsx`                                        |
-| 12  | "Falta de margin" (abas no mobile)                                                                | As abas "Todos os NFTs / Novos lançamentos / Em alta" ganharam 24 px de distância do banner (eram 12 px)                                                                                                                                                                                                                                                             | `mobile-feed-tabs.tsx`                                          |
-| 13  | "Não há espaço para o botão de excluir" (carrinho mobile)                                         | A lixeira foi para o canto superior direito e o seletor de quantidade para o canto inferior direito, com mais de 8 px entre os dois e sem tocar no texto (o título ganha reserva à direita). O item cresce se houver nota de preço, sem sobrepor o valor                                                                                                             | `mobile-cart-item.tsx`                                          |
-
-## 5. Camada de mocks
-
-### 5.1 Base simulada
-
-`src/mocks/db` guarda registros internos que **não** são as formas da API: o
-servidor é dono de hash de senha, propriedade e referências cruas, e os
-handlers projetam isso nos contratos na saída.
-
-A consequência mais importante desse corte está no carrinho. Uma linha guarda
-apenas `nftId + editionId + quantity` — nunca o preço. Preço unitário,
-subtotal e disponibilidade são lidos do NFT a cada projeção. Então um
-`nft.updated` aparece no resumo do carrinho **sem nenhum código de
-sincronização**, e é estruturalmente impossível o carrinho carregar um preço
-que o catálogo não oferece mais.
-
-Toda escrita passa por `mutate()`, que persiste e só então emite os eventos.
-Nenhuma mutação consegue pular a persistência, e nenhum evento sai antes do
-estado estar consistente.
-
-### 5.2 REST e Socket.IO não têm como divergir
-
-A base expõe um event bus (`onDbEvent`). O gateway assina esse bus e monta o
-payload **lendo o mesmo store que os handlers REST leem**, em vez de usar o que
-a mutação tinha em mãos. Não existe caminho em que um evento discorde da
-resposta REST do mesmo recurso.
-
-Eventos de catálogo vão para todos os clientes; eventos de pedido só para
-sockets que se identificaram como o dono (`session.identify`). Esse é o lado
-servidor do isolamento entre usuários — o cliente ainda confere `ownerId`.
-
-### 5.3 Cenários de rede
-
-Configuráveis por query string, por `POST /api/__mock__/scenario` ou por
-`localStorage`. A query string vence, para que um link de demonstração ou um
-teste Playwright fixe um cenário sem limpar storage de ninguém.
-
-| Latência       | Comportamento                                                     |
-| -------------- | ----------------------------------------------------------------- |
-| `none`         | 0 ms                                                              |
-| `fast`         | 120 ms (padrão)                                                   |
-| `slow`         | 1500 ms                                                           |
-| `variable`     | 100–2000 ms, gerador semeado                                      |
-| `out-of-order` | Requisições sucessivas resolvem **mais rápido** que as anteriores |
-
-| Falha          | Comportamento                                      |
+| Latência       | Comportamento                                      |
 | -------------- | -------------------------------------------------- |
-| `offline`      | Falha de transporte (`TypeError`), não status HTTP |
-| `server-error` | 500 com envelope `SERVER_ERROR`                    |
-| `timeout`      | Nunca resolve; quem encerra é o timeout do Axios   |
-| `intermittent` | Falha 1 a cada `failEvery` requisições             |
-| `unauthorized` | 401, para simular expiração no meio do fluxo       |
+| `none`         | 0 ms                                               |
+| `fast`         | 120 ms (padrão)                                    |
+| `slow`         | 1,5 s                                              |
+| `variable`     | 100–2000 ms, gerador semeado                       |
+| `out-of-order` | Cada requisição resolve mais rápido que a anterior |
 
-`scope` restringe a falha a prefixos de caminho, então dá para derrubar só
-`/api/cart` e manter o resto de pé.
+| Falha          | Comportamento                                    |
+| -------------- | ------------------------------------------------ |
+| `offline`      | Falha de transporte, não status HTTP             |
+| `server-error` | 500 com envelope `SERVER_ERROR`                  |
+| `timeout`      | Nunca resolve; quem encerra é o timeout do Axios |
+| `intermittent` | Falha 1 a cada `failEvery` requisições           |
+| `unauthorized` | 401, para simular expiração no meio do fluxo     |
 
-**Nada aqui usa `Math.random`.** O enunciado pede cenários reproduzíveis, e uma
-taxa de falha aleatória tornaria a suíte Playwright instável em vez de
-determinística. Falhas intermitentes são contadas por requisição e a latência
-variável vem de um gerador semeado. Medido: `intermittent` com `failEvery: 3`
-produz exatamente `[200, 200, 500, 200, 200, 500]`, e `out-of-order` resolve
-cinco requisições paralelas na ordem `[5, 4, 3, 2, 1]` — que é o que expõe
-race condition na camada de query.
+`scope` restringe a falha a prefixos de caminho (por exemplo, derrubar só `/api/cart`).
 
-### 5.4 Controle da simulação
+### 4.3 Rotas de controle
 
-| Rota                                  | Função                                                                                                                      |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `POST /api/__mock__/reset`            | Restaura o cenário semeado; o contador de versões nunca volta atrás                                                         |
-| `GET\|POST /api/__mock__/scenario`    | Lê ou ajusta as condições de rede                                                                                           |
-| `POST /api/__mock__/expire-sessions`  | Expira todas as sessões na hora                                                                                             |
-| `GET /api/__mock__/state`             | Snapshot para asserção nos testes                                                                                           |
-| `GET /api/__mock__/ping`              | Responde JSON enquanto o worker atende a aba; usado pelo guardião do worker (§5.6)                                          |
-| `POST /api/__mock__/nfts/:slug`       | Altera preço ou disponibilidade; o evento `nft.updated` sai pelo bus. `previousPriceEth` só é preenchido quando o preço cai |
-| `GET /api/__mock__/socket`            | Quantidade de clientes Socket.IO conectados e milissegundos restantes de uma queda simulada                                 |
-| `POST /api/__mock__/socket/drop`      | Derruba as conexões; com `{ holdMs }` recusa novas conexões durante a queda, para dar tempo de alterar dados offline        |
-| `POST /api/__mock__/socket/reconnect` | Encerra a queda e deixa o cliente reconectar                                                                                |
-| `POST /api/__mock__/socket/emit`      | Entrega um evento arbitrário aos clientes (duplicados, versões antigas)                                                     |
-| `POST /api/__mock__/socket/replay`    | Reenvia o último evento do NFT (`duplicate`) ou o anterior a ele (`stale`)                                                  |
+Ficam fora da simulação de rede de propósito: é preciso conseguir desligar uma falha mesmo com o cenário `offline` ativo.
 
-Essas rotas **não** passam pela simulação de rede, de propósito: é preciso
-conseguir resetar a base ou desligar uma falha enquanto o cenário `offline`
-está ativo, senão a única saída seria limpar o storage na mão.
+| Rota                                           | Função                                                                                |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `POST /api/__mock__/reset`                     | Restaura a base semeada; o contador de versões nunca volta atrás                      |
+| `GET\|POST /api/__mock__/scenario`             | Lê ou ajusta as condições de rede                                                     |
+| `POST /api/__mock__/expire-sessions`           | Expira todas as sessões na hora                                                       |
+| `GET /api/__mock__/state` · `/ping`            | Snapshot para testes · resposta de saúde do worker                                    |
+| `POST /api/__mock__/nfts/:slug`                | Muda preço ou disponibilidade e emite `nft.updated`                                   |
+| `GET /api/__mock__/socket`                     | Quantos clientes Socket.IO estão conectados e quanto falta de uma queda simulada      |
+| `POST /api/__mock__/socket/drop` · `reconnect` | Derruba as conexões (com `holdMs` recusa novas) · encerra a queda                     |
+| `POST /api/__mock__/socket/emit` · `replay`    | Entrega um evento arbitrário · reenvia o último (`duplicate`) ou o anterior (`stale`) |
 
-**Simulador de mercado.** `features/market-simulator` é um painel (oculto por padrão; `?simulador=1` ou `Ctrl+Alt+M`) que
-só chama essas rotas pelo cliente HTTP. A mudança de preço entra na base simulada, o bus emite `nft.updated`, o servidor
-Socket.IO simulado entrega ao `socket.io-client` e só então o cache do app é atualizado: o painel nunca escreve no cache
-nem chama setters, o que preserva a regra do enunciado de que eventos simulados passam pelo cliente Socket.IO. O módulo
-é carregado sob demanda (só o atalho fica no caminho do app) e só existe com os mocks ligados (`lib/mocks-enabled.ts`).
-No lado do servidor simulado, `socket/clients.ts` guarda as conexões, `socket/outage.ts` implementa a queda com retenção
-e `socket/event-log.ts` lembra os dois últimos eventos de cada NFT para o replay.
+### 4.4 Simulador de mercado
 
-`expire-sessions` existe porque esperar um TTL real deixaria o teste de
-expiração lento e dependente de relógio — inclusive o caso de expirar no meio
-do checkout.
+`src/features/market-simulator` é um painel (oculto por padrão; `?simulador=1` ou `Ctrl+Alt+M`) que **só chama essas
+rotas**. A mudança entra na base, o evento atravessa o Socket.IO simulado e só então o cache do app é atualizado: o
+painel nunca escreve no cache. O módulo é carregado sob demanda e só existe com os mocks ligados.
 
-### 5.5 Sessão
+### 4.5 Fixtures
 
-O token viaja como header `Authorization: Bearer`, não como cookie. O
-tratamento de cookie do MSW difere entre o worker do browser e o Node, e um
-header se comporta igual nos dois — o que importa porque os mesmos handlers
-sustentam a suíte Playwright. Um backend de produção deveria usar cookie
-`httpOnly`; é uma simplificação deliberada do ambiente simulado.
+O catálogo é gerado em tempo de execução (`src/mocks/fixtures/generate-nfts.ts`) a partir de uma semente fixa, na primeira
+visita ou após o reset: são **239 NFTs** em 27 páginas de 9. A distribuição por coleção reproduz o painel lateral do
+Figma, e os nove primeiros itens são os do layout, com nome, preço e raridade idênticos. Há 4 NFTs esgotados, 22 com
+preço anterior riscado e estoques de 0 a 40, para que cada cenário exista de verdade. Duas contas (`ana@kurio.test` e
+`bruno@kurio.test`) têm carrinhos, favoritos, carteiras e pedidos independentes, o que sustenta os testes de isolamento.
 
-A sessão dura 30 minutos e não é deslizante; sessões vencidas são removidas na primeira leitura.
-Senhas são guardadas como SHA-256 com salt por usuário e nunca voltam na
-resposta, nem para a própria conta. Login responde igual para conta
-inexistente e senha errada, para não transformar o formulário em um oráculo de
-contas.
+As contagens por rede do Figma (119, 78 e 86) somam 283 e são incompatíveis com as por coleção, que somam 239. Foi mantida
+a de coleção e as redes foram distribuídas na mesma proporção (101, 66 e 72); os números na tela são derivados dos dados.
 
-### 5.6 Worker do MSW encerrado pelo navegador
+## 5. Estado, cache e sincronização
 
-O MSW responde pela rede através de um service worker. O worker guarda em memória a lista de abas "ativas"
-(`activeClientIds`) e, quando o navegador o encerra por inatividade (abas em segundo plano ou ociosas), essa lista se
-perde: ao acordar, o worker deixa **todas** as chamadas passarem direto para o servidor estático. No Vite (e na Vercel,
-por causa da reescrita para `index.html`) um `GET /api/nfts` passa a devolver o HTML da aplicação com status 200.
+### 5.1 Camadas
 
-O sintoma era o catálogo exibir "Não foi possível carregar o catálogo — Algo deu errado" ao filtrar: dados já em cache
-continuavam na tela, mas qualquer consulta nova (filtro, ordenação, página) falhava ao validar o HTML contra o contrato.
-Reproduz-se encerrando o worker pelo DevTools (`ServiceWorker.stopAllWorkers`) e é coberto por `mock-resilience.spec.ts`.
+`contracts/` (Zod) → `features/*/api` (Axios + validação) → `features/*/hooks` (TanStack Query) → componentes. Nenhum
+componente chama o Axios e nenhuma resposta fictícia existe fora de `src/mocks/`. O cliente HTTP injeta `Authorization` e
+`x-visitor-id`, aplica timeout de 8 s e converte todo erro em `ApiRequestError`. Um `401` fora das rotas de credencial
+dispara a expiração de sessão.
 
-Correção em duas pontas, sem lógica de negócio fora de `src/mocks/`:
-
-- `lib/http/client.ts`: resposta `text/html` de uma rota `/api` é tratada como falha de rede (nunca chega à
-  validação) e dispara o evento `kurio:api-unreachable`. As leituras do Query já tentam de novo (§8.3), então a segunda
-  tentativa encontra o worker restaurado.
-- `mocks/worker-guard.ts`: sobre o evento, ao focar a janela, ao voltar a aba para o primeiro plano, ao reconectar e a
-  cada 15 s com a aba visível, faz `GET /api/__mock__/ping`; se a resposta não for JSON, reenvia `MOCK_ACTIVATE` ao
-  worker, que volta a atender a aba.
-
-## 6. Fixtures
-
-O catálogo é gerado em tempo de execução por `src/mocks/fixtures/generate-nfts.ts`, a partir da seed fixa `20261027`
-(PRNG `mulberry32`), só na primeira visita ou após o reset; visitas seguintes leem a base persistida. A saída é idêntica
-byte a byte à do antigo arquivo gerado (conferida por deep-equal na troca), e o `NFT_FIXTURE_REVISION` fica em
-`fixtures/revision.ts`. Não há mais um literal de 200 KB no bundle nem script para rodar.
-
-São 239 NFTs, 27 páginas de 9. A distribuição por coleção reproduz exatamente o sidebar do Figma
-(33, 12, 65, 39, 23, 17, 19, 13 e 18). Os nove primeiros itens, na ordem de "Listados
-recentemente", são os do layout, com nome, preço e raridade idênticos (Emerald Ape #042 a 1.19,
-Neon Vessel #552 a 1.99 com 2.29 riscado, e assim por diante). O Figma deixa o nome do oitavo
-card em branco; a fixture o chama de Golden Echo #233.
-
-O restante é gerado com preços de 0.02 a 12.30 ETH, a mesma faixa do filtro do layout, com
-distribuição enviesada para valores baixos. Há 4 NFTs esgotados, 22 com preço anterior riscado e
-edições com estoque de 0 a 40, para que cada cenário exista de verdade.
-
-Cada NFT tem as quatro edições do layout, `1/1`, `1/10`, `1/50` e `ABERTA`. O preço exibido é o
-da `1/50`, que é a edição selecionada por padrão no Figma.
-
-As contagens por rede do Figma (119, 78 e 86) somam 283 e são incompatíveis com as de coleção,
-que somam 239. A fixture mantém as de coleção e distribui as redes na mesma proporção (101, 66 e
-72); as contagens exibidas na interface são derivadas dos dados.
-
-Os textos descritivos (descrição curta, história, notas de rede, contrato e direitos autorais) são
-gerados por template em `src/mocks/db/copy.ts` em vez de guardados 239 vezes, e o `alt` de cada
-imagem descreve o personagem. O Figma troca os rótulos "Contrato" e "Direitos autorais" entre o
-texto de royalties e o endereço; a interface corrige o pareamento.
-
-Dois usuários (`ana@kurio.test`, `bruno@kurio.test`) com carrinhos, favoritos, carteiras e pedidos
-disjuntos sustentam os cenários de isolamento entre contas. As senhas são fictícias, existem em
-texto apenas no seed e são guardadas com hash na base simulada. Credenciais no README do projeto.
-
-## 7. Decisões de código
-
-O código não carrega comentários; o "porquê" não-óbvio mora aqui.
-
-### 7.1 Dinheiro
-
-- Valores em ETH são `EthAmount`, uma string decimal com brand do Zod. Uma string qualquer não
-  é aceita onde se espera um valor, e toda aritmética passa por `lib/money/eth.ts`.
-- `big.js` é configurado com `NE = -21` e `PE = 40`: sem isso `toString()` produz notação
-  exponencial (`1e-7`) para valores pequenos, que não passa no regex do schema e quebraria o
-  round-trip. `DP = 18` (precisão de wei) com arredondamento para baixo.
-- `subtractEth` trava em zero: um desconto nunca produz total negativo.
-- `formatEth` usa sempre ponto como separador e remove zeros à direita com piso de duas casas,
-  igual ao Figma (`1.19 ETH`, `8.936 ETH`).
-
-### 7.2 Catálogo
-
-- A consulta aplica filtros, depois ordenação, depois paginação. Paginar um conjunto ainda não
-  ordenado tornaria a página 2 inalcançável.
-- Todo comparador tem desempate por `id`. Sem ele, dois NFTs com o mesmo preço trocariam de lugar
-  entre requisições, o que faria a paginação pular itens e as baselines visuais oscilarem.
-- Os feeds são conjuntos diferentes, e cada um tem a sua ordenação padrão (`DEFAULT_SORT_BY_FEED`): `all` e `new` usam
-  "Listados recentemente"; `trending` usa "Mais populares". `new` são os NFTs lançados nos 14 dias anteriores à data fixa
-  do catálogo (`launchedAt`, um a cada quatro NFTs é recente) e `trending` é `favoritesCount >= 150`. A data é fixa, e
-  não o relógio, para o catálogo ser determinístico. A ordenação só entra na URL quando difere do padrão da aba, e trocar de
-  aba leva a ordenação junto enquanto ela seguia o padrão. O `NFT_FIXTURE_REVISION` é conferido contra o gerador por um
-  teste, então mudar as fixtures sem atualizar a revisão falha a suíte.
-- Serialização dos parâmetros vive em `lib/url/catalog-params.ts` e é usada pela rota e pelo
-  handler. Só valores fora do padrão entram na URL, então `/` e `/?feed=all&page=1` resolvem para
-  a mesma query key.
-
-### 7.3 Carrinho
-
-- Uma taxa de rede por cadeia distinta no carrinho: comprar em duas redes são duas transações
-  on-chain, então cobrar uma só subestimaria o total.
-- No login, o carrinho do visitante é fundido ao da conta. Quantidades que não cabem mais no
-  estoque são reduzidas ao possível em vez de rejeitadas: perder a linha inteira por uma edição
-  esgotada seria pior do que comprar menos.
-- Cupom de valor fixo nunca excede o subtotal. Carrinho vazio não carrega cupom.
-
-### 7.4 Base simulada
-
-- A base persiste em `localStorage` com `schemaVersion`. Um payload de versão diferente é
-  descartado e a base é semeada de novo, porque um mock migrado pela metade é pior que um novo.
-- `mutate()` persiste e só depois emite eventos, então nenhum evento sai antes de o estado estar
-  consistente.
-- Senhas usam SHA-256 com salt por usuário. Não é o que um backend real usaria (precisaria de
-  Argon2 ou bcrypt), mas mantém o seed reprodutível, o que um hash lento não permitiria.
-- A chave de idempotência compara o hash de um JSON com chaves ordenadas, de modo que a ordem
-  das chaves do corpo não transforma a mesma tentativa em conflito.
-- Sessões expiradas são removidas na primeira leitura, então a expiração se comporta igual
-  tanto no meio da navegação quanto entre carregamentos de página.
-
-## 8. Estado, cache e sincronização
-
-### 8.1 Camadas
-
-`contracts/` (Zod) → `features/*/api` (Axios + parse) → `features/*/hooks` (TanStack Query) → componentes. Nenhum
-componente chama o Axios; nenhuma resposta fictícia existe fora de `src/mocks/`. O cliente HTTP
-(`lib/http/client.ts`) injeta `Authorization` e `x-visitor-id`, aplica timeout de 8 s e normaliza todo erro em
-`ApiRequestError { kind, status, code, fields }`. Um `401` fora das rotas de credencial dispara a expiração de sessão
-(§10.1).
-
-### 8.2 Chaves de query e isolamento
+### 5.2 Chaves de query e isolamento
 
 ```
 ['catalog', scope, 'list' | 'detail' | 'related' | 'featured', ...]
 ['private', scope, 'cart' | 'quote' | 'wallets' | 'profile' | 'favorites' | 'orders', ...]
 ```
 
-`scope` é o id do usuário autenticado ou `guest`. Dados privados nunca compartilham chave entre usuários, e a chave
-inclui todos os parâmetros da consulta (filtros, ordenação, página). Login, logout e expiração chamam
-`resetQueryCache`, que cancela as consultas em voo e remove o cache inteiro, de modo que nada da sessão anterior sobrevive.
+`scope` é o id do usuário ou `guest`, e a chave inclui todos os parâmetros da consulta. Login, logout e expiração chamam
+`resetQueryCache`, que cancela o que está em voo e esvazia o cache inteiro: nada da sessão anterior sobrevive.
 
-### 8.3 Política de cache e retry
+### 5.3 Política de cache
 
-| Item                                 | Política                                                                                                                                                                                                     |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Padrão                               | `staleTime` 30 s, `gcTime` 5 min, sem refetch ao focar a janela                                                                                                                                              |
-| Retry de leitura                     | Até 2 tentativas; nenhuma em 4xx                                                                                                                                                                             |
-| Retry de mutation                    | Nenhum. Repetir é decisão do usuário, e pedidos usam idempotência                                                                                                                                            |
-| Catálogo e favoritos (lista)         | `keepPreviousData`: a página anterior continua visível, com `aria-busy`, enquanto a nova carrega                                                                                                             |
-| Facetas (coleções, redes, destaques) | `staleTime` 5 min                                                                                                                                                                                            |
-| Carteiras e IDs de favoritos         | `staleTime` 60 s                                                                                                                                                                                             |
-| Carrinho                             | `staleTime` 10 s; mutations gravam a resposta no cache e, em erro, invalidam                                                                                                                                 |
-| Sessão (`/auth/session`)             | `staleTime` 60 s; retry só para falha transitória (rede, timeout, 5xx), até 2 vezes. Só `401` expira a sessão; qualquer outra falha mostra a tela de erro da rota com "Tentar novamente" e mantém o contexto |
-| Cotação                              | `staleTime` infinito e `gcTime` 0, com refetch ao focar a janela; é refeita por evento `nft.updated` e pelo botão "Atualizar cotação"                                                                        |
-| Pedido pendente                      | Polling a cada 1,5 s enquanto `status === 'pending'`, além do evento `order.updated`; a consulta só existe com um id de pedido (nada de `GET /orders/` vazio)                                                |
-| Respostas obsoletas                  | O `AbortSignal` do Query cancela a consulta anterior; a chave com os parâmetros descarta o resto                                                                                                             |
+| Item                         | Política                                                                                            |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- |
+| Padrão                       | `staleTime` 30 s, `gcTime` 5 min, sem refetch ao focar a janela                                     |
+| Leituras                     | Até 2 tentativas, nenhuma em 4xx. **Mutations não repetem**: repetir é decisão do usuário           |
+| Catálogo e favoritos (lista) | `keepPreviousData`: a página anterior segue visível, com `aria-busy`, enquanto a nova carrega       |
+| Coleções, redes, destaques   | `staleTime` 5 min                                                                                   |
+| Carteiras e ids de favoritos | `staleTime` 60 s                                                                                    |
+| Carrinho                     | `staleTime` 10 s; mutations gravam a resposta no cache                                              |
+| Sessão                       | `staleTime` 60 s; só `401` expira a sessão, qualquer outra falha mostra erro com "Tentar novamente" |
+| Cotação                      | `staleTime` infinito, `gcTime` 0, refaz ao focar a janela e a cada `nft.updated`                    |
+| Pedido pendente              | Polling de 1,5 s enquanto `pending`, além do evento `order.updated`                                 |
 
-Invalidação coerente: mutations de carrinho gravam a resposta no cache (a API devolve o carrinho inteiro); eventos
-`nft.updated` invalidam carrinho e cotação; `order.updated` terminal invalida carrinho e catálogo.
+**Atualização otimista.** O favorito muda na tela antes da resposta; se der erro, o estado anterior volta e o usuário é
+avisado. Um teste derruba a rota e confere o retorno.
 
-### 8.4 Atualização otimista
+## 6. Tempo real no cliente
 
-O favorito atualiza `favorites/ids` antes da resposta (`onMutate`), guarda o estado anterior e o restaura em `onError`
-com aviso ao usuário; `onSettled` revalida IDs e lista. O teste E2E derruba a rota com o cenário `server-error`,
-confere o rollback e a recuperação.
+`features/realtime` carrega de forma preguiçosa (é requisito do transporte e ainda tira o `socket.io-client` do caminho
+crítico). Um socket por usuário: trocar de usuário fecha o anterior e abre outro, que se identifica com `session.identify`.
 
-## 9. Tempo real no cliente
+As regras que tornam eventos duplicados, atrasados ou de outro dono inofensivos:
 
-`features/realtime` é carregado de forma preguiçosa (`React.lazy` no root). Isso é requisito do transporte (§2.2 c), e
-também tira `socket.io-client` do caminho crítico.
-
-- Um socket por usuário: o efeito depende do `userId`, então troca de usuário fecha o socket anterior
-  (`removeAllListeners` + `disconnect`) e abre outro, que se identifica com `session.identify`.
 - **Ledger de eventos** (`lib/event-ledger.ts`): descarta `eventId` repetido e qualquer versão menor ou igual à maior já
-  vista para o recurso. Duplicatas e eventos antigos são inofensivos.
-- **Guarda de versão no cache** (`lib/patch-nft.ts`): o patch só altera um NFT cujo `version` seja menor que o do evento,
-  em listas, detalhe, relacionados, destaques e favoritos.
-- **Guarda de dono**: `order.updated` só entra no ledger e no cache se `ownerId` for o usuário atual. A checagem vem
-  **antes** do ledger: um evento de outro dono com versão alta não pode bloquear os eventos reais do pedido.
-- **Estados terminais**: pedido `confirmed` ou `declined` nunca é alterado por evento posterior, mesmo com versão maior.
-- **Reconciliação**: a cada reconexão (não na primeira conexão) as queries ativas de `['catalog', scope]` e
-  `['private', scope]` são invalidadas e relidas por REST. Enquanto ela não termina, eventos continuam sendo aplicados pela
-  regra de versão, então uma resposta REST mais antiga não sobrescreve um evento mais novo. O contador de versões do
-  servidor simulado nunca volta atrás (nem no reset), para o ledger do cliente não descartar eventos novos.
-- **Efeitos de UI no carrinho**: reduzir ou alterar preço ou estoque de um item mostra um aviso (`sonner`, região
-  `aria-live`), atualiza o resumo e deixa uma **nota persistente na linha do item** ("Subiu, era 1.19 ETH", "Restam 1"),
-  com ícone e texto, que some ao editar a quantidade. Comprar as últimas unidades não gera aviso contra o próprio
-  usuário (há um pedido em andamento).
-- **Efeitos de UI no checkout**: a cotação é refeita, aparece o alerta com as mudanças e **Confirmar compra** fica
-  desabilitado até o usuário aceitar (§10.3). Se o diálogo de confirmação estava aberto, ele fecha e o alerta é
-  rolado para a vista. Pedido terminal fora da tela do recibo gera um aviso com atalho para o recibo.
-- **Carga**: o `RealtimeBridge` (e com ele o `socket.io-client`) monta depois do primeiro conteúdo, em tempo ocioso, para
-  qualquer usuário; os testes esperam a conexão antes de disparar eventos.
+  vista para o recurso.
+- **Guarda de versão no cache** (`lib/patch-nft.ts`): o patch só altera um NFT cuja `version` seja menor que a do evento.
+- **Guarda de dono**: `order.updated` só vale se o `ownerId` for o usuário atual, e a checagem vem **antes** do ledger, para
+  um evento alheio de versão alta não bloquear os eventos reais do pedido.
+- **Estados terminais**: `confirmed` e `declined` nunca são alterados por evento posterior.
+- **Reconciliação**: a cada reconexão (não na primeira) as queries ativas são invalidadas e relidas por REST. Enquanto isso,
+  eventos continuam sendo aplicados pela regra de versão, então uma resposta REST antiga não sobrescreve um evento novo. O
+  contador do servidor simulado nunca volta atrás, nem no reset.
 
-## 10. Sessão, carrinho e pedido
+**O que o usuário vê.** No carrinho: um aviso (região `aria-live`), o resumo atualizado e uma **nota que fica na linha do
+item** ("Subiu, era 1.19 ETH", "Restam 1"), com ícone e texto. No checkout: a cotação é refeita, o alerta aparece e
+**Confirmar compra** fica desabilitado até aceitar; se o diálogo de confirmação estava aberto, ele fecha. Comprar as
+últimas unidades não gera aviso contra o próprio usuário.
 
-### 10.1 Sessão
+## 7. Sessão, carrinho e pedido
 
-Token em `localStorage` (`kurio:session-token`), consultado por `useSyncExternalStore`; a sessão vem de
-`GET /auth/session`. As rotas privadas ficam sob o layout `_authed`, cujo `beforeLoad` redireciona para
-`/entrar?redirect=...`; o destino passa por `sanitizeRedirect` (apenas caminhos internos, nunca outro host nem `//`, nem
-as rotas de acesso).
+### 7.1 Sessão
 
-Expiração: um `401` limpa o token e o cache e leva a `/entrar?redirect=<local atual>&expired=1`. Durante o carregamento
-inicial de uma rota o `beforeLoad` é quem redireciona (o handler global só limpa o estado), o que evita redirecionamento
-aninhado. Logout navega para a página inicial a partir do próprio hook da mutation, porque callbacks passados a
-`mutate()` não rodam se o componente desmonta.
+O token vai em `Authorization: Bearer` e fica no `localStorage` (`kurio:session-token`). Um backend de produção usaria
+cookie `httpOnly`; aqui o header se comporta igual no navegador e no Node, o que importa porque os mesmos handlers
+sustentam os testes. As rotas privadas ficam sob `_authed`, que redireciona para `/entrar?redirect=...`; o destino passa por
+`sanitizeRedirect` (só caminhos internos). Um `401` limpa o token e o cache e leva a `/entrar?redirect=...&expired=1`.
 
-### 10.2 Carrinho
+### 7.2 Carrinho
 
-Estado no servidor, por usuário ou por `x-visitor-id`. A linha guarda só `nftId + editionId + quantity`; preço, subtotal e
-limites são projetados do NFT (§5.1). O cache do cliente é sempre substituído pela resposta da API; nada de dinheiro é
-calculado na interface.
+O estado fica no servidor, por usuário ou por `x-visitor-id`. No login, o carrinho do visitante é fundido ao da conta;
+quantidades que não cabem mais no estoque são reduzidas ao possível em vez de rejeitadas (perder a linha inteira por uma
+edição esgotada seria pior). Há **uma taxa de rede por cadeia** no carrinho, porque comprar em duas redes são duas
+transações. Cupom fixo nunca excede o subtotal. A interface não calcula dinheiro: o servidor é a referência, e toda conta
+passa por `lib/money/eth.ts` (`big.js`, valores como string decimal).
 
-### 10.3 Pedido
+### 7.3 Pedido
 
-1. `POST /quotes` gera a cotação (e as `issues`). 2. A conexão de carteira é simulada (`connect`, `disconnect`; o cenário
-   `wallet=reject` a recusa). 3. `POST /orders` leva a chave `x-idempotency-key`, estável por cotação. 4. O recibo é um
-   snapshot imutável.
+1. `POST /quotes` gera a cotação e as `issues`. 2. A carteira é conectada (simulada; `wallet=reject` a recusa). 3.
+   `POST /orders` leva a chave `x-idempotency-key`, estável por cotação. 4. O recibo é um _snapshot_ imutável.
 
-**Cotação aceita de forma explícita.** O servidor compara cada cotação nova com a **última cotação aceita** pelo usuário
-(a primeira, a devolvida por `acknowledge` ou uma sem `issues`), e não com a última emitida. Assim o alerta de preço
-alterado persiste através de refetch por foco, troca de carteira, reload ou nova cotação, até o usuário clicar em
-"Aceitar alterações e atualizar". A cotação com qualquer `issue`, ou vencida, não pode ser enviada: o botão de
-confirmação e o botão do diálogo ficam desabilitados e um `409 QUOTE_STALE` fecha o diálogo e mostra o alerta. A
-validação de envio (`isQuoteStale`) também reavalia o cupom.
+**Cotação aceita de forma explícita.** O servidor compara cada cotação nova com a **última aceita** pelo usuário, não com
+a última emitida. Assim o alerta de preço alterado persiste através de refetch por foco, troca de carteira ou reload, até
+o clique em "Aceitar alterações e atualizar". Uma cotação com qualquer `issue`, ou vencida (5 minutos), não pode ser
+enviada. Um `409 QUOTE_STALE` fecha o diálogo e mostra o alerta.
 
-Recuperação: o id do pedido pendente fica em `localStorage`, e `/pedido/:id` relê o pedido (e continua vivo por polling e
-evento). Se a criação termina em erro de transporte ou 5xx — resultado ambíguo — o corpo da tentativa é guardado, e o
-checkout mostra **Verificar pedido**. Toda nova tentativa reenvia o **corpo guardado** com a **mesma chave** (a mutation
-sempre lê a tentativa persistida), então um timeout nunca gera uma segunda compra. Como o pedido pode já ter sido criado e
-confirmado enquanto a resposta se perdia (o carrinho vazio desmontaria o formulário), essa tentativa é independente do
-formulário.
+**Recuperação.** O id do pedido pendente fica no `localStorage`, e `/pedido/:id` o relê. Se a criação termina em erro de
+transporte ou 5xx (resultado ambíguo), o corpo da tentativa é guardado e o checkout mostra **Verificar pedido**. Toda nova
+tentativa reenvia o corpo guardado com a **mesma chave**, então um timeout nunca gera uma segunda compra.
 
-**Privacidade.** O logout apaga o token, as notas do carrinho, a tentativa de pedido (que guarda nome e e-mail do
-colecionador), o pedido pendente e as chaves de idempotência (`features/auth/lib/clear-private-data.ts`), além de
-zerar o cache do Query. Login, cadastro, troca de usuário e expiração zeram o cache do Query e trocam o token; a expiração
-**preserva** a tentativa e o pedido pendente do próprio usuário (guardados por id de usuário) justamente para a retomada
-após novo login, e a troca de usuário nunca os lê, porque as chaves pertencem a outro escopo.
+**Privacidade.** O logout apaga token, notas do carrinho, tentativa de pedido (que guarda nome e e-mail), pedido pendente e
+chaves de idempotência, além de zerar o cache. A expiração **preserva** a tentativa e o pedido do próprio usuário
+(guardados por id) justamente para retomar a compra após novo login; a troca de usuário nunca os lê.
 
-## 11. Layout responsivo
+## 8. Interface
 
-| Faixa         | Layout                                                                                                        |
-| ------------- | ------------------------------------------------------------------------------------------------------------- |
-| < 768 px      | Mobile: frames móveis do Figma (cabeçalho próprio, barra inferior com entalhe e botão central, painéis fixos) |
-| 768 – 1279 px | Tablet: o layout mobile em coluna central de 640 px; barras fixas respeitam a mesma largura                   |
-| ≥ 1280 px     | Desktop: frames de 1440 px, contêiner de 1200 px                                                              |
+### 8.1 Layout responsivo
 
-A troca mobile/desktop é feita por `useIsDesktop()` (`min-width: 1280px`), de modo que só uma árvore é montada. Os
-elementos de casca usam `xl:` com o mesmo limite. Nos 1280 px o conteúdo de 1200 px ainda cabe com respiro.
+| Faixa         | Layout                                                               |
+| ------------- | -------------------------------------------------------------------- |
+| < 768 px      | Mobile: os frames móveis do Figma                                    |
+| 768 – 1279 px | Tablet: o layout mobile numa coluna central de 640 px (não há frame) |
+| ≥ 1280 px     | Desktop: frames de 1440 px, contêiner de 1200 px                     |
 
-O Figma só tem frame mobile para início, detalhe, carrinho, pagamento, login e cadastro. Confirmação, perfil, carteiras,
-favoritos e 404 no mobile são derivados do padrão visual (modal em tela cheia, chips de navegação no lugar da barra
-lateral).
+A troca é feita por `useIsDesktop()` (`min-width: 1280px`), então só uma árvore é montada. Confirmação, perfil, carteiras,
+favoritos e 404 no mobile são derivados do padrão visual, pois o Figma não os traz.
 
-## 12. Acessibilidade
+### 8.2 Acessibilidade
 
-- Pular para o conteúdo, foco visível global (`:focus-visible`) e foco inicial no primeiro campo dos diálogos de acesso.
-- Diálogos e drawers usam Radix: foco aprisionado, retorno do foco ao gatilho, `Esc`. O título acessível dos diálogos é
-  distinto do título visível (evita leitura duplicada).
-- Campos têm `label` (visível ou `sr-only`), `aria-invalid` e `aria-describedby` para a mensagem de erro; os selects
-  (rede, tipo de carteira, domínio ENS) recebem os mesmos atributos e `aria-required` (`controlAria`), já que o asterisco
-  visual é `aria-hidden`.
-- Cada rota define `document.title` e um anúncio educado (`role="status"`) quando o título muda; diálogos devolvem o foco ao
-  elemento que os abriu (busca, ampliar imagem, confirmação de compra).
-- O botão de diminuir quantidade bloqueado usa `aria-disabled`, e não `disabled`, para continuar focável e explicar o
-  limite (dica e aviso `aria-live`); as notas de preço/estoque do carrinho têm ícone e texto, nunca só cor.
-- O `overflow-x: clip` do corpo esconde vazamentos reais, então o teste de responsividade mede os retângulos dos
-  elementos em 320, 390, 768 e 1440 px, e não `scrollWidth`.
-- O simulador é um `<aside aria-label="Simulador de mercado">` não modal, com linha de status `aria-live`, fechável por `Esc`.
-- Mutations e eventos em tempo real anunciam por regiões `aria-live` (`sonner`, totais do carrinho, aviso de cotação).
-- Ações fora do escopo (Criadores, Aprenda, Atividade, Ofertas, Arquivos baixados, Suporte, login social, recuperar
-  senha) são botões `aria-disabled` que respondem com aviso "não está disponível nesta versão"; nunca fingem sucesso.
-- O carrossel de destaques não avança sozinho com `prefers-reduced-motion`, pausa com foco visível por teclado e com a aba
-  oculta, e o ponto ativo usa `aria-current`.
-- Alvos dos indicadores de carrossel, semântica de `dl`, ordem de títulos e `aria-controls` foram auditados e
-  corrigidos a partir do relatório do Lighthouse.
+- Pular para o conteúdo, foco visível global e diálogos Radix com foco aprisionado, retorno do foco e `Esc`.
+- Campos com `label`, `aria-invalid`, `aria-describedby` e `aria-required` (inclusive os selects, já que o asterisco visual
+  é `aria-hidden`).
+- Cada rota define o `<title>` e anuncia a mudança por uma região educada para leitores de tela.
+- O botão "−" bloqueado usa `aria-disabled` (continua focável e explica o limite); as notas do carrinho têm ícone e texto,
+  nunca só cor. Ações fora do escopo são botões `aria-disabled` que respondem "não está disponível nesta versão".
+- O carrossel de destaques não avança com "reduzir movimento", pausa com foco por teclado e com a aba oculta.
+- O teste de responsividade mede os retângulos dos elementos em 320, 390, 768 e 1440 px, porque o `overflow-x: clip` do
+  corpo esconde vazamentos reais de `scrollWidth`.
 
-## 13. Performance e auditoria
+### 8.3 Desvios do Figma e decisões de UX
 
-### 13.1 Decisões de build e de carga
+| Item                       | Decisão                                                                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cores                      | Acrescentadas as que o Figma não tem: erro `#E2574C`, sucesso `#5C9E6B`, hover de botão `#C07A3C` e superfície elevada `#2F1D17`                                    |
+| Fonte                      | Roboto Mono em vez de Space Mono: os glifos do Figma (o `r` sem pé, o `M`, o `c` de terminais retos) correspondem à Roboto Mono                                     |
+| Container                  | 1200 px centralizado: a medição dos screenshots mostra o conteúdo começando em x=120 num viewport de 1440, e não 80 px de padding                                   |
+| Separador decimal          | Ponto em todos os valores (`1.19 ETH`); o Figma alterna entre ponto e vírgula                                                                                       |
+| Grade do catálogo (mobile) | Duas colunas **alinhadas** (o Figma escalona a direita), por decisão de produto                                                                                     |
+| Quantidade (−/+)           | Com 1 unidade o "−" fica bloqueado de forma bem visível (fundo apagado, anel, cursor proibido, dica "Quantidade mínima: 1")                                         |
+| Pagamento                  | No desktop lista as carteiras reais; no mobile o pedido usa os dados do perfil. O diálogo de revisão lista itens, taxa e total antes do envio                       |
+| Filtros ativos             | Aparecem como chips removíveis com "Limpar filtros" (não existem no Figma; tornam o estado da URL visível)                                                          |
+| Abas do catálogo           | "Todos", "Novos lançamentos" e "Em alta" mostram conjuntos diferentes (`new`: lançados nos 14 dias anteriores à data fixa do catálogo; `trending`: ≥ 150 favoritos) |
+| Modais (desktop)           | Sempre no tamanho do Figma, centralizados quando cabem; em janelas baixas a própria sobreposição rola. Clicar fora e `Esc` fecham                                   |
+| Avatar e pedidos           | O avatar é um seletor de emoji (sem upload) e não há tela de histórico de pedidos; o recibo abre pelo link do pedido                                                |
+| Simulador de mercado       | Painel de demonstração, oculto por padrão; não altera nenhuma tela quando fechado                                                                                   |
 
-Toda otimização vale para qualquer usuário: nada depende de `navigator.webdriver`, do user agent ou de parâmetro de URL, e
-as mesmas imagens, fontes e funcionalidades carregam na auditoria e em uso normal (o enunciado proíbe simplificações feitas só
-para a pontuação). Nada foi encurtado: a latência padrão dos mocks continua em 120 ms, as fontes não foram subsetadas e as
-imagens não perderam qualidade (§4.1).
+**Artes dos NFTs.** O Figma não acompanha as artes, mas três foram fornecidas; o quarto personagem (o gorila de chapéu) foi
+recortado do screenshot em resolução original. Os originais ficam em `assets/nft-source/` e `npm run art` gera as
+variantes (`{arte}-{160…960}.webp`, de 3 a 56 KB). Cada espaço da interface declara um `sizes` exato, então o navegador
+baixa a menor variante que cobre o tamanho real em pixels. `npm run art:check` é o portão de qualidade: cada variante
+precisa ter SSIM ≥ 0,97 contra o original. São quatro personagens para 239 NFTs, então as artes se repetem, como no Figma.
 
-- **Boot em etapas** (`app/boot.ts`): cada `import()` pesado avalia numa tarefa própria, com `yieldToMain` entre elas (zod
-  → runtime do MSW → mocks da aplicação → montagem), para que nenhuma tarefa passe de ~50 ms reais. O React renderiza dentro de
-  `startTransition`.
-- **Chunks** (`build.rolldownOptions.output.codeSplitting`): `react`, `tanstack`, `vendor` (axios, zod, tailwind-merge, big.js),
-  `msw` (runtime do MSW e dependências) e `mocks` (código de `src/mocks`). **Atenção:** `engine.io-client` captura `WebSocket` ao
-  ser avaliado; nunca pode cair num chunk avaliado antes do `worker.start()` (§2.2 c). O ponto de entrada não pode importar estaticamente `msw`, `vendor` ou `mocks` (senão tudo é avaliado numa só tarefa, antes do primeiro `yield`): por isso os helpers de boot (`yieldToMain`, `MOCKS_ENABLED` e o preload do Vite) têm o chunk próprio `preload`. Qualquer mudança de chunking ou de
-  montagem exige rodar a suíte E2E de tempo real.
-- **Preload por rota** (`build/plugins/route-preload.ts`): o HTML traz `modulepreload` dos chunks comuns e um script inline
-  mínimo que acrescenta os chunks da rota (`/` ou `/nft/*`) a partir de `location.pathname`, o que paraleliza o que antes era
-  uma cadeia de requisições. É uma regra de rota, nunca de user agent.
-- **Rotas com loader**: `/` e `/nft/:slug` disparam `prefetchQuery` no match da rota (só para visitante), em paralelo com o
-  download do chunk da página.
-- **Fora do caminho crítico** (carregados sob demanda ou em tempo ocioso, para todos): árvores desktop da home e do detalhe,
-  cabeçalho e rodapé desktop (renderizados só em ≥ 1280 px, onde já eram visíveis), painel de filtros do mobile, `sonner` e o
-  `Toaster` (`lib/toast.ts`, montados no primeiro aviso ou em ociosidade), `RealtimeBridge`/`socket.io-client`, carrossel de
-  relacionados do detalhe mobile (só ao se aproximar da tela) e o simulador de mercado.
-- **Renderização escalonada**: os quatro primeiros cards do mobile renderizam primeiro e o restante entra em seguida
-  (`useDeferredValue`), reduzindo a tarefa de renderização inicial.
-- **Fixtures**: o catálogo é gerado em tempo de execução (§6) e o seed intocado não é persistido na primeira visita.
-- `tldts` e `tough-cookie` apontam para shims mínimos (`src/mocks/shims`): só servem ao MSW e o ambiente usa `Authorization`.
-- **Imagens**: variantes de 160 a 960 px com `sizes` exato por slot e portão de qualidade por SSIM (§4.1); `vercel.json` dá
-  cache longo a `/fonts/*` e `/assets/*` e uma semana a `/nft/*`.
-- Source maps emitidos (exigência de Best Practices para JS grande); `robots.txt` e favicon declarados.
+### 8.4 Revisão de design: os comentários do Figma
 
-### 13.2 Como a auditoria é feita
+Quem revisou o layout deixou 13 comentários no Figma, e depois um 14º foi acrescentado. Cada um foi tratado e tem um teste
+em `e2e/design-review.spec.ts` que **falha no código anterior e passa no atual**. Onde o comentário aponta um defeito do
+próprio layout, a implementação se afasta do Figma de propósito. Os prints abaixo comparam o app antes e depois.
 
-`npm run lighthouse` compila, sobe `lighthouse/serve.mjs` (servidor estático HTTP/2 com Brotli, certificado autoassinado, que
-reproduz o comportamento de uma CDN como a da Vercel) e roda 3 medições por página (início e detalhe) e perfil (mobile e
-desktop), com armazenamento limpo a cada execução, usando o build otimizado e o cenário padrão dos mocks. Os relatórios HTML
-e JSON de cada medição, `summary.json` e um índice (`index.html`) ficam em `lighthouse/reports/`, e a tabela de medianas do
-README é reescrita ao fim. `LH_SERVER=preview` usa o `vite preview` (HTTP/1.1) para comparação e `LH_URL=https://...` audita
-uma URL pública (por exemplo, a da Vercel). Para investigar: `lighthouse/lantern.mjs` repete o simulador do Lighthouse sobre o
-mesmo trace e `lighthouse/trace.mjs` atribui as tarefas longas a scripts e funções.
+#### 1. Coleções fora de ordem alfabética
 
-### 13.3 Resultados e causas
+A lista agora sai em ordem alfabética (pt-BR). A ordenação é feita pela própria API (`GET /collections`), então o painel
+lateral, o filtro do mobile e qualquer outro consumidor recebem a mesma ordem. _(`mocks/handlers/nfts.ts`)_
 
-Última auditoria completa (`npm run lighthouse`, 3 medições por página e perfil, medianas; relatórios em `lighthouse/reports/`):
+![Coleções: antes fora de ordem, depois em ordem alfabética](assets/revisao/01-colecoes-ordem.webp)
 
-| Página  | Perfil  | Performance       | Acessibilidade | Boas práticas | SEO | LCP    | CLS | TBT    | Benchmark do host (3 rodadas) |
-| ------- | ------- | ----------------- | -------------- | ------------- | --- | ------ | --- | ------ | ----------------------------- |
-| Início  | Desktop | 100               | 97             | 100           | 100 | 0,59 s | 0   | 0 ms   | 2166 / 1952 / 2264            |
-| Detalhe | Desktop | 100               | 100            | 100           | 100 | 0,56 s | 0   | 0 ms   | 2328 / 2386 / 2077            |
-| Início  | Mobile  | 92 (92 / 94 / 92) | 100            | 100           | 100 | 2,66 s | 0   | 221 ms | 2119 / 2081 / 2296            |
-| Detalhe | Mobile  | 94 (96 / 94 / 94) | 100            | 100           | 100 | 2,56 s | 0   | 193 ms | 2265 / 2144 / 2306            |
+#### 2. Seletor do destaque colado na imagem
 
-Todas as metas do enunciado são atendidas (Performance ≥ 90, Acessibilidade ≥ 95, Boas práticas ≥ 95, SEO ≥ 90), com CLS 0 em todas
-as páginas e perfis. A Performance mobile depende da CPU do host, porque o Lighthouse reduz a CPU 4× sobre a CPU real da
-máquina: no mesmo build, rodadas com o notebook de desenvolvimento limitado a ~42 % da frequência (benchmark de 1000 a 1600)
-variam alguns pontos para baixo, e o `benchmarkIndex` de cada medição fica registrado em `lighthouse/reports/summary.json` e
-na tabela do README.
+Os pontos saíram do canto da imagem e ficam **abaixo** dela, centralizados na largura da imagem e fora da área da
+transição entre slides. _(`hero/hero-section.tsx`)_
 
-**O que mais pesou e como foi resolvido.** Até a última revisão, o ponto de entrada (`index`) importava estaticamente o chunk
-`mocks`, porque o agrupador de chunks colocou ali duas funções minúsculas que o próprio boot usa (`yieldToMain` e o helper de
-preload do Vite). Resultado: o MSW, o zod/axios (`vendor`) e o código dos mocks eram avaliados juntos, numa única tarefa de
-~36 ms reais, antes de qualquer `yield`, o que derrotava o boot em etapas (§13.1). Esses helpers passaram para um chunk próprio
-(`preload`, ~1,7 KB), e cada etapa voltou a avaliar na sua tarefa (a maior caiu de ~36 para ~15 ms). No Lantern, com benchmark
-parecido, o TBT mediano do início mobile foi de 540 ms para 204 ms (3–4 rodadas antes e depois), e o LCP caiu ~200 ms.
+![Destaque: pontos ao lado da imagem antes, abaixo dela depois](assets/revisao/02-destaque-pontos.webp)
 
-| Estado do build                                  | Início mobile                                                           | Detalhe mobile                    | Condição do host     |
-| ------------------------------------------------ | ----------------------------------------------------------------------- | --------------------------------- | -------------------- |
-| Antes (entrada importando `mocks`), CPU limitada | 79 (76 / 79 / 84), TBT 689 ms                                           | 81 (81 / 81 / 82), TBT 605 ms     | benchmark 975–1627   |
-| Antes, CPU em frequência cheia                   | 95 (96 / 95 / 94) numa rodada anterior à revisão de design, TBT ~135 ms | 83 (94 / 77 / 83)                 | benchmark ~2100–2350 |
-| Depois (esta auditoria)                          | **92** (92 / 94 / 92), TBT 221 ms                                       | **94** (96 / 94 / 94), TBT 193 ms | benchmark 2081–2306  |
+#### 3. Falta de uniformidade nos cards
 
-A linha "Antes, CPU em frequência cheia" é de uma rodada anterior anotada durante o trabalho (os relatórios de
-`lighthouse/reports/` guardam só a última). Ela mostra que o resultado oscila de rodada para rodada, e o ganho do ajuste de
-chunks aparece de forma consistente no detalhe (83 → 94) e no desempenho em CPU limitada (79/81 → 92–95 em medições
-de verificação).
+O respiro entre a imagem e a moldura era de 4 px nas laterais e 25 px em cima e embaixo. Agora é **igual nos quatro lados**
+(16 px no desktop, 14 px nos carrosséis, 8 px no mobile), e os esqueletos usam as mesmas medidas. _(`nft-card.tsx`)_
 
-Causas do que ainda separa o mobile de 100, medidas no trace (`lighthouse/lantern.mjs`, `lighthouse/trace.mjs`):
+![Card: respiro desigual antes, uniforme depois](assets/revisao/03-cards-uniformes.webp)
 
-1. **Bytes de JavaScript antes do primeiro card.** Em Brotli o caminho crítico carrega ~270 KB: React e React DOM (~68 KB em gzip),
-   a camada de backend simulado (MSW e dependências, ~45 KB, mais ~18 KB dos mocks da aplicação), zod e axios (~58 KB no chunk
-   `vendor`) e o TanStack (~36 KB). React, MSW, zod e axios somam ~55 % dos bytes. O MSW existe só porque o enunciado manda
-   simular o backend no cliente; um backend real não teria esse custo, e nada foi removido ou simplificado só para a medição.
-2. **CPU 4× sobre tarefas inevitáveis.** Restam quatro tarefas entre 15 e 30 ms reais (avaliação dos módulos de zod/mocks, criação
-   do roteador e da raiz do React, primeiro render e o primeiro layout); cada uma, multiplicada por 4 e descontados 50 ms,
-   vira TBT (~200 ms no total).
-3. **HTML e TLS fixos (~780 ms na simulação)** e uma janela de download de ~205 KB/s fazem cada 1 KB de JS antes do primeiro card
-   custar ~5 ms de LCP. As imagens dos cards (WebP, escada 160–960 px, `sizes` exato por slot) terminam junto da cauda da CPU e
-   mexem pouco na nota da página inicial.
-4. Em HTTP/1.1 (`vite preview`, `LH_SERVER=preview`) o mesmo build cai para ~80, porque dezenas de arquivos pequenos viram várias
-   ondas de requisição; o `serve.mjs` usa HTTP/2 e Brotli como uma CDN (Vercel).
+#### 4. Faltando margem nos cartões promocionais
 
-Ficaram de fora, por regra do enunciado (§10) ou por custo, a subsetagem de fontes, a condição por user agent, a perda de
-qualidade das imagens, a redução da latência dos mocks, o preload da imagem do LCP (ganho estimado de ±30 ms), a troca do axios
-por `fetch`, o `zod/mini` e mover banco e handlers para um Web Worker (últimos recursos de reserva).
+O botão **Explorar** deixou de ser posicionado em absoluto (onde encostava na descrição e cortava o texto): agora é o
+último item do fluxo, com 16 px de folga em cima, 24 px da borda direita e a mesma distância embaixo. O limite de linhas da
+descrição foi removido. _(`promo-cards.tsx`)_
 
-## 14. Testes
+![Cartões promocionais: texto cortado antes, com margens depois](assets/revisao/04-cartoes-promocionais.webp)
 
-`npm run test:e2e` (Playwright, Chromium) sobe o **build de produção** (`npm run build && vite preview`, sempre novo: `reuseExistingServer`
-é falso) com os mocks ativos. Projetos: `desktop` (1440×900) executa tudo; `mobile` (390×844) executa os testes marcados `@mobile`.
-Cada teste roda num contexto novo, portanto com `localStorage` vazio e base semeada de novo.
+#### 5. Texto muito próximo no carrinho
 
-**Controle de tempo, latência e eventos.** O relógio das cenas sensíveis a tempo é controlado por `page.clock` (rotação do
-destaque, liquidação do pedido, vencimento da cotação e da sessão); a latência e as falhas vêm dos cenários dos mocks
-(§5.3); os eventos de tempo real são disparados pelas rotas de controle (§5.4) e chegam ao app pelo `socket.io-client`.
-Esperas fixas foram trocadas por condições observáveis (`expect.poll`, `settleFrames`).
+O cabeçalho da tabela ficava a 4 px do caminho de navegação; agora há 24 px. _(`cart-page.tsx`)_
 
-**Cobertura dos 12 cenários do enunciado** (tabela por arquivo no README, seção "Testes com Playwright"), incluindo, além
-do caminho feliz: resultado vazio, respostas fora de ordem, restauração pelo histórico, expiração de sessão no meio da
-navegação e da confirmação do pedido, otimismo observável e falha ao desfavoritar, clique repetido e timeout com a mesma
-chave de idempotência, recusa e desconexão da carteira, preço e disponibilidade alterados com o diálogo de confirmação
-aberto, evento de outro dono, pedido terminal, queda do socket com pedido pendente, validação do checkout e foco de
-todos os diálogos, falha e nova tentativa em detalhe, carrinho e pagamento, e ausência de deslocamento de layout nos
-skeletons.
+![Carrinho: cabeçalho colado no caminho de navegação antes, com respiro depois](assets/revisao/05-carrinho-cabecalho.webp)
 
-**Regressão visual.** `visual.spec.ts` compara início, detalhe, carrinho e pagamento em 1440 e 390 px com
-`maxDiffPixelRatio` de 2%, animações desativadas, relógio e dados fixos. As baselines (`e2e/__screenshots__/{projeto}/{sistema}/`)
-existem para Windows e para Linux (esta gerada na imagem oficial do Playwright, porque a renderização de texto muda a altura
-das páginas entre sistemas); em outro sistema os testes visuais são pulados com instrução para gerar as próprias baselines.
+#### 6. Lixeira do carrinho sem centralizar
 
-Relatório HTML em `playwright-report/` e traces das falhas em `test-results/` (`trace: retain-on-failure`); ambos são gerados a
-cada execução e por isso não são versionados.
+A lixeira ficava colada na borda direita da linha; agora é centralizada na sua coluna, com 8 px de folga. _(`cart-row.tsx`)_
 
-## 15. Limitações assumidas
+![Lixeira do carrinho: colada na borda antes, centralizada depois](assets/revisao/06-carrinho-lixeira.webp)
+
+#### 7. Ícone do select de carteira
+
+Medi todos os selects: o ícone **já estava centralizado** na vertical (0 px de desvio) e com folga igual à do texto.
+Nada foi alterado; o comportamento ganhou um teste de regressão. _(`ui/select.tsx`)_
+
+![Select de carteira: ícone já centralizado](assets/revisao/07-select-carteira.webp)
+
+#### 8. Textos do recibo mais à direita
+
+**Taxa de rede**, **Desconto** e **Total** passam a alinhar à direita, colados na coluna de valores, em vez de flutuar a
+169 px da borda esquerda. _(`order-fees.tsx`)_
+
+![Recibo: rótulos soltos antes, junto dos valores depois](assets/revisao/08-recibo-totais.webp)
+
+#### 9. Tipografia do "Ordenar por"
+
+Faltava espaço depois dos dois-pontos. O rótulo usa a cor secundária e o valor escolhido vai em negrito, com 8 px entre
+eles. _(`catalog-toolbar.tsx`)_
+
+![Ordenar por: sem espaço antes, com espaço e destaque depois](assets/revisao/09-ordenar-por.webp)
+
+#### 10. Ícone desproporcional no botão Entrar
+
+O botão usava o ícone de **sair** a 16 px num botão de 35 px. Trocado pelo de **entrar**, com 14 px (40% da altura do
+botão) e traço mais firme. _(`header/account-control.tsx`)_
+
+![Botão Entrar: ícone de sair antes, de entrar proporcional depois](assets/revisao/10-botao-entrar.webp)
+
+#### 11. Imagem sobreposta no banner mobile
+
+A miniatura decorativa que cobria a imagem em destaque foi **removida**: duas imagens sobrepostas não comunicavam nada e
+escondiam o NFT em destaque. _(`mobile-hero-banner.tsx`)_
+
+![Banner mobile: imagem sobreposta antes, limpo depois](assets/revisao/11-banner-mobile.webp)
+
+#### 12. Falta de margem nas abas do mobile
+
+As abas "Todos os NFTs / Novos lançamentos / Em alta" ganharam 24 px de distância do banner (eram 12 px).
+_(`mobile-feed-tabs.tsx`)_
+
+![Abas no mobile: coladas no banner antes, com respiro depois](assets/revisao/12-abas-mobile.webp)
+
+#### 13. Sem espaço para o botão de excluir no carrinho mobile
+
+A lixeira foi para o canto superior direito e o seletor de quantidade para o inferior direito, com mais de 8 px entre os
+dois e sem tocar no texto. _(`mobile-cart-item.tsx`)_
+
+![Item do carrinho no mobile: lixeira apertada antes, com espaço próprio depois](assets/revisao/13-carrinho-mobile.webp)
+
+#### 14. Título da newsletter desalinhado no rodapé
+
+O título "Antecipe-se ao próximo lançamento" usava um tamanho e uma altura de linha diferentes dos outros títulos (18 px com
+linha de 16 px), então quebrava em duas linhas coladas e ficava mais alto que os demais. Agora usa o mesmo estilo (17 px,
+linha de 24 px), cabe em uma linha e fica **na mesma linha dos outros três títulos**; o campo de e-mail começa onde as
+descrições começam. As colunas foram levemente redistribuídas para o texto não encostar na borda direita.
+_(`footer/newsletter-form.tsx`, `footer/feature-band.tsx`)_
+
+![Rodapé: título da newsletter desalinhado antes, alinhado depois](assets/revisao/14-rodape-newsletter.webp)
+
+## 9. Performance
+
+### 9.1 O que foi feito (vale para qualquer usuário)
+
+Nada depende de `navigator.webdriver`, do user agent ou de parâmetro de URL, e a auditoria carrega as mesmas imagens,
+fontes e funcionalidades do uso normal: o desafio proíbe simplificar só para a pontuação. A latência padrão dos mocks
+continua em 120 ms, as fontes não foram subsetadas e as imagens não perderam qualidade.
+
+- **Boot em etapas** (`app/boot.ts`): cada `import()` pesado avalia numa tarefa própria, com `yieldToMain` entre eles (zod,
+  runtime do MSW, mocks, montagem), para nenhuma tarefa passar de ~50 ms.
+- **Chunks**: `react`, `tanstack`, `vendor` (axios, zod, tailwind-merge, big.js), `msw`, `mocks` e `preload` (os helpers do
+  próprio boot). **Regra importante:** o ponto de entrada não pode importar estaticamente `msw`, `vendor` ou `mocks`, senão
+  tudo é avaliado numa só tarefa antes do primeiro `yield`. Qualquer mudança de chunking exige rodar os testes de tempo real.
+- **Preload por rota** (`build/plugins/route-preload.ts`) e `prefetchQuery` nas rotas `/` e `/nft/:slug`, em paralelo com o
+  download da página.
+- **Fora do caminho crítico:** árvores desktop, cabeçalho e rodapé desktop, painel de filtros, `sonner`, `RealtimeBridge`
+  (com o `socket.io-client`) e o simulador, carregados sob demanda ou em tempo ocioso.
+- **Renderização escalonada** no mobile: os quatro primeiros cards primeiro, o resto em seguida.
+- **Imagens** em variantes de 160 a 960 px com `sizes` exato; `vercel.json` dá cache longo a `/fonts/*` e `/assets/*`.
+
+### 9.2 Como medir
+
+`npm run lighthouse` compila, sobe um servidor local HTTP/2 com Brotli (que se comporta como a CDN da Vercel) e roda 3
+medições por página (início e detalhe) e perfil (mobile e desktop), com armazenamento limpo a cada uma. Os relatórios ficam
+em `lighthouse/reports/`, e a tabela do README é reescrita ao fim. `LH_URL=https://...` audita uma URL pública, como a da
+Vercel. Para investigar, `lighthouse/lantern.mjs` repete a simulação do Lighthouse sobre o mesmo trace e
+`lighthouse/trace.mjs` atribui as tarefas longas a scripts e funções.
+
+### 9.3 Resultados
+
+Última auditoria completa (medianas de 3 medições):
+
+| Página  | Perfil  | Performance       | Acessibilidade | Boas práticas | SEO | LCP    | CLS | TBT    |
+| ------- | ------- | ----------------- | -------------- | ------------- | --- | ------ | --- | ------ |
+| Início  | Desktop | 100               | 97             | 100           | 100 | 0,59 s | 0   | 0 ms   |
+| Detalhe | Desktop | 100               | 100            | 100           | 100 | 0,56 s | 0   | 0 ms   |
+| Início  | Mobile  | 92 (92 / 94 / 92) | 100            | 100           | 100 | 2,66 s | 0   | 221 ms |
+| Detalhe | Mobile  | 94 (96 / 94 / 94) | 100            | 100           | 100 | 2,56 s | 0   | 193 ms |
+
+Todas as metas são atendidas (Performance ≥ 90, Acessibilidade ≥ 95, Boas práticas ≥ 95, SEO ≥ 90), com CLS 0.
+
+**A nota mobile depende da CPU de quem mede.** O Lighthouse reduz a CPU 4× sobre a CPU real da máquina. No notebook de
+desenvolvimento, que reduz a frequência sob carga (~42% do máximo, benchmark de 1000 a 1600), a mesma versão deu 79 e 81;
+com a CPU em frequência cheia, deu de 92 a 96. O `benchmarkIndex` de cada medição fica em `lighthouse/reports/summary.json`.
+
+**O que mais pesava e foi resolvido.** O ponto de entrada importava estaticamente o chunk `mocks`, porque o agrupador pôs ali
+duas funções minúsculas do próprio boot (`yieldToMain` e o helper de preload do Vite). O MSW, o zod/axios e os mocks eram
+avaliados juntos numa única tarefa de ~36 ms, o que derrotava o boot em etapas. Esses helpers foram para o chunk próprio
+`preload`: a maior tarefa caiu de ~36 para ~15 ms, o TBT mediano do início mobile foi de 540 para 204 ms e o LCP caiu ~200 ms.
+
+**O que ainda separa o mobile de 100:**
+
+1. **Bytes de JavaScript antes do primeiro card**: ~270 KB em Brotli. React, MSW, zod e axios somam ~55%. O MSW existe só
+   porque o desafio manda simular o backend no cliente; um backend real não teria esse custo.
+2. **CPU 4× sobre tarefas inevitáveis**: restam quatro tarefas de 15 a 30 ms reais (avaliação de zod e mocks, criação do
+   roteador e da raiz do React, primeiro render, primeiro layout), que viram ~200 ms de TBT.
+3. **HTML e TLS fixos** (~780 ms na simulação) e uma janela de download de ~205 KB/s: cada 1 KB de JS antes do primeiro card
+   custa ~5 ms de LCP.
+4. Em HTTP/1.1 (`LH_SERVER=preview`) o mesmo build cai para ~80, porque dezenas de arquivos pequenos viram várias ondas de
+   requisição; o servidor da auditoria usa HTTP/2, como a Vercel.
+
+Ficaram de fora, por regra do desafio ou por custo: subsetar fontes, condicionar por user agent, perder qualidade de imagem,
+reduzir a latência dos mocks, preload da imagem do LCP (ganho de ~30 ms), trocar o axios por `fetch`, `zod/mini` e mover banco
+e handlers para um Web Worker.
+
+## 10. Testes
+
+`npm run test:e2e` (Playwright, Chromium) compila e sobe o **build de produção** com os mocks ativos, sempre novo
+(`reuseExistingServer` é falso, para nunca testar um build antigo). O projeto `desktop` (1440×900) roda tudo; o `mobile`
+(390×844) roda os testes marcados `@mobile`. Cada teste começa com armazenamento vazio e base semeada.
+
+O relógio das cenas sensíveis ao tempo é controlado por `page.clock`; latência e falhas vêm dos cenários; os eventos de
+tempo real são disparados pelas rotas de controle e chegam ao app pelo `socket.io-client`, nunca por setters ou pelo
+cache. Esperas fixas foram trocadas por condições observáveis.
+
+A tabela dos 12 cenários do desafio e os arquivos que os cobrem estão no [README](README.md#71-cobertura-dos-12-cenários-do-enunciado).
+Além do caminho feliz, a suíte cobre resultado vazio, respostas fora de ordem, expiração de sessão no meio da navegação e
+da confirmação, clique repetido e timeout com a mesma chave, recusa de carteira, preço e disponibilidade alterados com o
+diálogo aberto, evento de outro dono, queda do socket com pedido pendente, foco de todos os diálogos e ausência de
+deslocamento de layout nos esqueletos.
+
+**Regressão visual.** `visual.spec.ts` compara início, detalhe, carrinho e pagamento em 1440 e 390 px (tolerância de 2%,
+animações desligadas, relógio e dados fixos). A renderização de texto muda a altura das páginas entre sistemas, então há
+baselines para **Windows** e para **Linux** (esta gerada na imagem oficial do Playwright); em outro sistema os testes visuais
+são pulados com instruções para gerar as próprias.
+
+## 11. Limitações assumidas
 
 - Sem backend real: sessão em `Authorization`/`localStorage`, senhas em SHA-256 com salt, tempo real simulado no navegador.
-- **Cada aba tem a sua própria base simulada** (em memória, persistida no `localStorage` ao mudar); a última escrita vence entre
-  abas. Por isso o simulador de mercado age sobre a aba em que foi aberto.
-- O MSW intercepta WebSocket mas não HTTP long-polling, então o cliente fala só WebSocket (§2.2); o `@mswjs/socket.io-binding`
-  não implementa namespaces nem rooms e usa um `sid` fixo (§2.4).
+- **Cada aba tem a sua própria base simulada** (em memória, persistida ao mudar; a última escrita vence entre abas). Por isso
+  o simulador age sobre a aba em que foi aberto.
+- O MSW não intercepta _long-polling_, então o cliente fala só WebSocket; o binding não tem namespaces nem rooms e usa um `sid`
+  fixo.
 - Login social, recuperação de senha, Atividade, Ofertas, Arquivos baixados, Suporte, Criadores e Aprenda não existem; os
-  controles correspondentes avisam que estão fora do escopo.
-- O avatar é um seletor de emoji (não há upload) e não existe tela de histórico de pedidos (§4).
-- A interface não faz cálculo monetário; o servidor é a referência. A apresentação arredonda a quatro casas decimais.
-- Em desenvolvimento (`npm run dev`) o `StrictMode` abre duas conexões Socket.IO por montagem; uma é encerrada antes do
-  handshake. Não ocorre no build.
-- Os resultados do Lighthouse mobile dependem da CPU do host (§13.3): o índice de benchmark é registrado a cada execução.
-- As baselines visuais foram geradas em Windows (§14).
+  controles avisam que estão fora do escopo. O avatar é um seletor de emoji e não há histórico de pedidos.
+- A apresentação arredonda valores a quatro casas decimais; o servidor é a referência.
+- Em desenvolvimento (`npm run dev`) o `StrictMode` abre duas conexões Socket.IO por montagem (uma é encerrada antes do
+  handshake). Não ocorre no build.
+- A nota mobile do Lighthouse depende da CPU do host (seção 9.3).
 
-## 16. Contratos REST e eventos
+## 12. Contratos REST e eventos
 
-Todos os schemas vivem em `src/contracts/` como schemas Zod; os tipos TypeScript são inferidos com `z.infer`. Os mesmos
-schemas validam as respostas no cliente e as requisições nos handlers do MSW, de modo que um desvio de contrato falha no
-ponto da rede, não três camadas acima na interface. Base path: `/api`.
+Todos os schemas vivem em `src/contracts/` (Zod) e os tipos são inferidos deles. Os **mesmos** schemas validam as respostas
+no cliente e as requisições nos handlers do MSW, então um desvio de contrato falha na rede, não três camadas acima. Base
+path: `/api`.
 
-### 16.1 Convenções
+### 12.1 Convenções
 
-**Dinheiro.** Valores em ETH trafegam como strings decimais (`"1.19"`), nunca como `number`. O tipo `EthAmount` é branded, então
-uma string qualquer não é aceita onde se espera um valor. Toda aritmética passa por `src/lib/money/eth.ts` (`big.js`).
-Quantidades são inteiras.
+- **Dinheiro:** strings decimais (`"1.19"`), nunca `number`; o tipo `EthAmount` tem _brand_ e a conta passa por
+  `lib/money/eth.ts`. Quantidades são inteiras.
+- **Versão:** todo recurso mutável tem `version` monotônico, igual em REST e em eventos. O cliente descarta o que não for
+  estritamente maior.
+- **Visitante:** toda requisição envia `x-visitor-id`; o carrinho de quem não entrou se liga a ele e é fundido no login.
+- **Paginação:** `{ items, pagination: { page, perPage, total, totalPages } }`.
+- **Erros:** toda resposta não-2xx usa `{ "error": { "code", "message", "fields?" } }`.
 
-**Versão.** Todo recurso mutável carrega `version: number`, monotônico. Respostas REST e eventos Socket.IO carregam o mesmo
-contador. O cliente guarda a maior versão vista por recurso e descarta o que não for estritamente maior, o que torna
-evento duplicado e fora de ordem inofensivo em vez de regressivo.
+| `code`             | HTTP | Significado                                                                           |
+| ------------------ | ---- | ------------------------------------------------------------------------------------- |
+| `VALIDATION_ERROR` | 422  | Entrada rejeitada; `fields` mapeia campo → mensagem                                   |
+| `UNAUTHENTICATED`  | 401  | Sessão ausente ou expirada                                                            |
+| `FORBIDDEN`        | 403  | Operação recusada (por exemplo, a carteira recusou a conexão)                         |
+| `NOT_FOUND`        | 404  | Inexistente ou de outro usuário (mesma resposta, para não revelar a existência)       |
+| `CONFLICT`         | 409  | Disponibilidade, cadastro duplicado, chave de idempotência reusada com outro conteúdo |
+| `COUPON_INVALID`   | 422  | Código desconhecido                                                                   |
+| `COUPON_EXPIRED`   | 422  | Código conhecido, fora da validade                                                    |
+| `QUOTE_STALE`      | 409  | Preço, disponibilidade, cupom ou validade da cotação mudaram                          |
+| `SERVER_ERROR`     | 500  | Falha transitória; seguro repetir                                                     |
 
-**Erros.** Toda resposta não-2xx usa o mesmo envelope:
+### 12.2 Rotas
 
-```json
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "...",
-    "fields": { "email": "E-mail inválido" }
-  }
-}
-```
+| Área      | Rota                                                                                                                 | Observações                                                                          |
+| --------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Sessão    | `POST /auth/register` · `POST /auth/login` · `GET /auth/session` · `POST /auth/logout`                               | `409` e-mail ou usuário em uso; `401` credenciais inválidas; sessão de 30 min        |
+| NFTs      | `GET /nfts` · `GET /nfts/:slug` · `GET /nfts/:slug/related` · `GET /featured` · `GET /collections` · `GET /networks` | Coleções em ordem alfabética (pt-BR); `404` para slug inexistente                    |
+| Favoritos | `GET /favorites/ids` · `GET /favorites` · `PUT /favorites/:nftId` · `DELETE /favorites/:nftId`                       | Exigem login. A lista de ids existe separada para o coração do catálogo              |
+| Carrinho  | `GET /cart` · `POST /cart/items` · `PATCH\|DELETE /cart/items/:itemId` · `POST\|DELETE /cart/coupon`                 | Sempre devolvem o carrinho inteiro, com totais calculados no servidor                |
+| Cotação   | `POST /quotes` · `POST /quotes/:id/acknowledge`                                                                      | Devolve `issues[]`; `acknowledge` aplica as correções e vira a nova base             |
+| Pedidos   | `POST /orders` · `GET /orders/:id` · `GET /orders`                                                                   | `x-idempotency-key` obrigatório no `POST`; `404` também para pedido de outro usuário |
+| Perfil    | `GET\|PATCH /profile` · `POST /profile/password`                                                                     | `409` usuário/e-mail em uso; `422` senha atual incorreta                             |
+| Carteiras | `GET\|POST /wallets` · `PATCH\|DELETE /wallets/:id` · `POST /wallets/:id/connect` · `POST /wallets/:id/disconnect`   | `403` se a carteira recusar; endereço validado por rede                              |
 
-| `code`             | HTTP | Significado                                                                                                |
-| ------------------ | ---- | ---------------------------------------------------------------------------------------------------------- |
-| `VALIDATION_ERROR` | 422  | Entrada rejeitada; `fields` mapeia campo → mensagem                                                        |
-| `UNAUTHENTICATED`  | 401  | Sessão ausente ou expirada                                                                                 |
-| `FORBIDDEN`        | 403  | Autenticado, mas a operação foi recusada (por exemplo, a carteira recusou a conexão)                       |
-| `NOT_FOUND`        | 404  | Recurso inexistente, ou que pertence a outro usuário (a resposta é a mesma, para não revelar a existência) |
-| `CONFLICT`         | 409  | Disponibilidade, cadastro duplicado, reuso de chave de idempotência com outro conteúdo                     |
-| `COUPON_INVALID`   | 422  | Código desconhecido                                                                                        |
-| `COUPON_EXPIRED`   | 422  | Código conhecido, fora da validade                                                                         |
-| `QUOTE_STALE`      | 409  | Preço, disponibilidade, cupom ou validade da cotação mudaram desde que ela foi emitida                     |
-| `SERVER_ERROR`     | 500  | Falha transitória; seguro repetir                                                                          |
+**Parâmetros de `GET /nfts`** (validados pelo mesmo `catalogQuerySchema` dos search params da rota): `q`, `collections[]`,
+`networks[]` (`ethereum | polygon | solana`), `rarity[]` (`common | rare | legendary`), `minPriceEth`, `maxPriceEth`,
+`feed` (`all | new | trending`), `sort` (`recent | price-asc | price-desc | popular`) e `page`. Mudar qualquer filtro volta
+`page` para 1, e só valores fora do padrão entram na URL. A consulta aplica filtros, depois ordenação, depois paginação, e
+todo comparador desempata por `id` (sem isso, a paginação pularia itens).
 
-**Sessão.** O token é opaco, enviado em `Authorization: Bearer` e guardado no `localStorage` (§5.5, §10.1). A resposta de
-sessão traz `expiresAt`; a interface reage ao `401`, não antecipa a expiração.
+**Issues da cotação:** `PRICE_CHANGED` (o preço difere do da última cotação aceita), `AVAILABILITY_REDUCED`, `SOLD_OUT`,
+`COUPON_EXPIRED` e `COUPON_INVALID`.
 
-**Visitante.** Toda requisição envia `x-visitor-id`, um UUID gerado no primeiro acesso. O carrinho de quem ainda não entrou
-fica ligado a esse identificador e é fundido ao da conta no login.
+**Idempotência de `POST /orders`.** Mesma chave e mesmo corpo devolvem o pedido já criado; mesma chave com corpo diferente
+dá `409 CONFLICT`. O `status` começa em `pending` e caminha para `confirmed` ou `declined` (terminais). Os itens só saem do
+carrinho depois da confirmação, e apenas nas quantidades compradas. `payment=decline` faz o pedido terminar recusado.
 
-**Paginação.** Listas respondem `{ items, pagination: { page, perPage, total, totalPages } }`.
+### 12.3 Eventos Socket.IO
 
-### 16.2 Sessão e conta
+O cliente conecta em `/socket.io` (só WebSocket), se identifica com `session.identify` a cada `connect` e assina:
 
-| Método | Rota             | Corpo           | Resposta      | Erros                                  |
-| ------ | ---------------- | --------------- | ------------- | -------------------------------------- |
-| `POST` | `/auth/register` | `RegisterInput` | `201 Session` | `409` e-mail ou usuário em uso · `422` |
-| `POST` | `/auth/login`    | `LoginInput`    | `200 Session` | `401` credenciais inválidas · `422`    |
-| `GET`  | `/auth/session`  | —               | `200 Session` | `401`                                  |
-| `POST` | `/auth/logout`   | —               | `204`         | —                                      |
-
-Senhas nunca trafegam de volta e são guardadas com hash e salt na base simulada. A sessão dura 30 minutos, sem renovação.
-
-### 16.3 NFTs
-
-| Método | Rota                  | Resposta                                        | Erros                      |
-| ------ | --------------------- | ----------------------------------------------- | -------------------------- |
-| `GET`  | `/nfts`               | `200 NftListResponse`                           | `422` parâmetros inválidos |
-| `GET`  | `/nfts/:slug`         | `200 NftDetail`                                 | `404`                      |
-| `GET`  | `/nfts/:slug/related` | `200 NftSummary[]`                              | `404`                      |
-| `GET`  | `/featured`           | `200 { hero, spotlight }`                       | —                          |
-| `GET`  | `/collections`        | `200 Collection[]` (em ordem alfabética, pt-BR) | —                          |
-| `GET`  | `/networks`           | `200 NetworkOption[]`                           | —                          |
-
-Parâmetros de `/nfts`, validados pelo mesmo `catalogQuerySchema` que valida os search params da rota:
-
-| Parâmetro                     | Tipo                                           | Padrão                                 |
-| ----------------------------- | ---------------------------------------------- | -------------------------------------- |
-| `q`                           | string                                         | —                                      |
-| `collections`                 | string[]                                       | `[]`                                   |
-| `networks`                    | `ethereum \| polygon \| solana`[]              | `[]`                                   |
-| `rarity`                      | `common \| rare \| legendary`[]                | `[]`                                   |
-| `minPriceEth` / `maxPriceEth` | decimal string                                 | —                                      |
-| `feed`                        | `all \| new \| trending`                       | `all`                                  |
-| `sort`                        | `recent \| price-asc \| price-desc \| popular` | `recent` (`popular` na aba `trending`) |
-| `page`                        | inteiro positivo                               | `1`                                    |
-
-Filtros são combináveis e qualquer mudança de filtro reinicia `page` para 1 (§7.2 descreve os feeds e a ordenação padrão).
-
-### 16.4 Favoritos
-
-Exigem autenticação.
-
-| Método   | Rota                | Resposta                             |
-| -------- | ------------------- | ------------------------------------ |
-| `GET`    | `/favorites/ids`    | `200 { nftIds: string[] }`           |
-| `GET`    | `/favorites`        | `200` lista paginada de `NftSummary` |
-| `PUT`    | `/favorites/:nftId` | `204`                                |
-| `DELETE` | `/favorites/:nftId` | `204`                                |
-
-A lista de ids existe separada da lista paginada para que o coração do catálogo não dependa dos summaries completos. É
-também o alvo da atualização otimista com rollback (§8.4).
-
-### 16.5 Carrinho
-
-| Método   | Rota                  | Corpo                 | Resposta   | Erros                               |
-| -------- | --------------------- | --------------------- | ---------- | ----------------------------------- |
-| `GET`    | `/cart`               | —                     | `200 Cart` | —                                   |
-| `POST`   | `/cart/items`         | `AddCartItemInput`    | `200 Cart` | `409` sem disponibilidade · `404`   |
-| `PATCH`  | `/cart/items/:itemId` | `UpdateCartItemInput` | `200 Cart` | `409` · `404`                       |
-| `DELETE` | `/cart/items/:itemId` | —                     | `200 Cart` | `404`                               |
-| `POST`   | `/cart/coupon`        | `ApplyCouponInput`    | `200 Cart` | `COUPON_INVALID` · `COUPON_EXPIRED` |
-| `DELETE` | `/cart/coupon`        | —                     | `200 Cart` | —                                   |
-
-No login, os itens do visitante são incorporados ao carrinho da conta; quantidades que excedam a disponibilidade são
-reduzidas ao máximo possível. Os totais (`subtotalEth`, `discountEth`, `networkFeeEth`, `totalEth`) são sempre calculados no
-servidor; a interface nunca deriva dinheiro.
-
-### 16.6 Cotação
-
-| Método | Rota                      | Corpo                   | Resposta                   |
-| ------ | ------------------------- | ----------------------- | -------------------------- |
-| `POST` | `/quotes`                 | `{ walletId, network }` | `200 Quote`                |
-| `POST` | `/quotes/:id/acknowledge` | —                       | `200 Quote` (nova cotação) |
-
-A cotação recalcula tudo e devolve `issues[]`:
-
-| `code`                              | Quando                                                  |
-| ----------------------------------- | ------------------------------------------------------- |
-| `PRICE_CHANGED`                     | O preço unitário difere do da **última cotação aceita** |
-| `AVAILABILITY_REDUCED`              | Estoque caiu abaixo da quantidade pedida                |
-| `SOLD_OUT`                          | Edição esgotou                                          |
-| `COUPON_EXPIRED` / `COUPON_INVALID` | Cupom deixou de valer                                   |
-
-`acknowledge` aplica as correções (preços e quantidades atuais) ao carrinho e devolve uma cotação nova, sem as `issues`
-aceitas, que passa a ser a base das próximas comparações. Uma cotação com qualquer `issue`, ou já vencida (`expiresAt`, 5
-minutos), não pode ser enviada: o usuário precisa reconhecer as mudanças e pedir nova cotação. É isso que impede uma
-compra de passar silenciosamente a um preço desatualizado (§10.3).
-
-### 16.7 Pedidos
-
-| Método | Rota          | Corpo              | Resposta             | Erros                                              |
-| ------ | ------------- | ------------------ | -------------------- | -------------------------------------------------- |
-| `POST` | `/orders`     | `CreateOrderInput` | `201 Order`          | `409 QUOTE_STALE` · `409 CONFLICT` · `404` · `422` |
-| `GET`  | `/orders/:id` | —                  | `200 Order`          | `404` (inclusive de outro usuário)                 |
-| `GET`  | `/orders`     | —                  | `200` lista paginada | `401`                                              |
-
-**Idempotência.** `POST /orders` exige o header `x-idempotency-key`, gerado pelo cliente e estável entre tentativas da mesma
-compra (uma por cotação).
-
-- **Mesma chave, mesmo corpo** → devolve o pedido já criado, com o status atual. É isso que permite recuperar o pedido após
-  timeout ou clique repetido sem criar uma segunda compra.
-- **Mesma chave, corpo diferente** → `409 CONFLICT`.
-- O cliente guarda a chave por cotação e a apaga no logout; o servidor mantém a associação chave → pedido.
-
-`status` começa em `pending` e caminha para `confirmed` ou `declined`, ambos terminais: nenhum evento tira um pedido de um
-estado terminal. Os itens só saem do carrinho depois da confirmação, e apenas nas quantidades compradas. O pedido guarda um
-snapshot imutável dos itens e totais; mudanças posteriores no catálogo não alteram o recibo. A liquidação simulada leva
-cerca de 1,5 s; `payment=decline` faz o pedido terminar recusado.
-
-### 16.8 Perfil e carteiras
-
-| Método   | Rota                      | Corpo                 | Resposta                      | Erros                               |
-| -------- | ------------------------- | --------------------- | ----------------------------- | ----------------------------------- |
-| `GET`    | `/profile`                | —                     | `200 User`                    | `401`                               |
-| `PATCH`  | `/profile`                | `UpdateProfileInput`  | `200 User`                    | `409` usuário/e-mail em uso · `422` |
-| `POST`   | `/profile/password`       | `ChangePasswordInput` | `204`                         | `422` senha atual incorreta         |
-| `GET`    | `/wallets`                | —                     | `200 Wallet[]`                | `401`                               |
-| `POST`   | `/wallets`                | `WalletInput`         | `201 Wallet`                  | `409` slot ocupado · `422`          |
-| `PATCH`  | `/wallets/:id`            | `WalletInput`         | `200 Wallet`                  | `404` · `422`                       |
-| `DELETE` | `/wallets/:id`            | —                     | `204`                         | `404`                               |
-| `POST`   | `/wallets/:id/connect`    | —                     | `200 { walletId, connected }` | `403` carteira recusou · `404`      |
-| `POST`   | `/wallets/:id/disconnect` | —                     | `200 { walletId, connected }` | `404`                               |
-
-`connect` e `disconnect` simulam a extensão de carteira. O cenário `wallet=reject` faz a conexão responder `403 FORBIDDEN`.
-Os campos `linkedReference` (ENS ou carteira vinculada, opcional), `profileName` e `referralCode` fazem parte de `Wallet`. O
-formato do endereço é validado por rede: `0x` + 40 hex para Ethereum e Polygon, base58 de 32 a 44 caracteres para Solana.
-
-### 16.9 Eventos Socket.IO
-
-Transporte, restrições e limitações estão na §2. O cliente conecta em `/socket.io` (só WebSocket), identifica-se com
-`session.identify` a cada `connect` e assina os dois eventos abaixo.
-
-**`nft.updated`** (servidor → cliente), enviado a todos os clientes:
+**`nft.updated`** (servidor → todos os clientes):
 
 ```ts
 {
-  eventId: string // único por emissão, distinto do id do recurso
+  eventId: string // único por emissão
   resource: 'nft'
   id: string
   version: number
   priceEth: string
-  previousPriceEth: string | null
+  previousPriceEth: string | null // só preenchido quando o preço cai
   available: number
   editions: Array<{ id: string; available: number; priceEth: string }>
   at: string // ISO-8601
 }
 ```
 
-Atualiza preço e disponibilidade no catálogo, no detalhe e no carrinho, e refaz a cotação do checkout.
-
-**`order.updated`** (servidor → cliente), enviado só aos sockets do dono:
+**`order.updated`** (servidor → só os sockets do dono):
 
 ```ts
 {
@@ -944,25 +625,12 @@ Atualiza preço e disponibilidade no catálogo, no detalhe e no carrinho, e refa
   status: 'pending' | 'confirmed' | 'declined'
   confirmedAt: string | null
   declinedReason: string | null
-  ownerId: string // escopo do evento
+  ownerId: string // o cliente ignora eventos cujo dono não seja o usuário atual
   at: string
 }
 ```
 
-`ownerId` existe para que um socket remanescente de uma sessão anterior não consiga escrever no cache de outro usuário: o
-cliente ignora todo evento cujo dono não seja o usuário autenticado, e a checagem acontece antes do ledger (§9).
-
 **`session.identify`** (cliente → servidor): `{ userId: string | null }`, reenviado a cada `connect` e a cada troca de
-usuário, para que o servidor saiba a quem endereçar os eventos privados.
+usuário, para o servidor saber a quem endereçar os eventos privados.
 
-### 16.10 Reconciliação REST ↔ Socket.IO
-
-O servidor simulado monta cada evento lendo o mesmo store que os handlers REST leem (§5.2), então REST e evento nunca
-divergem. No cliente, a regra de versão (ledger + guarda no cache) torna duplicados e eventos antigos inofensivos. Ao
-reconectar, o cliente invalida as queries dos recursos ativos e relê tudo por REST; eventos recebidos durante a leitura
-continuam sendo aplicados pela regra de versão, de modo que uma resposta REST mais antiga não sobrescreve um evento mais
-novo. Pedidos pendentes são recuperados pelo id guardado, por polling e por evento, sem criar outra compra.
-
-### 16.11 Plano de controle da simulação
-
-Rotas exclusivas do ambiente de mocks, fora da simulação de rede; a lista completa está na §5.4.
+A reconciliação entre REST e eventos está descrita na seção 6.
