@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import { onSessionExpired } from '@/lib/auth/expiry'
 import { clearToken, readToken } from '@/lib/auth/token'

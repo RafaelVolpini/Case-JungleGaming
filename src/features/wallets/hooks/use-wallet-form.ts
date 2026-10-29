@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import type { Wallet, WalletKind } from '@/contracts/wallet'
 import { applyApiErrors } from '@/features/auth/lib/apply-api-errors'

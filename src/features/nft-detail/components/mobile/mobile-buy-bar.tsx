@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { ShoppingCart } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import { QuantityStepper } from '@/components/shared/quantity-stepper'
 import type { Edition, NftDetail } from '@/contracts/nft'

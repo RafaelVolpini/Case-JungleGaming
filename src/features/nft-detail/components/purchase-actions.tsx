@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import { QuantityStepper } from '@/components/shared/quantity-stepper'
 import { Button } from '@/components/ui/button'

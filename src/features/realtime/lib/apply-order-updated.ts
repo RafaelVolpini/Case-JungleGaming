@@ -1,5 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import type { OrderUpdatedEvent } from '@/contracts/events'
 import type { Order } from '@/contracts/order'

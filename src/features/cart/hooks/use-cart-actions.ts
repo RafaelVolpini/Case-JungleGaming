@@ -1,4 +1,4 @@
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import type { CartItem } from '@/contracts/cart'
 import { useSession } from '@/features/auth/hooks/use-session'

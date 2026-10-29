@@ -1,5 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import type { Cart } from '@/contracts/cart'
 import type { NftUpdatedEvent } from '@/contracts/events'

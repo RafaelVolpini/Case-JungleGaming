@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 type UnavailableActionProps = Omit<ComponentProps<'button'>, 'onClick' | 'type'> & {
   subject?: string

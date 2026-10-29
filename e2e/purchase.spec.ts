@@ -13,12 +13,14 @@ test.describe('compra completa', () => {
     await openApp(page)
     await catalogCards(page).first().getByRole('link').first().click()
     await expect(page).toHaveURL(/\/nft\/[^/]+$/)
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    const buy = page.getByRole('button', {
+      name: isMobile ? 'Comprar NFT' : 'COMPRAR',
+      exact: true,
+    })
+    await expect(buy).toBeVisible()
     const name = (await page.getByRole('heading', { level: 1 }).innerText()).trim()
 
-    await page
-      .getByRole('button', { name: isMobile ? 'Comprar NFT' : 'COMPRAR', exact: true })
-      .click()
+    await buy.click()
     await expect(page).toHaveURL(/\/carrinho$/)
     await expect(
       page.getByRole('list', { name: 'Itens do carrinho' }).getByText(name),

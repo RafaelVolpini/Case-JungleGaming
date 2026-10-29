@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useRouterState } from '@tanstack/react-router'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import type { FavoriteIds } from '@/contracts/favorite'
 import { useSession } from '@/features/auth/hooks/use-session'

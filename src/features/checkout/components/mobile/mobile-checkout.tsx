@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import type { Cart } from '@/contracts/cart'
 import { collectorDetailsSchema } from '@/contracts/order'
