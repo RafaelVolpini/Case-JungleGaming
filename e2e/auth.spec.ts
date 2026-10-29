@@ -76,7 +76,19 @@ test.describe('conta e sessão', () => {
     await loginViaUi(page, 'ana', '/favoritos')
     await expect(page.getByRole('heading', { name: 'Emerald Ape #042' })).toBeVisible()
 
+    await page.evaluate(() => {
+      localStorage.setItem('kurio:order-attempt:user-ana', '{"input":{}}')
+      localStorage.setItem('kurio:pending-order:user-ana', 'order-1')
+      localStorage.setItem('kurio:idempotency:order:quote-1', 'idem-1')
+    })
+
     await logoutViaUi(page, isMobile)
+    const leftovers = await page.evaluate(() =>
+      Object.keys(localStorage).filter((key) =>
+        /^kurio:(order-attempt|pending-order|idempotency|session-token)/.test(key),
+      ),
+    )
+    expect(leftovers).toEqual([])
     await openApp(page, '/favoritos')
     await expect(page).toHaveURL(/\/entrar/)
 

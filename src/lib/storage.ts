@@ -35,3 +35,13 @@ export function readJsonStorage<T>(key: string): T | null {
 export function writeJsonStorage(key: string, value: unknown): void {
   writeStorage(key, JSON.stringify(value))
 }
+
+export function removeStorageByPrefix(prefix: string): void {
+  try {
+    Object.keys(window.localStorage)
+      .filter((key) => key.startsWith(prefix))
+      .forEach((key) => window.localStorage.removeItem(key))
+  } catch {
+    return
+  }
+}

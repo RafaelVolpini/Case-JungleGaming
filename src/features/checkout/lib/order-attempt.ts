@@ -1,9 +1,10 @@
 import type { CreateOrderInput } from '@/contracts/order'
-import { readStorage, removeStorage, writeStorage } from '@/lib/storage'
+import { readStorage, removeStorage, removeStorageByPrefix, writeStorage } from '@/lib/storage'
 
 export type OrderAttempt = { input: CreateOrderInput }
 
-const key = (scope: string) => `kurio:order-attempt:${scope}`
+const PREFIX = 'kurio:order-attempt:'
+const key = (scope: string) => `${PREFIX}${scope}`
 const listeners = new Set<() => void>()
 
 function notify(): void {
@@ -35,5 +36,10 @@ export function writeOrderAttempt(scope: string, attempt: OrderAttempt): void {
 
 export function clearOrderAttempt(scope: string): void {
   removeStorage(key(scope))
+  notify()
+}
+
+export function clearAllOrderAttempts(): void {
+  removeStorageByPrefix(PREFIX)
   notify()
 }

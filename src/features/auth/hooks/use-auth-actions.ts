@@ -3,11 +3,12 @@ import { useRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
 import type { AuthResponse } from '@/contracts/session'
-import { clearToken, writeToken } from '@/lib/auth/token'
+import { writeToken } from '@/lib/auth/token'
 import { queryKeys } from '@/lib/query/keys'
 import { resetQueryCache } from '@/lib/query/reset'
 
 import { loginRequest, logoutRequest, registerRequest } from '../api/auth-api'
+import { clearPrivateData } from '../lib/clear-private-data'
 
 export function useAuthActions() {
   const queryClient = useQueryClient()
@@ -28,7 +29,7 @@ export function useAuthActions() {
   const logout = useMutation({
     mutationFn: logoutRequest,
     onSettled: async () => {
-      clearToken()
+      clearPrivateData()
       await resetQueryCache(queryClient)
       await router.navigate({ to: '/', replace: true })
       toast.success('Você saiu da sua conta.')

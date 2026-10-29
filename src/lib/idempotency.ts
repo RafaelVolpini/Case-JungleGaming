@@ -1,4 +1,4 @@
-import { readStorage, removeStorage, writeStorage } from '@/lib/storage'
+import { readStorage, removeStorageByPrefix, writeStorage } from '@/lib/storage'
 
 const PREFIX = 'kurio:idempotency:'
 
@@ -10,6 +10,6 @@ export function getIdempotencyKey(scope: string): string {
   return created
 }
 
-export function clearIdempotencyKey(scope: string): void {
-  removeStorage(PREFIX + scope)
+export function clearAllIdempotencyKeys(): void {
+  removeStorageByPrefix(PREFIX)
 }
