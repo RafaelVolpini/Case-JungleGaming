@@ -6,6 +6,7 @@ import type { TestInfo } from '@playwright/test'
 const SCREENSHOTS = join(import.meta.dirname, '..', '__screenshots__')
 
 export function baselineMissing(testInfo: TestInfo): boolean {
+  if (testInfo.config.updateSnapshots !== 'missing') return false
   return !existsSync(join(SCREENSHOTS, testInfo.project.name, process.platform))
 }
 
