@@ -5,14 +5,15 @@ auditar, vá ao [README](README.md). A versão publicada está em https://case-j
 
 ## Por onde começar
 
-| Se você quer saber…                                   | Leia                                                                     |
-| ----------------------------------------------------- | ------------------------------------------------------------------------ |
-| Como o app funciona em uma passada                    | [1. O caminho de uma compra](#1-o-caminho-de-uma-compra)                 |
-| Como existe "backend" e tempo real sem servidor       | [3. O backend que não existe](#3-o-backend-que-não-existe)               |
-| O que acontece quando o preço muda durante a compra   | [6. Tempo real no cliente](#6-tempo-real-no-cliente) e [7.3](#73-pedido) |
-| O que foi corrigido a partir dos comentários do Figma | [8.4 Revisão de design](#84-revisão-de-design-os-comentários-do-figma)   |
-| Por que a nota mobile do Lighthouse é a que é         | [9. Performance](#9-performance)                                         |
-| Os contratos REST e os eventos Socket.IO              | [12. Contratos](#12-contratos-rest-e-eventos)                            |
+| Se você quer saber…                                    | Leia                                                                     |
+| ------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Como o app funciona em uma passada                     | [1. O caminho de uma compra](#1-o-caminho-de-uma-compra)                 |
+| Como existe "backend" e tempo real sem servidor        | [3. O backend que não existe](#3-o-backend-que-não-existe)               |
+| O que acontece quando o preço muda durante a compra    | [6. Tempo real no cliente](#6-tempo-real-no-cliente) e [7.3](#73-pedido) |
+| O que foi corrigido a partir dos comentários do Figma  | [8.4 Revisão de design](#84-revisão-de-design-os-comentários-do-figma)   |
+| Quais princípios de design (proximidade, alinhamento…) | [8.5 Princípios de design aplicados](#85-princípios-de-design-aplicados) |
+| Por que a nota mobile do Lighthouse é a que é          | [9. Performance](#9-performance)                                         |
+| Os contratos REST e os eventos Socket.IO               | [12. Contratos](#12-contratos-rest-e-eventos)                            |
 
 ## Sumário
 
@@ -61,18 +62,18 @@ mocks é o `boot.ts`; `features/` e `lib/` **nunca** importam de `mocks/`.
 
 ## 2. Stack
 
-| Responsabilidade | Escolha                                   | Observação                            |
-| ---------------- | ----------------------------------------- | ------------------------------------- |
-| Build            | Vite 8                                    | Deploy na Vercel                      |
-| Interface        | React 19.3                                | Versão sem a falha de segurança da 19.2|
-| Linguagem        | TypeScript 5.9                            | `strict` + `noUncheckedIndexedAccess` |
-| Roteamento       | TanStack Router                           | Baseado em arquivos, code splitting   |
-| Estado remoto    | TanStack Query v5                         |                                       |
-| HTTP             | Axios                                     |                                       |
-| Tempo real       | socket.io-client 4.8                      |                                       |
-| Estilo           | Tailwind CSS v4 + shadcn/ui               | Tokens em `@theme`                    |
-| Mocks            | MSW 2.15 + `@mswjs/socket.io-binding` 0.2 | Ver seção 3                           |
-| Testes           | Playwright                                |                                       |
+| Responsabilidade | Escolha                                   | Observação                              |
+| ---------------- | ----------------------------------------- | --------------------------------------- |
+| Build            | Vite 8                                    | Deploy na Vercel                        |
+| Interface        | React 19.3                                | Versão sem a falha de segurança da 19.2 |
+| Linguagem        | TypeScript 5.9                            | `strict` + `noUncheckedIndexedAccess`   |
+| Roteamento       | TanStack Router                           | Baseado em arquivos, code splitting     |
+| Estado remoto    | TanStack Query v5                         |                                         |
+| HTTP             | Axios                                     |                                         |
+| Tempo real       | socket.io-client 4.8                      |                                         |
+| Estilo           | Tailwind CSS v4 + shadcn/ui               | Tokens em `@theme`                      |
+| Mocks            | MSW 2.15 + `@mswjs/socket.io-binding` 0.2 | Ver seção 3                             |
+| Testes           | Playwright                                |                                         |
 
 O MSW fica na linha 2.x porque o `@mswjs/socket.io-binding@0.2.0` declara `msw: ^2.10.2` como dependência de par. Subir
 para o MSW 3 quebraria o tempo real.
@@ -423,7 +424,6 @@ _(`mobile-feed-tabs.tsx`)_
 
 <img width="732" height="741" alt="image" src="https://github.com/user-attachments/assets/57b614fa-d054-409b-a238-fd4cc6fb3c60" />
 
-
 #### 13. Sem espaço para o botão de excluir no carrinho mobile
 
 A lixeira foi para o canto superior direito e o seletor de quantidade para o inferior direito, com mais de 8 px entre os
@@ -440,6 +440,39 @@ descrições começam. As colunas foram levemente redistribuídas para o texto n
 _(`footer/newsletter-form.tsx`, `footer/feature-band.tsx`)_
 
 ![Rodapé: título da newsletter desalinhado antes, alinhado depois](assets/revisao/14-rodape-newsletter.webp)
+
+### 8.5 Princípios de design aplicados
+
+Os comentários da revisão tratam de defeitos pontuais, mas quase todos decorrem da violação de um princípio de design
+conhecido. Esta seção registra, por princípio, o que foi alterado e **como a regra é verificada**: cada critério abaixo é
+uma asserção em `e2e/design-review.spec.ts`, medida em pixels, e não uma avaliação visual subjetiva.
+
+| Princípio                                     | O que estabelece                                                                                      | Alterações realizadas                                                                                                                                                                                                                                                                                                                          | Critério verificado                                                                                                                             |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Proximidade** (Gestalt)                     | Elementos relacionados ficam próximos entre si; elementos de grupos distintos ficam separados.        | Rótulo e valor de "Ordenar por" aproximados e separados por 8 px (#9). Botão "Explorar" passou a pertencer ao grupo do cartão, com 16 px de folga do texto (#4). Abas afastadas do banner em 24 px (#12). Lixeira e seletor de quantidade separados em mais de 8 px (#13). Cabeçalho da tabela afastado do caminho de navegação em 24 px (#5). | Distâncias mínimas entre grupos (de 8 a 24 px, conforme o caso) e distância mínima de 6 px entre rótulo e valor.                                |
+| **Alinhamento**                               | Elementos relacionados compartilham eixos, o que reduz o ruído visual e facilita a varredura.         | Pontos do destaque centralizados na largura da imagem (#2). Lixeira centralizada na coluna e na linha (#6). Rótulos dos totais do recibo alinhados à direita, junto aos valores (#8). Títulos do rodapé na mesma linha (#14). Logo, menu, busca, carrinho e botão Entrar na mesma linha central do cabeçalho.                                  | Diferença de, no máximo, 1 px entre os centros ou as bordas dos elementos comparados (4 px na centralização horizontal dos pontos do destaque). |
+| **Consistência e repetição**                  | Elementos do mesmo tipo recebem o mesmo tratamento.                                                   | Respiro idêntico nos quatro lados da imagem de cada card, em 16, 14 e 8 px conforme o contexto (#3). Título da newsletter com o mesmo tamanho e a mesma altura de linha dos demais títulos do rodapé (#14). Título da guia do navegador com o mesmo separador das demais páginas.                                                              | Diferença de, no máximo, 1 px entre os quatro respiros do card; mesma linha para os quatro títulos do rodapé.                                   |
+| **Espaço negativo** (respiro)                 | Margens e espaços em branco adequados evitam a sensação de conteúdo comprimido.                       | Margens internas dos cartões promocionais (#4). Distância entre o banner e as abas no mobile (#12). Espaço no fim das páginas com barra inferior ampliado de 112 para 144 px, para que o botão de escanear não cubra a paginação.                                                                                                              | Folga mínima de 16 px nas bordas direita e inferior dos cartões; paginação, no mínimo, 8 px acima do botão de escanear.                         |
+| **Hierarquia tipográfica**                    | Tamanho, peso e cor indicam a importância relativa de cada texto.                                     | "Ordenar por": rótulo em cor secundária e valor escolhido em negrito (#9). Título da newsletter com altura de linha de 24 px, em vez de 16 px, o que eliminou o contato entre as duas linhas (#14).                                                                                                                                            | Espaço mínimo de 6 px entre rótulo e valor; título do rodapé em uma única linha.                                                                |
+| **Proporção e escala**                        | O tamanho de um elemento deve guardar relação com o do contêiner e com o dos elementos vizinhos.      | Ícone do botão Entrar reduzido de 16 para 14 px, 40% da altura do botão, e substituído pelo ícone semanticamente correto (entrar, e não sair) (#10).                                                                                                                                                                                           | Altura do ícone de, no máximo, 45% da altura do botão, centralizado com tolerância de 1 px.                                                     |
+| **Clareza visual** (ausência de sobreposição) | Nenhum elemento deve ocultar outro ou competir com ele por atenção.                                   | Miniatura que cobria a imagem em destaque no mobile removida (#11). Texto do banner mobile estreitado (de 190 para 170 unidades) e com descrição de 11 px, para não passar por baixo da imagem. Lixeira e seletor do carrinho mobile em cantos opostos, sem sobreposição (#13).                                                                | Borda direita do texto, no mínimo, 2 px à esquerda da imagem, em 320, 360, 390 e 414 px; descrição terminando antes do botão "Explorar".        |
+| **Previsibilidade e ordenação**               | Listas seguem uma ordem que o usuário consegue antecipar.                                             | Coleções em ordem alfabética (pt-BR), definida pela própria API, de modo que qualquer consumidor receba a mesma ordem (#1).                                                                                                                                                                                                                    | A lista renderizada é idêntica à mesma lista ordenada por `localeCompare` em pt-BR.                                                             |
+| **Affordance e estados**                      | A aparência de um controle indica que ele é interativo, e o estado desabilitado deve ser perceptível. | Cursor de clique em todos os botões, abas e links habilitados (o Tailwind v4 mantém o cursor padrão em botões). Botão "−" bloqueado com fundo apagado, anel e dica ao atingir a quantidade mínima.                                                                                                                                             | O estilo computado do cursor é `pointer` nos botões de curtir e de filtros; o estado bloqueado do "−" é coberto por `detail.spec.ts`.           |
+
+**Convenções adotadas.** Os espaçamentos adotados privilegiam múltiplos de 4 ou de 8 px (8, 16, 24, 32 px), o que
+mantém o ritmo vertical previsível; os valores do Figma que fogem dessa escala foram preservados quando não havia defeito. Tolerâncias de centralização e alinhamento são de 1 px, e distâncias mínimas entre
+grupos são de 16 px.
+
+**Compromissos assumidos.** Duas correções têm custo que deve ser registrado. Primeiro, a descrição do banner mobile passou
+de 12 para 11 px para continuar em três linhas ao lado da imagem sem invadir o botão "Explorar"; é o menor tamanho de
+texto de apoio da interface, e a alternativa seria aumentar a altura do banner, o que se afastaria ainda mais do quadro
+do Figma. Segundo, o aumento do espaço no fim das páginas do mobile acrescenta 32 px de rolagem vazia, aceitos para que o
+botão de escanear nunca cubra a paginação.
+
+**Onde a implementação se afasta do Figma.** Pontos do destaque abaixo da imagem (#2), botão "Explorar" no fluxo do cartão
+(#4), remoção da miniatura sobreposta no banner mobile (#11), posição da lixeira e do seletor no carrinho mobile (#13),
+título da newsletter e redistribuição das colunas do rodapé (#14), alinhamento vertical do cabeçalho e dimensões do texto
+do banner mobile. Em todos os casos o motivo é um dos princípios acima, e o desvio está coberto por teste.
 
 ## 9. Performance
 
