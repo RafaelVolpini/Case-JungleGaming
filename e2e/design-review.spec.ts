@@ -127,6 +127,30 @@ test.describe('revisão de design: catálogo', () => {
   })
 })
 
+test.describe('botões interativos', () => {
+  test('o botão de curtir mostra o cursor de clique e responde ao clique @mobile', async ({
+    page,
+  }) => {
+    await openApp(page)
+    const like = catalogCards(page).first().getByRole('button', { name: /favoritos/ })
+    await expect(like).toHaveCSS('cursor', 'pointer')
+    await like.click()
+    await expect(page).toHaveURL(/\/entrar/)
+  })
+
+  test('o botão de abrir filtros mostra o cursor de clique e abre o painel @mobile', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'o botão de filtros é exclusivo do mobile')
+    await openApp(page)
+    const filters = page.getByRole('button', { name: 'Abrir filtros' })
+    await expect(filters).toHaveCSS('cursor', 'pointer')
+    await filters.click()
+    await expect(page.getByRole('dialog', { name: 'Filtros' })).toBeVisible()
+  })
+})
+
 test.describe('revisão de design: carrinho', () => {
   test('o título da tabela respeita a distância do caminho de navegação', async ({
     page,

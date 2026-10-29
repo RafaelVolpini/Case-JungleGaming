@@ -138,6 +138,16 @@
     overflow-x: clip;
   }
 
+  button:not(:disabled, [aria-disabled='true']),
+  [role='button']:not([aria-disabled='true']),
+  [role='tab'],
+  [role='combobox'],
+  summary,
+  label[for],
+  a[href] {
+    cursor: pointer;
+  }
+
   :focus-visible {
     @apply outline-ring outline-2 outline-offset-2;
   }
