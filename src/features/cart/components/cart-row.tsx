@@ -7,6 +7,8 @@ import type { CartItem } from '@/contracts/cart'
 import { formatTokenId } from '@/lib/format/token'
 import { formatEth } from '@/lib/money/eth'
 
+import { CartChangeNote } from './cart-change-note'
+
 export const cartRowColumns = 'md:grid-cols-[311.5px_138.5px_136px_1fr_36px]'
 
 type CartRowProps = {
@@ -35,7 +37,10 @@ export function CartRow({ item, busy, onQuantityChange, onRemove }: CartRowProps
           <p className="sr-only">Edição {item.edition.label}</p>
         </div>
       </div>
-      <p className="text-foreground text-[17px] font-bold">{formatEth(item.unitPriceEth)}</p>
+      <div>
+        <p className="text-foreground text-[17px] font-bold">{formatEth(item.unitPriceEth)}</p>
+        <CartChangeNote itemId={item.id} />
+      </div>
       <QuantityStepper
         size="compact"
         value={item.quantity}

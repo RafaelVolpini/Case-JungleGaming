@@ -1,15 +1,18 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import type { NftUpdatedEvent } from '@/contracts/events'
 import type { Cart } from '@/contracts/cart'
-import { compareEth, formatEth } from '@/lib/money/eth'
+import type { NftUpdatedEvent } from '@/contracts/events'
+import { recordCartNote, type CartChangeNote } from '@/features/cart/lib/cart-change-notes'
 import { isAwaitingOwnOrder } from '@/features/orders/lib/pending-order'
+import { compareEth, formatEth } from '@/lib/money/eth'
 import { queryKeys } from '@/lib/query/keys'
 
 import { patchNftData } from './patch-nft'
 
-function describeCartChanges(cart: Cart | undefined, event: NftUpdatedEvent): string[] {
+type CartChange = { itemId: string; message: string; note: CartChangeNote }
+
+function describeCartChanges(cart: Cart | undefined, event: NftUpdatedEvent): CartChange[] {
   if (!cart) return []
 
   return cart.items
@@ -17,22 +20,33 @@ function describeCartChanges(cart: Cart | undefined, event: NftUpdatedEvent): st
     .flatMap((item) => {
       const edition = event.editions.find((candidate) => candidate.id === item.edition.id)
       if (!edition) return []
-      const messages: string[] = []
-      if (compareEth(edition.priceEth, item.unitPriceEth) !== 0) {
-        messages.push(
-          `O preço de ${item.name} mudou de ${formatEth(item.unitPriceEth)} para ${formatEth(edition.priceEth)}.`,
-        )
+      const changes: CartChange[] = []
+      const priceOrder = compareEth(edition.priceEth, item.unitPriceEth)
+      if (priceOrder !== 0) {
+        changes.push({
+          itemId: item.id,
+          message: `O preço de ${item.name} mudou de ${formatEth(item.unitPriceEth)} para ${formatEth(edition.priceEth)}.`,
+          note: {
+            kind: 'price',
+            from: item.unitPriceEth,
+            direction: priceOrder > 0 ? 'up' : 'down',
+          },
+        })
       }
       if (edition.available < item.quantity) {
-        messages.push(`A disponibilidade de ${item.name} foi reduzida para ${edition.available}.`)
+        changes.push({
+          itemId: item.id,
+          message: `A disponibilidade de ${item.name} foi reduzida para ${edition.available}.`,
+          note: { kind: 'availability', available: edition.available },
+        })
       }
-      return messages
+      return changes
     })
 }
 
 export function applyNftUpdated(queryClient: QueryClient, scope: string, event: NftUpdatedEvent) {
   const cartKey = queryKeys.cart(scope)
-  const messages = isAwaitingOwnOrder(scope)
+  const changes = isAwaitingOwnOrder(scope)
     ? []
     : describeCartChanges(queryClient.getQueryData<Cart>(cartKey), event)
 
@@ -43,5 +57,8 @@ export function applyNftUpdated(queryClient: QueryClient, scope: string, event: 
   void queryClient.invalidateQueries({ queryKey: cartKey })
   void queryClient.invalidateQueries({ queryKey: queryKeys.quote(scope) })
 
-  for (const message of messages) toast.warning(message)
+  for (const change of changes) {
+    recordCartNote(scope, change.itemId, change.note)
+    toast.warning(change.message)
+  }
 }

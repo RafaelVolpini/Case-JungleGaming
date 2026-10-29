@@ -6,6 +6,8 @@ import { QuantityStepper } from '@/components/shared/quantity-stepper'
 import type { CartItem } from '@/contracts/cart'
 import { formatEth } from '@/lib/money/eth'
 
+import { CartChangeNote } from '../cart-change-note'
+
 type MobileCartItemProps = {
   item: CartItem
   busy: boolean
@@ -30,6 +32,7 @@ export function MobileCartItem({ item, busy, onQuantityChange, onRemove }: Mobil
           {formatEth(item.subtotalEth)}
         </p>
       </div>
+      <CartChangeNote itemId={item.id} className="absolute bottom-[10px] left-[113px]" />
       <QuantityStepper
         size="round"
         value={item.quantity}

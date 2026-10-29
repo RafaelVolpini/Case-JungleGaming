@@ -16,6 +16,7 @@ test.describe('tempo real: preço e disponibilidade', () => {
     await mock.changeNft(page, SLUG, { priceEth: '2.00' })
     await expect(page.getByText(/O preço de Emerald Ape #042 mudou/)).toBeVisible()
     await expect(total).toHaveText('4.016 ETH')
+    await expect(page.getByTestId('cart-change-note')).toContainText('Subiu, era 1.19 ETH')
   })
 
   test('redução de disponibilidade é informada no carrinho @mobile', async ({ page }) => {
@@ -25,6 +26,7 @@ test.describe('tempo real: preço e disponibilidade', () => {
 
     await mock.changeNft(page, SLUG, { edition: '1/50', available: 1 })
     await expect(page.getByText(/disponibilidade de Emerald Ape #042 foi reduzida/)).toBeVisible()
+    await expect(page.getByTestId('cart-change-note')).toContainText('Restam 1')
   })
 
   test('checkout bloqueia a confirmação com cotação desatualizada até aceitar @mobile', async ({
