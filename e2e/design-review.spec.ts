@@ -243,3 +243,32 @@ test.describe('revisão de design: recibo', () => {
     expect(right(fee)).toBeGreaterThan(subtotal.x - 60)
   })
 })
+
+test.describe('revisão de design: rodapé', () => {
+  test('o título da newsletter fica na mesma linha dos outros títulos e cabe na faixa', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'a faixa em quatro colunas é exclusiva do desktop')
+    await openApp(page)
+    const band = page.locator('section[aria-label="Diferenciais da Kurio"]')
+    await band.scrollIntoViewIfNeeded()
+    const titles = await Promise.all((await band.locator('h3').all()).map(box))
+    expect(titles).toHaveLength(4)
+    const newsletter = titles[3]!
+    for (const title of titles.slice(0, 3)) {
+      expect(Math.abs(title.y - newsletter.y)).toBeLessThanOrEqual(1)
+    }
+    expect(newsletter.height).toBeLessThanOrEqual(26)
+
+    const frame = await box(band)
+    const description = await box(band.locator('form p'))
+    expect(bottom(description)).toBeLessThanOrEqual(bottom(frame) - 4)
+    const textRight = await band.locator('form p').evaluate((paragraph) => {
+      const range = document.createRange()
+      range.selectNodeContents(paragraph)
+      return range.getBoundingClientRect().right
+    })
+    expect(textRight).toBeLessThanOrEqual(right(frame) - 16)
+  })
+})

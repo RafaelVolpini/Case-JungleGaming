@@ -7,7 +7,7 @@ export function FeatureBand() {
   return (
     <section
       aria-label="Diferenciais da Kurio"
-      className="bg-card grid h-auto md:grid-cols-2 lg:h-[250px] lg:grid-cols-[297fr_265.5fr_266fr_371.5fr]"
+      className="bg-card grid h-auto md:grid-cols-2 lg:h-[250px] lg:grid-cols-[290fr_258fr_258fr_394fr]"
     >
       {FOOTER_FEATURES.map((feature, index) => (
         <FeatureItem key={feature.letter} {...feature} isFirst={index === 0} />

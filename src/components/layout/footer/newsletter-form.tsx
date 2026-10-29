@@ -14,10 +14,10 @@ export function NewsletterForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="border-primary mt-8 mb-4 px-8 lg:border-l lg:px-0 lg:pl-4"
+      className="border-primary mt-8 mb-4 px-8 lg:border-l lg:px-0 lg:pt-[83px] lg:pl-4"
     >
-      <h3 className="text-cream text-lg leading-4 font-bold">{NEWSLETTER.title}</h3>
-      <div className="mt-4 flex h-10 max-w-[325px] overflow-hidden rounded-lg">
+      <h3 className="text-cream text-[17px] leading-6 font-bold">{NEWSLETTER.title}</h3>
+      <div className="mt-[7px] flex h-10 max-w-[325px] overflow-hidden rounded-lg">
         <label htmlFor={inputId} className="sr-only">
           E-mail
         </label>
@@ -34,7 +34,7 @@ export function NewsletterForm() {
           Enviar
         </button>
       </div>
-      <p className="text-foreground mt-[12.5px] max-w-[325px] text-sm leading-[22px]">
+      <p className="text-foreground mt-3 text-sm leading-[22px]">
         {NEWSLETTER.description}
       </p>
     </form>
