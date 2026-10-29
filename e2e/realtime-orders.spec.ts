@@ -92,4 +92,31 @@ test.describe('tempo real: pedidos', () => {
     )
     await expect(page.getByText(reason)).toHaveCount(0)
   })
+
+  test('pedido pendente durante a queda do socket é recuperado ao reconectar sem nova compra @mobile', async ({
+    page,
+  }) => {
+    test.setTimeout(75_000)
+    const orderId = await placeOrderAndLeave(page)
+    await mock.dropSocket(page, 30_000)
+    await expect.poll(() => mock.socketClients(page)).toBe(0)
+
+    await expect
+      .poll(
+        async () =>
+          (await api<OrderSnapshot>(page, `/api/orders/${orderId}`, { auth: true })).body.status,
+        { timeout: 20_000 },
+      )
+      .toBe('confirmed')
+    await mock.reconnectSocket(page)
+    await expect.poll(() => mock.socketClients(page), { timeout: 25_000 }).toBeGreaterThan(0)
+
+    await page
+      .getByRole('link', { name: /Carrinho/ })
+      .first()
+      .click()
+    await expect(page.getByText('Seu carrinho está vazio')).toBeVisible()
+    const orders = await api<{ items: unknown[] }>(page, '/api/orders', { auth: true })
+    expect(orders.body.items).toHaveLength(1)
+  })
 })

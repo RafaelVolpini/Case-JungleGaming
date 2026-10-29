@@ -124,4 +124,18 @@ test.describe('falhas de pagamento', () => {
     expect(new Set(keys).size).toBe(1)
     expect(await orders(page)).toHaveLength(1)
   })
+
+  test('cotação vencida pelo relógio bloqueia o envio até atualizar @mobile', async ({ page }) => {
+    await page.clock.install()
+    await readyToPay(page)
+    const confirm = page.getByRole('button', { name: 'Confirmar compra' })
+    await expect(confirm).toBeEnabled()
+
+    await page.clock.fastForward('06:00')
+    await expect(page.getByRole('alert').filter({ hasText: 'Sua cotação expirou' })).toBeVisible()
+    await expect(confirm).toBeDisabled()
+
+    await page.getByRole('button', { name: 'Atualizar cotação' }).click()
+    await expect(confirm).toBeEnabled()
+  })
 })

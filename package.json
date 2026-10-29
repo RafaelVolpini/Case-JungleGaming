@@ -15,6 +15,8 @@
     "art": "node scripts/build-nft-art.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:update": "playwright test e2e/visual.spec.ts --update-snapshots",
+    "test:e2e:visual": "playwright test e2e/visual.spec.ts",
     "test:e2e:report": "playwright show-report",
     "lighthouse": "npm run build && node lighthouse/run.mjs"
   },
