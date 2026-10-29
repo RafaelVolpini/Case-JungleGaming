@@ -1,4 +1,4 @@
-# Arquitetura — Kurio NFT Marketplace
+# Arquitetura Kurio NFT Marketplace
 
 Este documento explica **como o projeto funciona por dentro e por que foi feito assim**. Para instalar, rodar, testar e
 auditar, vá ao [README](README.md). A versão publicada está em https://case-jungle-gaming.vercel.app.
