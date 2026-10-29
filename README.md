@@ -74,10 +74,16 @@ inválido. Também é possível criar contas novas em `/criar-conta`.
 
 ## 5. Mocks: cenários, reset e falhas
 
-A camada de rede é simulada pelo MSW (REST) e por um servidor Socket.IO simulado dentro do MSW
-(`@mswjs/socket.io-binding`); o cliente é um `socket.io-client` real. O estado fica em memória e é persistido no
-`localStorage` a cada mudança (chaves `kurio:mock-db` e `kurio:mock-scenario`). **Cada aba tem a sua própria base**:
-use o simulador e o app na mesma aba.
+Este projeto não tem um backend de verdade. Quem responde às chamadas da API é o MSW, que roda no próprio navegador e
+intercepta cada requisição. O tempo real funciona do mesmo jeito: existe um servidor Socket.IO simulado dentro do MSW
+(`@mswjs/socket.io-binding`), e o app conversa com ele usando o `socket.io-client` de verdade, sem nenhum atalho.
+
+Tudo o que esse "servidor" sabe (catálogo, usuários, carrinhos e pedidos) fica na memória e é salvo no `localStorage` a
+cada mudança, nas chaves `kurio:mock-db` e `kurio:mock-scenario`. Por isso os dados continuam lá depois de recarregar a
+página.
+
+Um detalhe que costuma pegar de surpresa: **cada aba do navegador tem a sua própria base**. Se você mudar um preço pelo
+simulador numa aba, o app aberto em outra aba não fica sabendo. Use o simulador e o app na mesma aba.
 
 ### 5.1 Selecionar o cenário
 
