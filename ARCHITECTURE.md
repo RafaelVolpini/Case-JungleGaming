@@ -352,7 +352,7 @@ lateral, o filtro do mobile e qualquer outro consumidor recebem a mesma ordem. _
 Os pontos saíram do canto da imagem e ficam **abaixo** dela, centralizados na largura da imagem e fora da área da
 transição entre slides. _(`hero/hero-section.tsx`)_
 
-![Destaque: pontos ao lado da imagem antes, abaixo dela depois](assets/revisao/02-destaque-pontos.webp)
+<img width="932" height="857" alt="image" src="https://github.com/user-attachments/assets/a02bbee7-deae-4c8d-9817-b21df33d7c2d" />
 
 #### 3. Falta de uniformidade nos cards
 
@@ -414,14 +414,15 @@ botão) e traço mais firme. _(`header/account-control.tsx`)_
 A miniatura decorativa que cobria a imagem em destaque foi **removida**: duas imagens sobrepostas não comunicavam nada e
 escondiam o NFT em destaque. _(`mobile-hero-banner.tsx`)_
 
-![Banner mobile: imagem sobreposta antes, limpo depois](assets/revisao/11-banner-mobile.webp)
+<img width="716" height="884" alt="image" src="https://github.com/user-attachments/assets/ad8575e0-c277-4ace-8a31-f3ff21b4634f" />
 
 #### 12. Falta de margem nas abas do mobile
 
 As abas "Todos os NFTs / Novos lançamentos / Em alta" ganharam 24 px de distância do banner (eram 12 px).
 _(`mobile-feed-tabs.tsx`)_
 
-![Abas no mobile: coladas no banner antes, com respiro depois](assets/revisao/12-abas-mobile.webp)
+<img width="732" height="741" alt="image" src="https://github.com/user-attachments/assets/57b614fa-d054-409b-a238-fd4cc6fb3c60" />
+
 
 #### 13. Sem espaço para o botão de excluir no carrinho mobile
 
