@@ -1,6 +1,7 @@
 import { findNftById } from './catalog'
 import { getDb, nextVersion } from './store'
 import type { CartRecord, NftRecord } from './types'
+import { mockId } from './ids'
 
 function availableFor(nft: NftRecord, editionId: string): number {
   return nft.editions.find((edition) => edition.id === editionId)?.available ?? 0
@@ -50,7 +51,7 @@ export function mergeVisitorCart(visitorId: string | null, userId: string): Cart
     } else {
       target.items.push({
         ...item,
-        id: `ci-${crypto.randomUUID()}`,
+        id: mockId('ci'),
         quantity: Math.min(item.quantity, capacity, nft.maxPerOrder),
       })
     }

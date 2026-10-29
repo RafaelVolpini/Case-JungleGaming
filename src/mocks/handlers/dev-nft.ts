@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { z } from 'zod'
 
 import { ethAmountSchema } from '@/contracts/common'
-import { percentOfEth, roundEth } from '@/lib/money/eth'
+import { compareEth, percentOfEth, roundEth } from '@/lib/money/eth'
 
 import { findNftBySlug } from '../db/catalog'
 import { mutateWith, nextVersion } from '../db/store'
@@ -27,7 +27,7 @@ export const devNftHandlers = [
 
     return mutateWith(() => {
       if (priceEth) {
-        nft.previousPriceEth = nft.priceEth
+        nft.previousPriceEth = compareEth(priceEth, nft.priceEth) < 0 ? nft.priceEth : null
         nft.priceEth = priceEth
         for (const edition of nft.editions) {
           const multiplier = EDITION_PRICE_MULTIPLIERS[edition.label] ?? 1

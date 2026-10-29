@@ -90,7 +90,9 @@ export function setDb(next: MockDb): void {
 }
 
 export function resetDb(seed: () => MockDb): MockDb {
+  const previousSequence = db?.sequence ?? 0
   const fresh = seed()
+  fresh.sequence = Math.max(fresh.sequence, previousSequence)
   setDb(fresh)
   return fresh
 }

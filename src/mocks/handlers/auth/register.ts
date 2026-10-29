@@ -10,6 +10,7 @@ import { API, VISITOR_HEADER } from '../constants'
 import { errorResponse, validationError } from '../errors'
 import { simulated } from '../network'
 import { issueSession, sessionPayload } from './shared'
+import { mockId } from '../../db/ids'
 
 function findConflicts(username: string, email: string): Record<string, string> {
   const { users } = getDb()
@@ -38,7 +39,7 @@ export const registerHandler = http.post(
       return errorResponse('CONFLICT', 'Não foi possível criar a conta.', conflicts)
     }
 
-    const id = `user-${crypto.randomUUID().slice(0, 8)}`
+    const id = mockId('user')
     const passwordSalt = `${id}-salt`
     const user: UserRecord = {
       id,

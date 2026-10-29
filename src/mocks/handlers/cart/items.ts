@@ -11,6 +11,7 @@ import { errorResponse, validationError } from '../errors'
 import { simulated } from '../network'
 import { cartFor } from './context'
 import { quantityLimitError } from './limits'
+import { mockId } from '../../db/ids'
 
 const addItem = http.post(
   `${API}/cart/items`,
@@ -40,7 +41,7 @@ const addItem = http.post(
         existing.quantity = desired
       } else {
         cart.items.push({
-          id: `ci-${crypto.randomUUID().slice(0, 8)}`,
+          id: mockId('ci'),
           nftId,
           editionId,
           quantity,

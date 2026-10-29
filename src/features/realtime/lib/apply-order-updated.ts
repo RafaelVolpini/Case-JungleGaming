@@ -9,7 +9,6 @@ import { queryKeys } from '@/lib/query/keys'
 type OrderContext = {
   queryClient: QueryClient
   scope: string
-  userId: string | null
   openOrder: (orderId: string) => void
 }
 
@@ -18,12 +17,13 @@ function viewingOrder(orderId: string): boolean {
 }
 
 export function applyOrderUpdated(
-  { queryClient, scope, userId, openOrder }: OrderContext,
+  { queryClient, scope, openOrder }: OrderContext,
   event: OrderUpdatedEvent,
 ) {
-  if (userId === null || event.ownerId !== userId) return
-
   const detailKey = queryKeys.orders.detail(scope, event.id)
+  const cached = queryClient.getQueryData<Order>(detailKey)
+  if (cached && cached.status !== 'pending') return
+
   queryClient.setQueryData<Order>(detailKey, (order) =>
     order && event.version > order.version
       ? {

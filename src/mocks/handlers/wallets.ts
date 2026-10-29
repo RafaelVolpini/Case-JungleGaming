@@ -9,6 +9,7 @@ import { API } from './constants'
 import { errorResponse, validationError } from './errors'
 import { requireUser, resolveCaller } from './identity'
 import { simulated } from './network'
+import { mockId } from '../db/ids'
 
 const KIND_LABEL = { primary: 'principal', secondary: 'secundária' } as const
 
@@ -63,7 +64,7 @@ export const walletHandlers = [
 
       const wallet: WalletRecord = {
         ...parsed.data,
-        id: `wallet-${crypto.randomUUID().slice(0, 8)}`,
+        id: mockId('wallet'),
         ownerId: auth.user.id,
         createdAt: new Date().toISOString(),
       }

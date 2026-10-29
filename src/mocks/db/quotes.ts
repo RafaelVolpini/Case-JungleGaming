@@ -9,6 +9,7 @@ import { findCoupon, isCouponExpired } from './coupons'
 import { applyIssueFixes, detectIssues } from './quote-issues'
 import { getDb, nextVersion } from './store'
 import type { QuoteRecord } from './types'
+import { mockId } from './ids'
 
 const QUOTE_TTL_MS = 5 * 60 * 1000
 const MAX_QUOTES_PER_OWNER = 20
@@ -40,7 +41,7 @@ export function createQuote(input: QuoteInput, { compare = true } = {}): QuoteOu
     compare ? latestAcknowledgedQuote(input.ownerId) : undefined,
   )
   const quote: QuoteRecord = {
-    id: `quote-${crypto.randomUUID().slice(0, 8)}`,
+    id: mockId('quote'),
     ownerId: input.ownerId,
     cartVersion: cart.version,
     lines: items.map((item) => ({

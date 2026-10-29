@@ -7,6 +7,7 @@ import { socketUrlFromOrigin } from '@/lib/realtime/constants'
 import { findNftById } from '../db/catalog'
 import { totalAvailable } from '../db/projections'
 import { getDb, isDbReady, onDbEvent, type DbEvent } from '../db/store'
+import { mockId } from '../db/ids'
 
 export const socketLink = ws.link(socketUrlFromOrigin(window.location.origin))
 
@@ -49,7 +50,7 @@ function broadcast(event: DbEvent): void {
     if (!nft) return
 
     const payload = {
-      eventId: crypto.randomUUID(),
+      eventId: mockId('evt'),
       resource: 'nft' as const,
       id: nft.id,
       version: nft.version,
@@ -72,7 +73,7 @@ function broadcast(event: DbEvent): void {
   if (!order) return
 
   const payload = {
-    eventId: crypto.randomUUID(),
+    eventId: mockId('evt'),
     resource: 'order' as const,
     id: order.id,
     version: order.version,

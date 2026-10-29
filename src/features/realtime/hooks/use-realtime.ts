@@ -23,7 +23,6 @@ export function useRealtime() {
     const orderContext = {
       queryClient,
       scope,
-      userId,
       openOrder: (orderId: string) =>
         void router.navigate({ to: '/pedido/$orderId', params: { orderId } }),
     }
@@ -44,9 +43,8 @@ export function useRealtime() {
 
     socket.on(SOCKET_EVENTS.orderUpdated, (payload) => {
       const parsed = orderUpdatedEventSchema.safeParse(payload)
-      if (parsed.success && ledger.accept(parsed.data)) {
-        applyOrderUpdated(orderContext, parsed.data)
-      }
+      if (!parsed.success || userId === null || parsed.data.ownerId !== userId) return
+      if (ledger.accept(parsed.data)) applyOrderUpdated(orderContext, parsed.data)
     })
 
     socket.connect()

@@ -7,6 +7,7 @@ import { findCoupon } from './coupons'
 import { imageFor } from './projections'
 import { getDb, nextVersion, type DbEvent } from './store'
 import type { OrderItemRecord, OrderRecord, QuoteRecord, WalletRecord } from './types'
+import { mockId } from './ids'
 
 const EXPLORERS: Record<Network, string> = {
   ethereum: 'https://etherscan.io/tx/',
@@ -61,7 +62,7 @@ type CreateOrderInput = {
 
 export function createOrder({ quote, wallet, outcome }: CreateOrderInput) {
   const db = getDb()
-  const id = `ord-${crypto.randomUUID().slice(0, 8)}`
+  const id = mockId('ord')
   const reference = referenceFor(id)
   const now = new Date()
   const coupon = quote.couponCode ? findCoupon(quote.couponCode) : undefined
