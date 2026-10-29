@@ -94,13 +94,15 @@ Há um `.env.example` na raiz. Nenhuma outra variável é necessária.
 
 ## 4. Credenciais e cupons fictícios
 
+Você pode tanto criar um usuário pela tela de entrar, selecionando a opção 'Criar Conta' quanto logar com algum usuário já cadastrado como os abaixos:
+
 | Usuário | E-mail | Senha |
 | --- | --- | --- |
 | Ana Ribeiro (carteiras principal e secundária cadastradas, 3 favoritos) | `ana@kurio.test` | `kurio-ana-2026` |
 | Bruno Carvalho (sem favoritos) | `bruno@kurio.test` | `kurio-bruno-2026` |
 
 Cupons: `KURIO10` (10%), `PRIMEIRACUNHAGEM` (0.05 ETH), `EXPIRADO` e `VENCIDO30` (vencidos). Qualquer outro código é
-inválido. Também é possível criar contas novas em `/criar-conta`.
+inválido. 
 
 ## 5. Mocks: cenários, reset e falhas
 
