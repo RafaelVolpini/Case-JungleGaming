@@ -109,7 +109,11 @@ test.describe('falhas de pagamento', () => {
     await mock.scenario(page, { orderTimeout: true })
 
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
+    const created = page.waitForRequest(
+      (request) => request.method() === 'POST' && new URL(request.url()).pathname === '/api/orders',
+    )
     await page.getByRole('button', { name: 'Confirmar e enviar' }).click()
+    await created
     await page.clock.fastForward(9_000)
     const recover = page.getByRole('button', { name: /Tentar novamente|Verificar pedido/ })
     await expect(recover).toBeVisible()
