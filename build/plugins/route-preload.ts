@@ -69,7 +69,7 @@ function routeScript(sets: Array<{ test: string; files: string[] }>): HtmlTagDes
   const branches = sets
     .map(({ test, files }) => `if(${test})l=${JSON.stringify(files.map((file) => `/${file}`))};`)
     .join('else ')
-  const code = `(function(){var p=location.pathname,l=[];${branches}for(var i=0;i<l.length;i++){var k=document.createElement('link');k.rel='modulepreload';k.crossOrigin='';k.href=l[i];document.head.appendChild(k)}})()`
+  const code = `(function(){var p=location.pathname,l=[];${branches}var f=document.createDocumentFragment();for(var i=0;i<l.length;i++){var k=document.createElement('link');k.rel='modulepreload';k.crossOrigin='';k.href=l[i];f.appendChild(k)}document.head.appendChild(f)})()`
   return { tag: 'script', children: code, injectTo: 'head-prepend' }
 }
 
