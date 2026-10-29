@@ -505,10 +505,10 @@ Vercel. Para investigar, `lighthouse/lantern.mjs` repete a simulação do Lighth
 
 | Página  | Perfil  | Performance       | Acessibilidade | Boas práticas | SEO | LCP    | CLS | TBT    |
 | ------- | ------- | ----------------- | -------------- | ------------- | --- | ------ | --- | ------ |
-| Início  | Desktop | 100               | 97             | 100           | 100 | 0,59 s | 0   | 0 ms   |
+| Início  | Desktop | 100               | 97             | 100           | 100 | 0,61 s | 0   | 0 ms   |
 | Detalhe | Desktop | 100               | 100            | 100           | 100 | 0,56 s | 0   | 0 ms   |
-| Início  | Mobile  | 92 (92 / 94 / 92) | 100            | 100           | 100 | 2,66 s | 0   | 221 ms |
-| Detalhe | Mobile  | 94 (96 / 94 / 94) | 100            | 100           | 100 | 2,56 s | 0   | 193 ms |
+| Início  | Mobile  | 93 (92 / 93 / 94) | 100            | 100           | 100 | 2,70 s | 0   | 218 ms |
+| Detalhe | Mobile  | 93 (94 / 93 / 92) | 100            | 100           | 100 | 2,55 s | 0   | 232 ms |
 
 Todas as metas são atendidas (Performance ≥ 90, Acessibilidade ≥ 95, Boas práticas ≥ 95, SEO ≥ 90), com CLS 0.
 
