@@ -11,10 +11,17 @@ export async function openApp(page: Page, path = '/'): Promise<void> {
   await page.locator('#root > *').first().waitFor()
 }
 
+export function emailField(page: Page) {
+  return page
+    .locator('form')
+    .filter({ has: page.getByLabel('Senha', { exact: true }) })
+    .getByRole('textbox', { name: 'E-mail' })
+}
+
 export async function loginViaUi(page: Page, who: UserKey, redirect?: string): Promise<void> {
   const search = redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''
   await openApp(page, `/entrar${search}`)
-  await page.getByRole('textbox', { name: 'E-mail' }).fill(USERS[who].email)
+  await emailField(page).fill(USERS[who].email)
   await page.getByLabel('Senha', { exact: true }).fill(USERS[who].password)
   await page.getByRole('button', { name: 'Entrar', exact: true }).first().click()
   await expect(page).not.toHaveURL(/\/entrar/)

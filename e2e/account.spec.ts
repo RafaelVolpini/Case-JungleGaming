@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { loginViaApi, openApp } from './support/app'
+import { emailField, loginViaApi, openApp } from './support/app'
 import { api, mock } from './support/mock-api'
 
 const save = (page: Page) => page.getByRole('button', { name: 'Salvar', exact: true }).click()
@@ -68,7 +68,7 @@ test.describe('perfil, avatar e senha', () => {
     await api(page, '/api/auth/logout', { method: 'POST', auth: true })
     await page.evaluate(() => localStorage.removeItem('kurio:session-token'))
     await openApp(page, '/entrar')
-    await page.getByRole('textbox', { name: 'E-mail' }).fill('ana@kurio.test')
+    await emailField(page).fill('ana@kurio.test')
     await page.getByLabel('Senha', { exact: true }).fill('kurio-ana-2026')
     await page.getByRole('button', { name: 'Entrar', exact: true }).first().click()
     await expect(
@@ -98,7 +98,7 @@ test.describe('carteiras', () => {
   test('cadastro da carteira principal persiste após refresh @mobile', async ({ page }) => {
     await openApp(page, '/criar-conta?redirect=/perfil/carteiras')
     await page.getByRole('textbox', { name: 'Nome de usuário' }).fill('nova-pessoa')
-    await page.getByRole('textbox', { name: 'E-mail' }).fill('nova.pessoa@kurio.test')
+    await emailField(page).fill('nova.pessoa@kurio.test')
     await page.getByLabel('Senha', { exact: true }).fill('senha-segura-1')
     await page.getByLabel('Confirmar senha').fill('senha-segura-1')
     await page.getByRole('button', { name: /Criar (conta|perfil)/ }).click()

@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test'
 
-import { loginViaApi, loginViaUi, logoutViaUi, openApp } from './support/app'
+import { emailField, loginViaApi, loginViaUi, logoutViaUi, openApp } from './support/app'
 import { mock } from './support/mock-api'
 
 test.describe('conta e sessão', () => {
   test('cadastro cria a sessão e leva ao destino @mobile', async ({ page }) => {
     await openApp(page, '/criar-conta?redirect=/favoritos')
     await page.getByRole('textbox', { name: 'Nome de usuário' }).fill('colecionador-novo')
-    await page.getByRole('textbox', { name: 'E-mail' }).fill('novo@kurio.test')
+    await emailField(page).fill('novo@kurio.test')
     await page.getByLabel('Senha', { exact: true }).fill('senha-segura-1')
     await page.getByLabel('Confirmar senha').fill('senha-segura-1')
     await page.getByRole('button', { name: /Criar (conta|perfil)/ }).click()
@@ -18,7 +18,7 @@ test.describe('conta e sessão', () => {
   test('cadastro valida campos e mostra conflitos da API @mobile', async ({ page }) => {
     await openApp(page, '/criar-conta')
     await page.getByRole('textbox', { name: 'Nome de usuário' }).fill('ab')
-    await page.getByRole('textbox', { name: 'E-mail' }).fill('invalido')
+    await emailField(page).fill('invalido')
     await page.getByLabel('Senha', { exact: true }).fill('123')
     await page.getByLabel('Confirmar senha').fill('456')
     await page.getByRole('button', { name: /Criar (conta|perfil)/ }).click()
@@ -28,7 +28,7 @@ test.describe('conta e sessão', () => {
     await expect(page.getByText('As senhas não coincidem')).toBeVisible()
 
     await page.getByRole('textbox', { name: 'Nome de usuário' }).fill('ana-ribeiro')
-    await page.getByRole('textbox', { name: 'E-mail' }).fill('ana@kurio.test')
+    await emailField(page).fill('ana@kurio.test')
     await page.getByLabel('Senha', { exact: true }).fill('senha-segura-1')
     await page.getByLabel('Confirmar senha').fill('senha-segura-1')
     await page.getByRole('button', { name: /Criar (conta|perfil)/ }).click()
@@ -39,7 +39,7 @@ test.describe('conta e sessão', () => {
     page,
   }) => {
     await openApp(page, '/entrar?redirect=/carrinho')
-    await page.getByRole('textbox', { name: 'E-mail' }).fill('ana@kurio.test')
+    await emailField(page).fill('ana@kurio.test')
     await page.getByLabel('Senha', { exact: true }).fill('senha-errada')
     await page.getByRole('button', { name: 'Entrar', exact: true }).first().click()
     await expect(
@@ -66,7 +66,7 @@ test.describe('conta e sessão', () => {
     await expect(page.getByText(/Sua sessão expirou/).first()).toBeVisible()
     expect(decodeURIComponent(new URL(page.url()).search)).toContain('redirect=/perfil/carteiras')
 
-    await page.getByRole('textbox', { name: 'E-mail' }).fill('ana@kurio.test')
+    await emailField(page).fill('ana@kurio.test')
     await page.getByLabel('Senha', { exact: true }).fill('kurio-ana-2026')
     await page.getByRole('button', { name: 'Entrar', exact: true }).first().click()
     await expect(page).toHaveURL(/\/perfil\/carteiras$/)

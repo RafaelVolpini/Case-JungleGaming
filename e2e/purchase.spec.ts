@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { addToCart, catalogCards, loginViaApi, openApp } from './support/app'
+import { addToCart, catalogCards, emailField, loginViaApi, openApp } from './support/app'
 import { api, mock, USERS } from './support/mock-api'
 
 async function confirmPurchase(page: Page) {
@@ -28,7 +28,7 @@ test.describe('compra completa', () => {
 
     await page.getByRole('button', { name: 'Conectar e finalizar' }).click()
     await expect(page).toHaveURL(/\/entrar\?.*redirect/)
-    await page.getByRole('textbox', { name: 'E-mail' }).fill(USERS.ana.email)
+    await emailField(page).fill(USERS.ana.email)
     await page.getByLabel('Senha', { exact: true }).fill(USERS.ana.password)
     await page.getByRole('button', { name: 'Entrar', exact: true }).first().click()
     await expect(page).toHaveURL(/\/pagamento$/)

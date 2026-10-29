@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { openApp } from './support/app'
+import { emailField, openApp } from './support/app'
 
 const focusInside = (page: Page, selector: string) =>
   page.evaluate(
@@ -58,7 +58,7 @@ test.describe('teclado, foco e formulários', () => {
   }) => {
     test.skip(isMobile, 'no mobile o login é uma tela cheia')
     await openApp(page, '/entrar')
-    await expect(page.getByRole('textbox', { name: 'E-mail' })).toBeFocused()
+    await expect(emailField(page)).toBeFocused()
     for (let step = 0; step < 12; step += 1) {
       await page.keyboard.press('Tab')
       expect(await focusInside(page, '[role="dialog"]')).toBe(true)
@@ -83,7 +83,7 @@ test.describe('teclado, foco e formulários', () => {
   }) => {
     await openApp(page, '/criar-conta?redirect=/perfil/carteiras')
     await page.getByRole('textbox', { name: 'Nome de usuário' }).fill('nova-pessoa')
-    await page.getByRole('textbox', { name: 'E-mail' }).fill('nova.pessoa@kurio.test')
+    await emailField(page).fill('nova.pessoa@kurio.test')
     await page.getByLabel('Senha', { exact: true }).fill('senha-segura-1')
     await page.getByLabel('Confirmar senha').fill('senha-segura-1')
     await page.getByRole('button', { name: /Criar (conta|perfil)/ }).click()
