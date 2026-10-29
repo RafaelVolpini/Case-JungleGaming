@@ -1,26 +1,18 @@
 import { EmptyState } from '@/components/feedback/empty-state'
 import { ErrorState } from '@/components/feedback/error-state'
-import { NftCardSkeleton } from '@/components/nft/nft-card-skeleton'
 import { Pagination } from '@/components/shared/pagination'
 import { Button } from '@/components/ui/button'
 
 import { useCatalogFilters } from '../../hooks/use-catalog-filters'
 import { useCatalog } from '../../hooks/use-catalog-queries'
+import { MobileCatalogSkeleton } from './mobile-catalog-skeleton'
 import { MobileNftColumns } from './mobile-nft-columns'
 
 export function MobileCatalogGrid() {
   const { query, update, reset } = useCatalogFilters()
   const { data, error, isPending, isPlaceholderData, refetch } = useCatalog(query)
 
-  if (isPending && !error) {
-    return (
-      <div className="mt-4 grid grid-cols-2 gap-4" aria-busy="true" aria-label="Carregando NFTs">
-        {Array.from({ length: 4 }, (_, index) => (
-          <NftCardSkeleton key={index} />
-        ))}
-      </div>
-    )
-  }
+  if (isPending && !error) return <MobileCatalogSkeleton />
   if (!data) {
     return (
       <ErrorState

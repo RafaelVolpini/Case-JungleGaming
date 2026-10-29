@@ -1,9 +1,9 @@
 import { ErrorState } from '@/components/feedback/error-state'
 import { BackButton } from '@/components/shared/back-button'
-import { Skeleton } from '@/components/ui/skeleton'
 
 import { CartEmpty } from '../components/cart-empty'
 import { MobileCartItem } from '../components/mobile/mobile-cart-item'
+import { MobileCartSkeleton } from '../components/mobile/mobile-cart-skeleton'
 import { MobileCartSummary } from '../components/mobile/mobile-cart-summary'
 import { useCartActions } from '../hooks/use-cart-actions'
 import { useCart } from '../hooks/use-cart'
@@ -20,12 +20,7 @@ export function MobileCartPage() {
         <h1 className="text-cream text-xl leading-7 font-bold">Carrinho de NFTs</h1>
       </header>
       <div className="mt-[21px]">
-        {isPending && (
-          <div aria-busy="true" className="flex flex-col gap-5">
-            <Skeleton className="h-[100px] rounded-[20px]" />
-            <Skeleton className="h-[100px] rounded-[20px]" />
-          </div>
-        )}
+        {isPending && <MobileCartSkeleton />}
         {error && !cart && (
           <ErrorState
             error={error}
