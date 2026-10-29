@@ -316,7 +316,7 @@ favoritos e 404 no mobile são derivados do padrão visual, pois o Figma não os
 | Item                       | Decisão                                                                                                                                                             |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Cores                      | Acrescentadas as que o Figma não tem: erro `#E2574C`, sucesso `#5C9E6B`, hover de botão `#C07A3C` e superfície elevada `#2F1D17`                                    |
-| Fonte                      | Roboto Mono em vez de Space Mono: os glifos do Figma (o `r` sem pé, o `M`, o `c` de terminais retos) correspondem à Roboto Mono                                     |
+| Fonte                      | Iguais as do Figma.                                                                                                                                                 |
 | Container                  | 1200 px centralizado: a medição dos screenshots mostra o conteúdo começando em x=120 num viewport de 1440, e não 80 px de padding                                   |
 | Separador decimal          | Ponto em todos os valores (`1.19 ETH`); o Figma alterna entre ponto e vírgula                                                                                       |
 | Grade do catálogo (mobile) | Duas colunas **alinhadas** (o Figma escalona a direita), por decisão de produto                                                                                     |
