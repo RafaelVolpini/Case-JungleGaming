@@ -94,21 +94,34 @@ test.describe('falhas de pagamento', () => {
     expect(await orders(page)).toHaveLength(1)
   })
 
-  test('timeout após criar o pedido é recuperado pela idempotência', async ({ page }) => {
+  test('timeout após criar o pedido é recuperado com a mesma chave de idempotência @mobile', async ({
+    page,
+  }) => {
     test.setTimeout(75_000)
+    await page.clock.install()
     await readyToPay(page)
+    const keys: string[] = []
+    page.on('request', (request) => {
+      const isOrderCreation =
+        request.method() === 'POST' && new URL(request.url()).pathname === '/api/orders'
+      if (isOrderCreation) keys.push(request.headers()['x-idempotency-key'] ?? '')
+    })
     await mock.scenario(page, { orderTimeout: true })
 
     await page.getByRole('button', { name: 'Confirmar compra' }).click()
     await page.getByRole('button', { name: 'Confirmar e enviar' }).click()
+    await page.clock.fastForward(9_000)
     const recover = page.getByRole('button', { name: /Tentar novamente|Verificar pedido/ })
-    await expect(recover).toBeVisible({ timeout: 25_000 })
+    await expect(recover).toBeVisible()
     await recover.click()
 
     await expect(page).toHaveURL(/\/pedido\//)
+    await page.clock.fastForward(3_000)
     await expect(page.getByText('Seus NFTs agora estão na sua carteira')).toBeVisible({
       timeout: 25_000,
     })
+    expect(keys).toHaveLength(2)
+    expect(new Set(keys).size).toBe(1)
     expect(await orders(page)).toHaveLength(1)
   })
 })

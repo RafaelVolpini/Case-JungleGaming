@@ -14,7 +14,7 @@ import {
 } from '@/features/orders/lib/pending-order'
 
 import { createOrderRequest } from '../api/checkout-api'
-import { clearOrderAttempt, writeOrderAttempt } from '../lib/order-attempt'
+import { clearOrderAttempt, resolveOrderInput, writeOrderAttempt } from '../lib/order-attempt'
 
 export function usePlaceOrder() {
   const queryClient = useQueryClient()
@@ -25,8 +25,10 @@ export function usePlaceOrder() {
     onMutate: beginPlacingOrder,
     onSettled: endPlacingOrder,
 
-    mutationFn: (input: CreateOrderInput) =>
-      createOrderRequest(input, getIdempotencyKey(`order:${input.quoteId}`)),
+    mutationFn: (input: CreateOrderInput) => {
+      const effective = resolveOrderInput(scope, input)
+      return createOrderRequest(effective, getIdempotencyKey(`order:${effective.quoteId}`))
+    },
 
     onSuccess: (order) => {
       clearOrderAttempt(scope)
@@ -36,8 +38,12 @@ export function usePlaceOrder() {
     },
 
     onError: (error, input) => {
-      if (error instanceof ApiRequestError && error.isTransient) writeOrderAttempt(scope, { input })
+      const effective = resolveOrderInput(scope, input)
+      if (error instanceof ApiRequestError && error.isTransient) {
+        writeOrderAttempt(scope, { input: effective })
+      }
       if ((error as { code?: string }).code === 'QUOTE_STALE') {
+        clearOrderAttempt(scope)
         void queryClient.invalidateQueries({ queryKey: queryKeys.quote(scope) })
       }
     },

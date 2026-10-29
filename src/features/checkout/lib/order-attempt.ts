@@ -43,3 +43,7 @@ export function clearAllOrderAttempts(): void {
   removeStorageByPrefix(PREFIX)
   notify()
 }
+
+export function resolveOrderInput(scope: string, input: CreateOrderInput): CreateOrderInput {
+  return parseOrderAttempt(readOrderAttemptSnapshot(scope))?.input ?? input
+}
