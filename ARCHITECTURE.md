@@ -64,7 +64,7 @@ mocks é o `boot.ts`; `features/` e `lib/` **nunca** importam de `mocks/`.
 | Responsabilidade | Escolha                                   | Observação                            |
 | ---------------- | ----------------------------------------- | ------------------------------------- |
 | Build            | Vite 8                                    | Deploy na Vercel                      |
-| Interface        | React 19.3                                |                                       |
+| Interface        | React 19.3                                | Versão sem a falha de segurança da 19.2|
 | Linguagem        | TypeScript 5.9                            | `strict` + `noUncheckedIndexedAccess` |
 | Roteamento       | TanStack Router                           | Baseado em arquivos, code splitting   |
 | Estado remoto    | TanStack Query v5                         |                                       |
