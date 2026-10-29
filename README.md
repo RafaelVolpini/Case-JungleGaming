@@ -178,7 +178,7 @@ npm run test:e2e:report       # relatório HTML (playwright-report/)
 npx playwright show-trace test-results/<pasta-da-falha>/trace.zip   # trace de uma falha
 ```
 
-- **Projetos:** `desktop` (Chromium, 1440×900) roda tudo; `mobile` (Chromium, 390×844) roda os testes marcados com `@mobile`.
+- **Projetos:** `desktop` (Chromium, 1440×900) roda tudo (116 testes); `mobile` (Chromium, 390×844) roda os testes marcados com `@mobile` (85 testes). São 30 arquivos e 201 execuções, 2 delas puladas por serem exclusivas de um layout.
 - **Estado isolado:** cada teste usa um contexto novo (armazenamento vazio, base semeada). Relógio, latência, falhas e eventos
   de tempo real são controlados por `page.clock`, pelos cenários e pelas rotas de controle do MSW; os eventos passam pelo
   `socket.io-client`, nunca por setters ou pelo cache.
