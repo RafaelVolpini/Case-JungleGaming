@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { addToCart, loginViaUi, openApp } from './support/app'
+import { expectMinimumBlocked } from './support/stepper'
 
 const amount = async (page: Page) => {
   const text = await page.getByTestId('cart-total').innerText()
@@ -15,10 +16,9 @@ test.describe('carrinho', () => {
     await openApp(page, '/carrinho')
 
     const before = await amount(page)
-    await page
-      .getByRole('group', { name: 'Quantidade de Emerald Ape #042' })
-      .getByRole('button', { name: 'Aumentar quantidade' })
-      .click()
+    const group = page.getByRole('group', { name: 'Quantidade de Emerald Ape #042' })
+    await expectMinimumBlocked(group, '1')
+    await group.getByRole('button', { name: 'Aumentar quantidade' }).click()
     await expect.poll(() => amount(page)).toBeGreaterThan(before)
 
     await page.getByRole('button', { name: 'Remover Emerald Ape #042 do carrinho' }).click()

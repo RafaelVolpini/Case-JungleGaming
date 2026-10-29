@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 
 import { openApp } from './support/app'
 import { mock } from './support/mock-api'
+import { expectMinimumBlocked } from './support/stepper'
 
 const SLUG = 'emerald-ape-042'
 
@@ -40,5 +41,18 @@ test.describe('detalhe do NFT', () => {
     await increase.click({ force: true })
     await expect(quantity).toHaveText('3')
     await expect(increase).toHaveAttribute('aria-disabled', 'true')
+  })
+
+  test('o botão de diminuir fica bloqueado com uma unidade @mobile', async ({ page }) => {
+    await openApp(page, `/nft/${SLUG}`)
+    const group = page.getByRole('group', { name: 'Quantidade' })
+    await expectMinimumBlocked(group, '1')
+
+    await group.getByRole('button', { name: 'Aumentar quantidade' }).click()
+    await expect(group.locator('output')).toHaveText('2')
+    await expect(group.getByRole('button', { name: 'Diminuir quantidade' })).not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
   })
 })

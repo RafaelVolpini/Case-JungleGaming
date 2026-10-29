@@ -1,6 +1,6 @@
-import { Minus, Plus } from 'lucide-react'
-
 import { cn } from '@/lib/utils'
+
+import { StepperButton, type StepperSize } from './stepper-button'
 
 type QuantityStepperProps = {
   value: number
@@ -8,15 +8,9 @@ type QuantityStepperProps = {
   max: number
   onChange: (value: number) => void
   disabled?: boolean
-  size?: 'lg' | 'compact' | 'round'
+  size?: StepperSize
   label?: string
   className?: string
-}
-
-const buttonSize = {
-  lg: 'h-12 w-[31px]',
-  compact: 'h-[29px] w-[19px]',
-  round: 'size-6',
 }
 
 export function QuantityStepper({
@@ -29,28 +23,16 @@ export function QuantityStepper({
   label = 'Quantidade',
   className,
 }: QuantityStepperProps) {
-  const buttonClassName = cn(
-    size === 'round'
-      ? 'bg-surface-raised text-cream hover:text-primary-light aria-disabled:text-primary/40'
-      : 'bg-primary text-primary-foreground hover:bg-primary-hover',
-    'grid shrink-0 place-items-center rounded-full transition-colors outline-none',
-    'focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2',
-    'disabled:cursor-not-allowed disabled:opacity-40 aria-disabled:cursor-not-allowed',
-    buttonSize[size],
-  )
-
   return (
     <div role="group" aria-label={label} className={cn('flex items-center gap-[11px]', className)}>
-      <button
-        type="button"
-        aria-label="Diminuir quantidade"
+      <StepperButton
+        direction="decrease"
+        size={size}
         disabled={disabled}
-        aria-disabled={value <= min}
+        atLimit={value <= min}
+        limitHint={`Quantidade mínima: ${min}`}
         onClick={() => value > min && onChange(value - 1)}
-        className={buttonClassName}
-      >
-        <Minus className={size === 'lg' ? 'size-5' : 'size-3'} strokeWidth={3} />
-      </button>
+      />
       <output
         aria-live="polite"
         className={cn(
@@ -60,16 +42,14 @@ export function QuantityStepper({
       >
         {value}
       </output>
-      <button
-        type="button"
-        aria-label="Aumentar quantidade"
+      <StepperButton
+        direction="increase"
+        size={size}
         disabled={disabled}
-        aria-disabled={value >= max}
+        atLimit={value >= max}
+        limitHint={`Quantidade máxima: ${max}`}
         onClick={() => value < max && onChange(value + 1)}
-        className={buttonClassName}
-      >
-        <Plus className={size === 'lg' ? 'size-5' : 'size-3'} strokeWidth={3} />
-      </button>
+      />
     </div>
   )
 }
