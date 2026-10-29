@@ -29,7 +29,7 @@ Se você só quer ver o projeto funcionando, siga este caminho. Ele passa pelas 
 
 2. **Explore o catálogo.** Filtre por coleção, busque, troque de aba ("Todos", "Novos lançamentos", "Em alta") e ordene.
    Tudo isso fica na URL, então recarregar a página mantém o que você escolheu.
-3. **Entre como Ana** (`ana@kurio.test`, senha `kurio-ana-2026`) pelo botão **Entrar**. As credenciais estão na [seção
+3. **Entre como Ana** (`ana@kurio.test`, senha `kurio-ana-2026`) ou cadastre seu usuário pelo botão **Entrar**. As credenciais estão na [seção
    4](#4-credenciais-e-cupons-fictícios).
 4. **Adicione um NFT ao carrinho** na página do NFT, abra o carrinho e vá para o pagamento.
 5. **Veja o tempo real.** Aperte **`Ctrl+Alt+M`** para abrir o simulador de mercado e clique em **+10%**. O preço muda na
