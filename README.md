@@ -264,7 +264,9 @@ funcionalidades da entrega: nada foi simplificado só para melhorar a pontuaçã
 
 Aplicação estática, pronta para a Vercel (framework Vite): `vercel.json` já define o comando de build (`npm run build`), a
 saída (`dist/`), a reescrita de todas as rotas para `index.html` (acesso direto e refresh funcionam) e os cabeçalhos de cache.
-O service worker do MSW (`/mockServiceWorker.js`) é servido sem cache. Mantenha `VITE_ENABLE_MOCKS=true` (padrão) na
+O service worker do MSW (`/mockServiceWorker.js`) é servido sem cache e foi ajustado para interceptar só `/api/`
+(fontes, imagens e scripts passam direto); por isso o `package.json` não declara `msw.workerDirectory`, o que evita que o
+`postinstall` do MSW sobrescreva o arquivo a cada instalação. Mantenha `VITE_ENABLE_MOCKS=true` (padrão) na
 demonstração.
 
 Depois do deploy, confira: acesso direto a `/nft/emerald-ape-042`, `/carrinho` e `/pagamento` com refresh; uma compra
