@@ -4,15 +4,13 @@ import { NftImage } from '@/components/nft/nft-image'
 import { NftPrice } from '@/components/nft/nft-price'
 import type { NftSummary } from '@/contracts/nft'
 import { FavoriteButton } from '@/features/favorites/components/favorite-button'
-import { cn } from '@/lib/utils'
 
 type MobileNftCardProps = {
   nft: NftSummary
-  imageAlign: 'top' | 'bottom'
   priority?: boolean
 }
 
-export function MobileNftCard({ nft, imageAlign, priority = false }: MobileNftCardProps) {
+export function MobileNftCard({ nft, priority = false }: MobileNftCardProps) {
   const soldOut = nft.available === 0
 
   return (
@@ -22,12 +20,7 @@ export function MobileNftCard({ nft, imageAlign, priority = false }: MobileNftCa
         params={{ slug: nft.slug }}
         className="focus-visible:ring-ring block rounded-[20px] outline-none focus-visible:ring-2"
       >
-        <div
-          className={cn(
-            'bg-card relative rounded-[20px] px-1',
-            imageAlign === 'top' ? 'pt-3 pb-5' : 'pt-5 pb-3',
-          )}
-        >
+        <div className="bg-card relative rounded-[20px] px-1 pt-3 pb-5">
           <NftImage
             image={nft.image}
             priority={priority}

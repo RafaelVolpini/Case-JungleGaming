@@ -2,28 +2,16 @@ import type { NftSummary } from '@/contracts/nft'
 
 import { MobileNftCard } from './mobile-nft-card'
 
-const COLUMN = 'flex min-w-0 flex-1 flex-col gap-5'
+const PRIORITY_COUNT = 4
 
 export function MobileNftColumns({ items }: { items: NftSummary[] }) {
-  const left = items.filter((_, index) => index % 2 === 0)
-  const right = items.filter((_, index) => index % 2 === 1)
-
   return (
-    <div className="flex gap-4">
-      <ul className={COLUMN}>
-        {left.map((nft, index) => (
-          <li key={nft.id}>
-            <MobileNftCard nft={nft} imageAlign="top" priority={index < 2} />
-          </li>
-        ))}
-      </ul>
-      <ul className={`${COLUMN} mt-8`}>
-        {right.map((nft) => (
-          <li key={nft.id}>
-            <MobileNftCard nft={nft} imageAlign="bottom" />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className="grid grid-cols-2 gap-x-4 gap-y-5">
+      {items.map((nft, index) => (
+        <li key={nft.id} className="min-w-0">
+          <MobileNftCard nft={nft} priority={index < PRIORITY_COUNT} />
+        </li>
+      ))}
+    </ul>
   )
 }
