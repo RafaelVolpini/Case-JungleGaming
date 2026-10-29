@@ -41,13 +41,7 @@ export function QuantityStepper({
           value > min ? onChange(value - 1) : notifyLimit(`A quantidade mínima é ${min}.`)
         }
       />
-      <output
-        aria-live="polite"
-        className={cn(
-          'text-cream min-w-4 text-center text-base',
-          size === 'round' && 'relative top-1.5',
-        )}
-      >
+      <output aria-live="polite" className="text-cream min-w-4 text-center text-base">
         {value}
       </output>
       <StepperButton

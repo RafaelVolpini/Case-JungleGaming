@@ -341,3 +341,19 @@ test.describe('revisão de design: cabeçalho', () => {
     }
   })
 })
+
+test.describe('revisão de design: seletor de quantidade', () => {
+  test('o número fica centralizado na vertical em relação aos botões − e + @mobile', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'o item compacto é exclusivo do mobile')
+    await fillCart(page)
+    const group = page.getByRole('group', { name: 'Quantidade de Emerald Ape #042' })
+    const value = await box(group.locator('output'))
+    const decrease = await box(group.getByRole('button', { name: 'Diminuir quantidade' }))
+    const increase = await box(group.getByRole('button', { name: 'Aumentar quantidade' }))
+    expect(Math.abs(centerY(value) - centerY(decrease))).toBeLessThanOrEqual(1)
+    expect(Math.abs(centerY(value) - centerY(increase))).toBeLessThanOrEqual(1)
+  })
+})
