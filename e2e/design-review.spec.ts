@@ -292,7 +292,7 @@ test.describe('revisão de design: banner mobile', () => {
         })
       const description = hero.locator('p').last()
       expect(await textRight(hero.locator('h1'))).toBeLessThanOrEqual(image.x - 2)
-      expect(await textRight(description)).toBeLessThanOrEqual(image.x - 2)
+      expect(await textRight(description)).toBeLessThanOrEqual(image.x - 8)
 
       const action = await box(hero.locator('a[href="#catalogo"]'))
       expect(bottom(await box(description))).toBeLessThanOrEqual(action.y)

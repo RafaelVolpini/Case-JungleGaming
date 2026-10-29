@@ -29,7 +29,7 @@ export function MobileHeroBanner() {
           >
             {HERO_COPY_MOBILE.title}
           </h1>
-          <p className="text-foreground mt-[calc(7*var(--u))] text-[length:calc(11*var(--u))] leading-[calc(16*var(--u))]">
+          <p className="text-foreground mt-[calc(7*var(--u))] max-w-[24.5ch] text-[length:calc(11*var(--u))] leading-[calc(16*var(--u))]">
             {HERO_COPY_MOBILE.description}
           </p>
         </div>
