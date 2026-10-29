@@ -272,3 +272,45 @@ test.describe('revisão de design: rodapé', () => {
     expect(textRight).toBeLessThanOrEqual(right(frame) - 16)
   })
 })
+
+test.describe('revisão de design: banner mobile', () => {
+  for (const width of [320, 360, 390, 414]) {
+    test(`o texto do banner não passa por baixo da imagem em ${width} px @mobile`, async ({
+      page,
+      isMobile,
+    }) => {
+      test.skip(!isMobile, 'o banner mobile é exclusivo do layout mobile')
+      await page.setViewportSize({ width, height: 844 })
+      await openApp(page)
+      const hero = page.locator('section[aria-labelledby="hero-title"]')
+      const image = await box(hero.locator('img[aria-hidden="false"]'))
+      const textRight = (locator: Locator) =>
+        locator.evaluate((element) => {
+          const range = document.createRange()
+          range.selectNodeContents(element)
+          return range.getBoundingClientRect().right
+        })
+      const description = hero.locator('p').last()
+      expect(await textRight(hero.locator('h1'))).toBeLessThanOrEqual(image.x - 2)
+      expect(await textRight(description)).toBeLessThanOrEqual(image.x - 2)
+
+      const action = await box(hero.locator('a[href="#catalogo"]'))
+      expect(bottom(await box(description))).toBeLessThanOrEqual(action.y)
+    })
+  }
+})
+
+test.describe('revisão de design: paginação no mobile', () => {
+  test('a paginação do fim da página fica acima do botão de escanear @mobile', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'a barra inferior é exclusiva do mobile')
+    await openApp(page)
+    await expect(catalogCards(page).first()).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    const pagination = await box(page.getByRole('navigation', { name: /Paginação/ }))
+    const scan = await box(page.getByRole('button', { name: 'Escanear QR code' }))
+    expect(bottom(pagination)).toBeLessThanOrEqual(scan.y - 8)
+  })
+})

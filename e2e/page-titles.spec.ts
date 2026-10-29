@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { loginViaApi, openApp } from './support/app'
 
 const TITLES: [string, string | RegExp][] = [
-  ['/', 'Kurio — Marketplace de NFTs'],
+  ['/', 'Kurio · Marketplace de NFTs'],
   ['/nft/emerald-ape-042', 'Emerald Ape #042 · Kurio'],
   ['/carrinho', 'Carrinho · Kurio'],
   ['/entrar', 'Entrar · Kurio'],

@@ -22,7 +22,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         id="conteudo"
         className={cn(
           'mx-auto w-full max-w-[640px] flex-1 outline-none xl:max-w-none xl:pb-0',
-          tabBarVisible && 'pb-28',
+          tabBarVisible && 'pb-36',
         )}
         tabIndex={-1}
       >

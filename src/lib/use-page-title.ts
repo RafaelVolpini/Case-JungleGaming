@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export const DEFAULT_TITLE = 'Kurio — Marketplace de NFTs'
+export const DEFAULT_TITLE = 'Kurio · Marketplace de NFTs'
 
 export function formatPageTitle(title?: string): string {
   return title ? `${title} · Kurio` : DEFAULT_TITLE

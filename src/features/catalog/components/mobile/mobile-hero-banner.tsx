@@ -19,7 +19,7 @@ export function MobileHeroBanner() {
         {...focusProps}
         className="relative h-[calc(190*var(--u))] overflow-hidden rounded-[20px] bg-[#2a1b12] bg-[radial-gradient(circle_98px_at_118px_98px,rgba(214,150,96,0.2)_0_99%,transparent_100%),radial-gradient(circle_135px_at_215px_130px,rgba(214,150,96,0.1)_0_99%,transparent_100%),radial-gradient(circle_at_26%_50%,#7c5434_0%,#5a3b22_30%,#3a2615_62%,#2a1b12_100%)]"
       >
-        <div className="absolute top-[calc(6*var(--u))] left-[calc(16*var(--u))] w-[calc(190*var(--u))]">
+        <div className="absolute top-[calc(6*var(--u))] left-[calc(16*var(--u))] w-[calc(170*var(--u))]">
           <p className="text-cream text-[length:calc(12*var(--u))] leading-[calc(16*var(--u))]">
             {HERO_COPY_MOBILE.eyebrow}
           </p>
@@ -29,7 +29,7 @@ export function MobileHeroBanner() {
           >
             {HERO_COPY_MOBILE.title}
           </h1>
-          <p className="text-foreground mt-[calc(7*var(--u))] text-[length:calc(12*var(--u))] leading-[calc(18*var(--u))]">
+          <p className="text-foreground mt-[calc(7*var(--u))] text-[length:calc(11*var(--u))] leading-[calc(16*var(--u))]">
             {HERO_COPY_MOBILE.description}
           </p>
         </div>
