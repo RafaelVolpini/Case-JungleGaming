@@ -7,7 +7,7 @@ import { defineConfig } from 'vite'
 
 import { routePreload } from './build/plugins/route-preload.ts'
 
-const MOCK_PACKAGES = [
+const MSW_PACKAGES = [
   'node_modules/msw/',
   '@mswjs/',
   '@open-draft/',
@@ -17,8 +17,9 @@ const MOCK_PACKAGES = [
   'headers-polyfill',
   'path-to-regexp',
   'set-cookie-parser',
-  'src/mocks/',
 ]
+
+const MOCK_SOURCES = ['src/mocks/']
 
 const REACT_PACKAGES = ['node_modules/react/', 'node_modules/react-dom/', 'node_modules/scheduler/']
 
@@ -56,7 +57,8 @@ export default defineConfig({
             { name: 'react', test: (id) => matches(id, REACT_PACKAGES), priority: 50 },
             { name: 'tanstack', test: (id) => matches(id, TANSTACK_PACKAGES), priority: 45 },
             { name: 'vendor', test: (id) => matches(id, VENDOR_PACKAGES), priority: 40 },
-            { name: 'mocks', test: (id) => matches(id, MOCK_PACKAGES), priority: 30 },
+            { name: 'msw', test: (id) => matches(id, MSW_PACKAGES), priority: 35 },
+            { name: 'mocks', test: (id) => matches(id, MOCK_SOURCES), priority: 30 },
           ],
         },
       },

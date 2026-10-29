@@ -3,6 +3,8 @@ import { yieldToMain } from '@/lib/yield-to-main'
 
 async function startMocks(): Promise<void> {
   if (!MOCKS_ENABLED) return
+  await import('msw/browser')
+  await yieldToMain()
   const { startMockWorker } = await import('@/mocks/browser')
   await yieldToMain()
   const heartbeat = new URLSearchParams(window.location.search).get('heartbeat') !== '0'
