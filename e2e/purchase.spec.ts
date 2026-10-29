@@ -96,4 +96,25 @@ test.describe('compra completa', () => {
     await expect(page.getByRole('button', { name: 'Confirmar compra' })).toBeVisible()
     expect(orderRequests).toEqual([])
   })
+
+  test('a revisão do pedido lista itens, taxa e total antes de enviar @mobile', async ({
+    page,
+    isMobile,
+  }) => {
+    await loginViaApi(page, 'ana', '/')
+    await addToCart(page, 'golden-beat-207', { quantity: 2, auth: true })
+    await openApp(page, '/pagamento')
+
+    const items = page.getByRole('list', { name: 'Itens do pedido' })
+    if (!isMobile) await expect(items).toContainText('Golden Beat #207')
+    await page.getByRole('button', { name: 'Confirmar compra' }).click()
+
+    if (isMobile) {
+      const review = page.getByRole('region', { name: 'Resumo do pedido' })
+      await expect(items).toContainText('Golden Beat #207 (x2)')
+      await expect(review).toContainText('Taxa de rede')
+      await expect(review).toContainText('Total')
+    }
+    await expect(page.getByRole('button', { name: 'Confirmar e enviar' })).toBeVisible()
+  })
 })

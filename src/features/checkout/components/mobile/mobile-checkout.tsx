@@ -1,6 +1,9 @@
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import type { Cart } from '@/contracts/cart'
+import { collectorDetailsSchema } from '@/contracts/order'
 import type { Quote } from '@/contracts/quote'
 import type { User } from '@/contracts/session'
 import type { Wallet, WalletType } from '@/contracts/wallet'
@@ -15,6 +18,7 @@ import { useAcknowledgeQuote, useQuote } from '../../hooks/use-quote'
 import { collectorFromProfile } from '../../lib/collector-from-profile'
 import { QuoteAlerts } from '../quote-alerts'
 import { WalletConnectDialog } from '../wallet-connect-dialog'
+import { MobileOrderReview } from './mobile-order-review'
 import { MobileProviderList } from './mobile-provider-list'
 import { MobileWalletList } from './mobile-wallet-list'
 
@@ -22,6 +26,7 @@ type MobileCheckoutProps = {
   user: User
   wallet: Wallet
   wallets: Wallet[]
+  items: Cart['items']
   quote: Quote
   onWalletChange: (walletId: string) => void
 }
@@ -30,6 +35,7 @@ export function MobileCheckout({
   user,
   wallet,
   wallets,
+  items,
   quote,
   onWalletChange,
 }: MobileCheckoutProps) {
@@ -39,7 +45,9 @@ export function MobileCheckout({
   const placeOrder = usePlaceOrder()
   const saveWallet = useSaveWallet()
   const expired = useIsExpired(quote.expiresAt)
-  const blocked = quote.issues.length > 0 || expired
+  const collector = collectorFromProfile(user, wallet)
+  const missing = collectorDetailsSchema.safeParse(collector).error?.issues[0]?.message ?? null
+  const blocked = quote.issues.length > 0 || expired || missing !== null
 
   const placeError =
     placeOrder.error instanceof ApiRequestError && placeOrder.error.code !== 'QUOTE_STALE'
@@ -51,7 +59,7 @@ export function MobileCheckout({
       quoteId: quote.id,
       walletId: wallet.id,
       network: wallet.network,
-      collector: collectorFromProfile(user, wallet),
+      collector,
     })
 
   const changeProvider = (walletType: WalletType) =>
@@ -70,6 +78,17 @@ export function MobileCheckout({
         onAcknowledge={() => acknowledge.mutate(quote)}
         onRefresh={() => void quoteQuery.refetch()}
       />
+      {missing && (
+        <p
+          role="alert"
+          className="border-warning/60 bg-warning/10 text-cream mb-4 rounded-lg border p-3 text-sm"
+        >
+          {missing} na carteira antes de confirmar.{' '}
+          <Link to="/perfil/carteiras" className="text-primary-light underline underline-offset-4">
+            Editar carteira
+          </Link>
+        </p>
+      )}
       <MobileWalletList wallets={wallets} value={wallet.id} onChange={onWalletChange} />
       <MobileProviderList
         value={wallet.walletType}
@@ -105,6 +124,7 @@ export function MobileCheckout({
         placeError={placeError}
         onOpenChange={setDialogOpen}
         onConfirm={confirm}
+        review={<MobileOrderReview items={items} totals={quote.totals} />}
       />
     </div>
   )

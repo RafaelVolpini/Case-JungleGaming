@@ -95,6 +95,7 @@ export function CheckoutPage() {
               user={user}
               wallet={wallet}
               wallets={list}
+              items={cart.data.items}
               quote={quote.data}
               onWalletChange={setSelectedId}
             />

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
@@ -17,6 +17,7 @@ type WalletConnectDialogProps = {
   placeError: string | null
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
+  review?: ReactNode
 }
 
 export function WalletConnectDialog({
@@ -26,6 +27,7 @@ export function WalletConnectDialog({
   placeError,
   onOpenChange,
   onConfirm,
+  review,
 }: WalletConnectDialogProps) {
   const connect = useMutation({ mutationFn: () => connectWallet(wallet.id) })
   const disconnect = useMutation({ mutationFn: () => disconnectWallet(wallet.id) })
@@ -53,6 +55,8 @@ export function WalletConnectDialog({
         <DialogDescription className="text-foreground text-sm">
           {typeLabel} · {shortAddress(wallet.address)} · {NETWORK_LABELS[wallet.network]}
         </DialogDescription>
+
+        {review}
 
         <div aria-live="polite" className="min-h-[56px] text-sm">
           {connecting && (
