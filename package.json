@@ -13,6 +13,7 @@
     "format": "prettier --write src scripts",
     "format:check": "prettier --check src scripts",
     "art": "node scripts/build-nft-art.mjs",
+    "art:check": "node scripts/check-nft-art.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:update": "playwright test e2e/visual.spec.ts --update-snapshots",

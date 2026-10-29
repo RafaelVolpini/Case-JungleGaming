@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 
 import { NftImage } from '@/components/nft/nft-image'
 import { NftPrice } from '@/components/nft/nft-price'
+import { MOBILE_CARD_SIZES } from '@/lib/format/image'
 import type { NftSummary } from '@/contracts/nft'
 import { FavoriteButton } from '@/features/favorites/components/favorite-button'
 
@@ -24,7 +25,7 @@ export function MobileNftCard({ nft, priority = false }: MobileNftCardProps) {
           <NftImage
             image={nft.image}
             priority={priority}
-            sizes="168px"
+            sizes={MOBILE_CARD_SIZES}
             className="aspect-square w-full rounded-2xl"
           />
           {nft.rarity === 'rare' && nft.previousPriceEth !== null && (

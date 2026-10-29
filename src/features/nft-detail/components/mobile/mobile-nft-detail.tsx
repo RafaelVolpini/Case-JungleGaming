@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react'
 
 import { NftImage } from '@/components/nft/nft-image'
 import { BackButton } from '@/components/shared/back-button'
+import { MOBILE_COVER_SIZES } from '@/lib/format/image'
 import type { NftDetail } from '@/contracts/nft'
 import { FavoriteButton } from '@/features/favorites/components/favorite-button'
 
@@ -35,7 +36,12 @@ export function MobileNftDetail({ nft }: { nft: NftDetail }) {
       </div>
       {cover && (
         <div className="mt-2 ml-7 mr-[25px] aspect-[361/326] overflow-hidden rounded-t-[30px]">
-          <NftImage image={cover} priority sizes="361px" className="aspect-square w-full" />
+          <NftImage
+            image={cover}
+            priority
+            sizes={MOBILE_COVER_SIZES}
+            className="aspect-square w-full"
+          />
         </div>
       )}
       <MobileDetailSheet
