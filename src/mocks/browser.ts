@@ -1,5 +1,7 @@
 import { setupWorker } from 'msw/browser'
 
+import { yieldToMain } from '@/lib/yield-to-main'
+
 import { createSeed, prepareSeed } from './db/seed'
 import { loadOrSeed } from './db/store'
 import { authHandlers } from './handlers/auth'
@@ -21,8 +23,10 @@ import { guardMockWorker } from './worker-guard'
 
 export async function startMockWorker(options: SocketGatewayOptions = {}) {
   await prepareSeed()
+  await yieldToMain()
   const { seeded } = loadOrSeed(createSeed)
   const scenario = loadScenario()
+  await yieldToMain()
 
   const worker = setupWorker(
     ...nftHandlers,
