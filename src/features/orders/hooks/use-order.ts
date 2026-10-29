@@ -13,7 +13,7 @@ export function useOrder(orderId: string) {
   return useQuery({
     queryKey: queryKeys.orders.detail(scope, orderId),
     queryFn: ({ signal }) => fetchOrderRequest(orderId, signal),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && orderId !== '',
     refetchInterval: (query) => (query.state.data?.status === 'pending' ? POLL_INTERVAL_MS : false),
     retry: (count, error) => (error as { status?: number }).status !== 404 && count < 2,
   })

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { catalogCards, loginViaApi, openApp } from './support/app'
+import { addToCart, catalogCards, loginViaApi, openApp } from './support/app'
 import { api, USERS } from './support/mock-api'
 
 async function confirmPurchase(page: Page) {
@@ -78,5 +78,22 @@ test.describe('compra completa', () => {
         .or(page.getByText(/não encontrad/i))
         .first(),
     ).toBeVisible()
+  })
+
+  test('abrir o pagamento sem pedido pendente não consulta a lista de pedidos @mobile', async ({
+    page,
+  }) => {
+    await loginViaApi(page, 'ana', '/')
+    await addToCart(page, 'golden-beat-207', { auth: true })
+    const orderRequests: string[] = []
+    page.on('request', (request) => {
+      if (new URL(request.url()).pathname.replace(/\/$/, '') === '/api/orders') {
+        orderRequests.push(request.url())
+      }
+    })
+
+    await openApp(page, '/pagamento')
+    await expect(page.getByRole('button', { name: 'Confirmar compra' })).toBeVisible()
+    expect(orderRequests).toEqual([])
   })
 })
