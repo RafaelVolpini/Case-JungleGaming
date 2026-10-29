@@ -18,3 +18,17 @@ export function clearPendingOrderId(scope: string): void {
 export function clearAllPendingOrderIds(): void {
   removeStorageByPrefix(PREFIX)
 }
+
+let ordersInFlight = 0
+
+export function beginPlacingOrder(): void {
+  ordersInFlight += 1
+}
+
+export function endPlacingOrder(): void {
+  ordersInFlight = Math.max(0, ordersInFlight - 1)
+}
+
+export function isAwaitingOwnOrder(scope: string): boolean {
+  return ordersInFlight > 0 || readPendingOrderId(scope) !== null
+}

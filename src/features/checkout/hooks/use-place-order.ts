@@ -7,7 +7,11 @@ import { ApiRequestError } from '@/lib/http/errors'
 import { getIdempotencyKey } from '@/lib/idempotency'
 import { queryKeys } from '@/lib/query/keys'
 
-import { writePendingOrderId } from '@/features/orders/lib/pending-order'
+import {
+  beginPlacingOrder,
+  endPlacingOrder,
+  writePendingOrderId,
+} from '@/features/orders/lib/pending-order'
 
 import { createOrderRequest } from '../api/checkout-api'
 import { clearOrderAttempt, writeOrderAttempt } from '../lib/order-attempt'
@@ -18,6 +22,9 @@ export function usePlaceOrder() {
   const { scope } = useSession()
 
   return useMutation({
+    onMutate: beginPlacingOrder,
+    onSettled: endPlacingOrder,
+
     mutationFn: (input: CreateOrderInput) =>
       createOrderRequest(input, getIdempotencyKey(`order:${input.quoteId}`)),
 

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { addToCart, catalogCards, loginViaApi, openApp } from './support/app'
-import { api, USERS } from './support/mock-api'
+import { api, mock, USERS } from './support/mock-api'
 
 async function confirmPurchase(page: Page) {
   await page.getByRole('button', { name: 'Confirmar compra' }).click()
@@ -116,5 +116,33 @@ test.describe('compra completa', () => {
       await expect(review).toContainText('Total')
     }
     await expect(page.getByRole('button', { name: 'Confirmar e enviar' })).toBeVisible()
+  })
+
+  test('comprar as últimas unidades não gera aviso de disponibilidade contra o próprio usuário', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const seen: string[] = []
+      Object.assign(window, { __toastsSeen: seen })
+      new MutationObserver(() => {
+        document.querySelectorAll('[data-sonner-toast]').forEach((toast) => {
+          const text = toast.textContent ?? ''
+          if (!seen.includes(text)) seen.push(text)
+        })
+      }).observe(document, { subtree: true, childList: true, characterData: true })
+    })
+    await loginViaApi(page, 'ana', '/')
+    await mock.changeNft(page, 'golden-beat-207', { edition: '1/50', available: 1 })
+    await addToCart(page, 'golden-beat-207', { edition: '1/50', quantity: 1, auth: true })
+    await openApp(page, '/pagamento')
+    await confirmPurchase(page)
+
+    await expect(page.getByText('Seus NFTs agora estão na sua carteira')).toBeVisible({
+      timeout: 20_000,
+    })
+    const seen = await page.evaluate(
+      () => (window as unknown as { __toastsSeen: string[] }).__toastsSeen,
+    )
+    expect(seen.filter((text) => /disponibilidade/.test(text))).toEqual([])
   })
 })

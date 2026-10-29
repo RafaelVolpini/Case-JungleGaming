@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import type { NftUpdatedEvent } from '@/contracts/events'
 import type { Cart } from '@/contracts/cart'
 import { compareEth, formatEth } from '@/lib/money/eth'
+import { isAwaitingOwnOrder } from '@/features/orders/lib/pending-order'
 import { queryKeys } from '@/lib/query/keys'
 
 import { patchNftData } from './patch-nft'
@@ -31,7 +32,9 @@ function describeCartChanges(cart: Cart | undefined, event: NftUpdatedEvent): st
 
 export function applyNftUpdated(queryClient: QueryClient, scope: string, event: NftUpdatedEvent) {
   const cartKey = queryKeys.cart(scope)
-  const messages = describeCartChanges(queryClient.getQueryData<Cart>(cartKey), event)
+  const messages = isAwaitingOwnOrder(scope)
+    ? []
+    : describeCartChanges(queryClient.getQueryData<Cart>(cartKey), event)
 
   queryClient.setQueriesData({ queryKey: ['catalog', scope] }, (data) => patchNftData(data, event))
   queryClient.setQueriesData({ queryKey: ['private', scope, 'favorites', 'list'] }, (data) =>

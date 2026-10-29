@@ -5,6 +5,7 @@ import { compareEth } from '@/lib/money/eth'
 import { projectCartItems } from './cart-projection'
 import { computeTotals } from './cart-totals'
 import { getOrCreateCart } from './carts'
+import { findCoupon, isCouponExpired } from './coupons'
 import { applyIssueFixes, detectIssues } from './quote-issues'
 import { getDb, nextVersion } from './store'
 import type { QuoteRecord } from './types'
@@ -92,6 +93,11 @@ export function isQuoteStale(quote: QuoteRecord): string | null {
   if (new Date(quote.expiresAt) <= new Date()) return 'A cotação expirou. Atualize para continuar.'
   if (quote.issues.length > 0)
     return 'Há alterações pendentes na cotação. Revise antes de confirmar.'
+
+  if (quote.couponCode) {
+    const coupon = findCoupon(quote.couponCode)
+    if (!coupon || isCouponExpired(coupon)) return `O cupom ${quote.couponCode} não é mais válido.`
+  }
 
   const cart = getOrCreateCart(quote.ownerId, null)
   if (cart.version !== quote.cartVersion) return 'O carrinho mudou desde a cotação.'
