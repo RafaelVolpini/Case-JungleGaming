@@ -16,7 +16,7 @@ const CPU_RATE = Number(process.env.TRACE_CPU ?? 4)
 const VERBOSE = process.env.TRACE_VERBOSE === '1'
 const TOP_SOURCES = Number(process.env.TRACE_SOURCES ?? 12)
 const TOP_FUNCTIONS = Number(process.env.TRACE_TOP ?? 0)
-const LONG_TASK_MS = 50
+const LONG_TASK_MS = Number(process.env.TRACE_LONG_MS ?? 50)
 const CATEGORIES = [
   'devtools.timeline',
   'v8.execute',
@@ -195,6 +195,36 @@ function eventSums(events, thread) {
   return sums
 }
 
+function breakdown(events, profile, task, thread) {
+  const nodes = new Map(profile.nodes.map((node) => [node.id, node]))
+  const sources = new Map()
+  let clock = profile.startTime
+  profile.samples.forEach((id, index) => {
+    clock += profile.timeDeltas[index] ?? 0
+    if (clock < task.ts || clock > task.ts + task.dur) return
+    const frame = nodes.get(id).callFrame
+    if (frame.functionName === '(idle)') return
+    const script = (frame.url || frame.functionName).split('/').pop()
+    const origin = originOf(frame, script)
+    const key = `${origin.source} ${origin.name}`
+    sources.set(key, (sources.get(key) ?? 0) + (profile.timeDeltas[index + 1] ?? 0) / 1000)
+  })
+  const kinds = new Map()
+  for (const event of events) {
+    if (event.ph !== 'X' || event.name === 'RunTask' || `${event.pid}:${event.tid}` !== thread)
+      continue
+    if (event.ts < task.ts || event.ts + event.dur > task.ts + task.dur || event.dur < 1500)
+      continue
+    kinds.set(event.name, Math.max(kinds.get(event.name) ?? 0, event.dur / 1000))
+  }
+  const top = (map, count) =>
+    [...map]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, count)
+      .map(([label, ms]) => `${label} ${ms.toFixed(1)}`)
+  return { sources: top(sources, 6), kinds: top(kinds, 5) }
+}
+
 function analyze({ events, perf, profile }) {
   const thread = rendererThread(events)
   const tasks = events
@@ -211,6 +241,7 @@ function analyze({ events, perf, profile }) {
       at: Math.round((task.ts - origin) / 1000),
       ms: Math.round(task.dur / 1000),
       what: attribute(events, task).join(' | '),
+      detail: process.env.TRACE_BREAKDOWN === '1' ? breakdown(events, profile, task, thread) : null,
     }))
   const blocking = long
     .filter((task) => task.at >= fcp - 400)
@@ -249,7 +280,12 @@ function printRun(run, index) {
   for (const task of run.long)
     console.log(
       `    t=${String(task.at).padStart(5)}  ${String(task.ms).padStart(4)} ms  ${task.what}`,
-    )
+    ) ||
+      (task.detail &&
+        console.log(
+          `         kinds: ${task.detail.kinds.join(' | ')}
+         cpu: ${task.detail.sources.join(' | ')}`,
+        ))
 }
 
 function printMedians(runs) {
@@ -283,12 +319,28 @@ function printMedians(runs) {
     console.log(`  ${String(Math.round(ms)).padStart(5)}  ${label}`)
 }
 
+function printModules(events) {
+  const thread = rendererThread(events)
+  const first = events.find((e) => e.name === 'RunTask' && `${e.pid}:${e.tid}` === thread)?.ts ?? 0
+  for (const event of events) {
+    if (!['v8.evaluateModule', 'v8.compileModule', 'v8.compile', 'v8.run'].includes(event.name))
+      continue
+    if (event.ph !== 'X' || `${event.pid}:${event.tid}` !== thread || event.dur < 1500) continue
+    const url = event.args?.fileName ?? event.args?.data?.url ?? ''
+    console.log(
+      `    ${event.name} t=${Math.round((event.ts - first) / 1000)} ${(event.dur / 1000).toFixed(1)} ms ${url.split('/').pop()}`,
+    )
+  }
+}
+
 const server = await startServer(PORT)
 const browser = await chromium.launch({ args: ['--ignore-certificate-errors'] })
 console.log(`trace ${PATH} (CPU ${CPU_RATE}x, 1.6 Mbps, 150 ms RTT) | host loop ${hostLoopMs()} ms`)
 const runs = []
 for (let run = 0; run < RUNS; run += 1) {
-  runs.push(analyze(await measure(browser)))
+  const sample = await measure(browser)
+  if (process.env.TRACE_MODULES === '1') printModules(sample.events)
+  runs.push(analyze(sample))
   printRun(runs[run], run)
 }
 printMedians(runs)

@@ -34,6 +34,8 @@ const VENDOR_PACKAGES = [
   'node_modules/big.js/',
 ]
 
+const BOOT_HELPERS = ['vite/preload-helper', 'src/lib/yield-to-main', 'src/lib/mocks-enabled']
+
 const matches = (id: string, parts: string[]) => parts.some((part) => id.includes(part))
 
 export default defineConfig({
@@ -54,6 +56,7 @@ export default defineConfig({
       output: {
         codeSplitting: {
           groups: [
+            { name: 'preload', test: (id) => matches(id, BOOT_HELPERS), priority: 60 },
             { name: 'react', test: (id) => matches(id, REACT_PACKAGES), priority: 50 },
             { name: 'tanstack', test: (id) => matches(id, TANSTACK_PACKAGES), priority: 45 },
             { name: 'vendor', test: (id) => matches(id, VENDOR_PACKAGES), priority: 40 },
