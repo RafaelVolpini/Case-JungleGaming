@@ -46,4 +46,45 @@ test.describe('favoritos', () => {
     await expect(page.getByRole('heading', { name: 'Emerald Ape #042' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Golden Beat #207' })).toBeVisible()
   })
+
+  test('o coração muda na hora, antes da resposta lenta, e volta se a API falhar @mobile', async ({
+    page,
+  }) => {
+    await loginViaApi(page, 'ana', `/nft/${SLUG}`)
+    const heart = page
+      .getByRole('button', { name: /Favoritar|aos favoritos|dos favoritos/ })
+      .first()
+    await expect(heart).toHaveAttribute('aria-pressed', 'false')
+
+    await mock.scenario(page, {
+      latency: 'slow',
+      failure: 'server-error',
+      scope: ['/api/favorites'],
+    })
+    await heart.click()
+    await expect(heart).toHaveAttribute('aria-pressed', 'true', { timeout: 1_000 })
+    await expect(page.getByText(/Não foi possível atualizar seus favoritos/)).toBeVisible({
+      timeout: 10_000,
+    })
+    await expect(heart).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  test('falha ao desfavoritar mantém o item favorito e permite tentar de novo @mobile', async ({
+    page,
+  }) => {
+    await loginViaApi(page, 'ana', '/nft/emerald-ape-042')
+    const heart = page
+      .getByRole('button', { name: /Favoritar|aos favoritos|dos favoritos/ })
+      .first()
+    await expect(heart).toHaveAttribute('aria-pressed', 'true')
+
+    await mock.scenario(page, { failure: 'server-error', scope: ['/api/favorites'] })
+    await heart.click()
+    await expect(page.getByText(/Não foi possível atualizar seus favoritos/)).toBeVisible()
+    await expect(heart).toHaveAttribute('aria-pressed', 'true')
+
+    await mock.scenario(page, { failure: 'none', scope: [] })
+    await heart.click()
+    await expect(heart).toHaveAttribute('aria-pressed', 'false')
+  })
 })
