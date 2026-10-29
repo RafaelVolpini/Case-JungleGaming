@@ -1,11 +1,11 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { addToCart, loginViaApi, openApp, waitForImages } from './support/app'
+import { addToCart, loginViaApi, openApp, settleFrames, waitForImages } from './support/app'
 
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready)
   await waitForImages(page)
-  await page.waitForTimeout(300)
+  await settleFrames(page)
 }
 
 test.describe('regressão visual @mobile', () => {

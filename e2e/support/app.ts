@@ -86,3 +86,9 @@ export async function logoutViaUi(page: Page, isMobile: boolean): Promise<void> 
   }
   await expect(page).toHaveURL(/\/$/)
 }
+
+export async function settleFrames(page: Page): Promise<void> {
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  )
+}

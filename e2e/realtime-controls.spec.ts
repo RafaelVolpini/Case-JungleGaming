@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { openApp } from './support/app'
+import { openApp, settleFrames } from './support/app'
 import { mock } from './support/mock-api'
 
 const SLUG = 'emerald-ape-042'
@@ -10,11 +10,6 @@ async function connectedDetail(page: Page) {
   await expect(page.getByText('1.19 ETH').first()).toBeVisible()
   await expect.poll(() => mock.socketClients(page)).toBeGreaterThan(0)
 }
-
-const settleFrames = (page: Page) =>
-  page.evaluate(
-    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
-  )
 
 test.describe('tempo real: controles do simulador de rede', () => {
   test('evento duplicado reenviado pelo servidor não altera o estado @mobile', async ({ page }) => {

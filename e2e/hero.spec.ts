@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 
 import { openApp } from './support/app'
 
-const ROTATION_WAIT_MS = 9_000
+const ROTATION_MS = 5_000
 
 function dots(page: Page) {
   return page.getByRole('group', { name: 'Destaques' }).getByRole('button')
@@ -25,6 +25,7 @@ test.describe('carrossel de destaques', () => {
     test('ponto selecionado acompanha a imagem e o carrossel avança sozinho @mobile', async ({
       page,
     }) => {
+      await page.clock.install()
       await openApp(page)
       await expect(dots(page)).toHaveCount(3)
       await expect(dots(page).nth(0)).toHaveAttribute('aria-current', 'true')
@@ -39,17 +40,17 @@ test.describe('carrossel de destaques', () => {
       await expect(dots(page).nth(0)).not.toHaveAttribute('aria-current', 'true')
       await expect(visibleSlide(page)).toHaveAttribute('src', /ivory/)
 
-      await expect(dots(page).nth(2)).toHaveAttribute('aria-current', 'true', {
-        timeout: ROTATION_WAIT_MS,
-      })
+      await page.clock.fastForward(ROTATION_MS + 500)
+      await expect(dots(page).nth(2)).toHaveAttribute('aria-current', 'true')
       await expect(visibleSlide(page)).toHaveAttribute('src', /golden/)
     })
   })
 
   test('não avança sozinho quando o usuário prefere menos movimento @mobile', async ({ page }) => {
+    await page.clock.install()
     await openApp(page)
     await expect(dots(page).nth(0)).toHaveAttribute('aria-current', 'true')
-    await page.waitForTimeout(6_500)
+    await page.clock.fastForward(ROTATION_MS * 2)
     await expect(dots(page).nth(0)).toHaveAttribute('aria-current', 'true')
 
     await dots(page).nth(2).click()

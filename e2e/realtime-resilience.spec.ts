@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { addToCart, loginViaApi, openApp } from './support/app'
+import { addToCart, loginViaApi, openApp, settleFrames } from './support/app'
 import { api, mock } from './support/mock-api'
 
 const SLUG = 'emerald-ape-042'
@@ -48,7 +48,7 @@ test.describe('tempo real: resiliência', () => {
       priceEth: '0.10',
       editions: event.editions.map((edition) => ({ ...edition, priceEth: '0.10' })),
     })
-    await page.waitForTimeout(600)
+    await settleFrames(page)
     await expect(page.getByText('3.33 ETH').first()).toBeVisible()
     await expect(page.getByText('0.10 ETH')).toHaveCount(0)
   })
@@ -76,7 +76,7 @@ test.describe('tempo real: resiliência', () => {
       declinedReason: 'Evento de outro usuário',
       ownerId: 'user-bruno',
     })
-    await page.waitForTimeout(500)
+    await settleFrames(page)
     await expect(page.getByText('Evento de outro usuário')).toHaveCount(0)
 
     await mock.dropSocket(page)
