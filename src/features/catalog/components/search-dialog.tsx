@@ -6,12 +6,14 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { Input } from '@/components/ui/input'
 import { useReturnFocus } from '@/lib/use-return-focus'
 
+import { useCatalogFilters } from '../hooks/use-catalog-filters'
 import { catalogSearch } from '../search'
 
 export function SearchDialog() {
   const [open, setOpen] = useState(false)
   const [term, setTerm] = useState('')
   const navigate = useNavigate()
+  const { query } = useCatalogFilters()
   const { triggerRef, onCloseAutoFocus } = useReturnFocus<HTMLButtonElement>()
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -27,7 +29,10 @@ export function SearchDialog() {
         ref={triggerRef}
         type="button"
         aria-label="Buscar NFTs"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setTerm(query.q ?? '')
+          setOpen(true)
+        }}
         className="text-cream hover:text-primary-light grid size-6 place-items-center transition-colors"
       >
         <Search className="size-[23px]" strokeWidth={2.2} />

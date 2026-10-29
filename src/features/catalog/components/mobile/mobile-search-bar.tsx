@@ -4,8 +4,15 @@ import { useState, type FormEvent } from 'react'
 import { useCatalogFilters } from '../../hooks/use-catalog-filters'
 
 export function MobileSearchBar({ onOpenFilters }: { onOpenFilters: () => void }) {
-  const { query, update } = useCatalogFilters()
-  const [term, setTerm] = useState(query.q ?? '')
+  const { query } = useCatalogFilters()
+  return <SearchForm key={query.q ?? ''} applied={query.q ?? ''} onOpenFilters={onOpenFilters} />
+}
+
+type SearchFormProps = { applied: string; onOpenFilters: () => void }
+
+function SearchForm({ applied, onOpenFilters }: SearchFormProps) {
+  const { update } = useCatalogFilters()
+  const [term, setTerm] = useState(applied)
 
   function submit(event: FormEvent) {
     event.preventDefault()

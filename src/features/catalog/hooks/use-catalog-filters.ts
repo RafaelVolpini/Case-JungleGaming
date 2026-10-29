@@ -3,12 +3,20 @@ import { useCallback, useMemo } from 'react'
 
 import { DEFAULT_SORT_BY_FEED, type CatalogQuery } from '@/contracts/nft'
 
-import { resolveCatalogQuery, stripCatalogDefaults, type CatalogSearch } from '../search'
+import {
+  parseCatalogSearch,
+  resolveCatalogQuery,
+  stripCatalogDefaults,
+  type CatalogSearch,
+} from '../search'
 
 export function useCatalogFilters() {
   const search = useSearch({ strict: false }) as CatalogSearch
   const navigate = useNavigate({ from: '/' })
-  const query = useMemo(() => resolveCatalogQuery(search), [search])
+  const query = useMemo(
+    () => resolveCatalogQuery(parseCatalogSearch(search as Record<string, unknown>)),
+    [search],
+  )
 
   const update = useCallback(
     (patch: Partial<CatalogQuery>) => {

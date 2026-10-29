@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { ActiveFilters } from '../components/active-filters'
 import { MobileCatalogGrid } from '../components/mobile/mobile-catalog-grid'
 import { MobileFeedTabs } from '../components/mobile/mobile-feed-tabs'
 import { MobileFilterSheet } from '../components/mobile/mobile-filter-sheet'
@@ -16,6 +17,7 @@ export function MobileHomePage() {
       <section id="catalogo" aria-label="Catálogo de NFTs" className="scroll-mt-4">
         <h2 className="sr-only">Catálogo de NFTs</h2>
         <MobileFeedTabs />
+        <ActiveFilters className="mt-4" />
         <MobileCatalogGrid />
       </section>
       <MobileFilterSheet open={filtersOpen} onOpenChange={setFiltersOpen} />

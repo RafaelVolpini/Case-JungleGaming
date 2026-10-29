@@ -1,5 +1,6 @@
 import { useIsDesktop } from '@/lib/use-media-query'
 
+import { ActiveFilters } from '../components/active-filters'
 import { CatalogGrid } from '../components/catalog-grid'
 import { CatalogToolbar } from '../components/catalog-toolbar'
 import { HeroSection } from '../components/hero/hero-section'
@@ -29,6 +30,7 @@ export function HomePage() {
         </div>
         <div className="min-w-0">
           <CatalogToolbar />
+          <ActiveFilters className="mb-4" />
           <CatalogGrid />
         </div>
       </section>
