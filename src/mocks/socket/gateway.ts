@@ -5,71 +5,33 @@ import { SOCKET_EVENTS } from '@/contracts/events'
 import { socketUrlFromOrigin } from '@/lib/realtime/constants'
 
 import { findNftById } from '../db/catalog'
-import { totalAvailable } from '../db/projections'
-import { getDb, isDbReady, onDbEvent, type DbEvent } from '../db/store'
 import { mockId } from '../db/ids'
+import { getDb, isDbReady, onDbEvent, type DbEvent } from '../db/store'
+import { connectedClients, registerClient, unregisterClient, type ConnectedClient } from './clients'
+import { rememberNftEvent } from './event-log'
+import { buildNftPayload } from './nft-payload'
+import { isOutageActive } from './outage'
 
 export const socketLink = ws.link(socketUrlFromOrigin(window.location.origin))
 
 const HEARTBEAT_INTERVAL_MS = 20_000
-
-type ConnectedClient = {
-  emit: (event: string, payload: unknown) => void
-  close: () => void
-  userId: string | null
-}
-
-const clients = new Set<ConnectedClient>()
-
-export function connectedClientCount(): number {
-  return clients.size
-}
-
-export function dropConnectedClients(): number {
-  const dropped = clients.size
-  for (const client of [...clients]) client.close()
-  return dropped
-}
-
-export function emitToConnectedClients(event: string, payload: unknown): number {
-  for (const client of clients) client.emit(event, payload)
-  return clients.size
-}
 
 export type SocketGatewayOptions = {
   heartbeat?: boolean
   onLog?: (line: string) => void
 }
 
-function broadcast(event: DbEvent): void {
-  if (!isDbReady() || clients.size === 0) return
-  const at = new Date().toISOString()
+function broadcastNftUpdated(nftId: string, at: string): void {
+  const nft = findNftById(nftId)
+  if (!nft) return
 
-  if (event.type === 'nft.updated') {
-    const nft = findNftById(event.nftId)
-    if (!nft) return
+  const payload = buildNftPayload(nft, at)
+  rememberNftEvent(payload)
+  for (const client of connectedClients()) client.emit(SOCKET_EVENTS.nftUpdated, payload)
+}
 
-    const payload = {
-      eventId: mockId('evt'),
-      resource: 'nft' as const,
-      id: nft.id,
-      version: nft.version,
-      priceEth: nft.priceEth,
-      previousPriceEth: nft.previousPriceEth,
-      available: totalAvailable(nft),
-      editions: nft.editions.map((edition) => ({
-        id: edition.id,
-        available: edition.available,
-        priceEth: edition.priceEth,
-      })),
-      at,
-    }
-
-    for (const client of clients) client.emit(SOCKET_EVENTS.nftUpdated, payload)
-    return
-  }
-
-  const order = getDb().orders.find((candidate) => candidate.id === event.orderId)
+function broadcastOrderUpdated(orderId: string, at: string): void {
+  const order = getDb().orders.find((candidate) => candidate.id === orderId)
   if (!order) return
 
   const payload = {
@@ -84,9 +46,16 @@ function broadcast(event: DbEvent): void {
     at,
   }
 
-  for (const client of clients) {
+  for (const client of connectedClients()) {
     if (client.userId === order.ownerId) client.emit(SOCKET_EVENTS.orderUpdated, payload)
   }
+}
+
+function broadcast(event: DbEvent): void {
+  if (!isDbReady() || connectedClients().size === 0) return
+  const at = new Date().toISOString()
+  if (event.type === 'nft.updated') broadcastNftUpdated(event.nftId, at)
+  else broadcastOrderUpdated(event.orderId, at)
 }
 
 let unsubscribe: (() => void) | null = null
@@ -102,14 +71,19 @@ export function createSocketGateway({
   ensureSubscription()
 
   return socketLink.addEventListener('connection', (connection) => {
-    const io = toSocketIo(connection)
+    if (isOutageActive()) {
+      connection.client.close()
+      onLog('connection refused during outage')
+      return
+    }
 
+    const io = toSocketIo(connection)
     const client: ConnectedClient = {
       emit: (event, payload) => io.client.emit(event, payload),
       close: () => connection.client.close(),
       userId: null,
     }
-    clients.add(client)
+    registerClient(client)
     onLog('connection opened')
 
     let heartbeatTimer: ReturnType<typeof setInterval> | undefined
@@ -121,7 +95,7 @@ export function createSocketGateway({
 
     connection.client.addEventListener('close', () => {
       clearInterval(heartbeatTimer)
-      clients.delete(client)
+      unregisterClient(client)
       onLog('connection closed')
     })
 

@@ -6,6 +6,8 @@ import { compareEth, percentOfEth, roundEth } from '@/lib/money/eth'
 
 import { findNftBySlug } from '../db/catalog'
 import { mutateWith, nextVersion } from '../db/store'
+import { rememberNftEvent } from '../socket/event-log'
+import { buildNftPayload } from '../socket/nft-payload'
 import { EDITION_PRICE_MULTIPLIERS } from '../fixtures/editions'
 import { API } from './constants'
 import { errorResponse, validationError } from './errors'
@@ -26,6 +28,7 @@ export const devNftHandlers = [
     const { priceEth, edition: editionLabel = '1/50', available } = parsed.data
 
     return mutateWith(() => {
+      rememberNftEvent(buildNftPayload(nft, new Date().toISOString()))
       if (priceEth) {
         nft.previousPriceEth = compareEth(priceEth, nft.priceEth) < 0 ? nft.priceEth : null
         nft.priceEth = priceEth

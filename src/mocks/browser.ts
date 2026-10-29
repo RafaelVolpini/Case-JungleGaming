@@ -6,6 +6,7 @@ import { authHandlers } from './handlers/auth'
 import { cartHandlers } from './handlers/cart'
 import { devHandlers } from './handlers/dev'
 import { devNftHandlers } from './handlers/dev-nft'
+import { devSocketHandlers } from './handlers/dev-socket'
 import { favoriteHandlers } from './handlers/favorites'
 import { healthHandlers } from './handlers/health'
 import { nftHandlers } from './handlers/nfts'
@@ -36,6 +37,7 @@ export async function startMockWorker(options: SocketGatewayOptions = {}) {
     ...healthHandlers,
     ...devHandlers,
     ...devNftHandlers,
+    ...devSocketHandlers,
     createSocketGateway(options),
   )
 

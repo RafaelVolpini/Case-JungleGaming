@@ -51,7 +51,14 @@ export const mock = {
   ) => api(page, `/api/__mock__/nfts/${slug}`, { method: 'POST', body: change }),
   emit: (page: Page, event: string, payload: unknown) =>
     api(page, '/api/__mock__/socket/emit', { method: 'POST', body: { event, payload } }),
-  dropSocket: (page: Page) => api(page, '/api/__mock__/socket/drop', { method: 'POST' }),
+  dropSocket: (page: Page, holdMs = 0) =>
+    api(page, '/api/__mock__/socket/drop', { method: 'POST', body: { holdMs } }),
+  reconnectSocket: (page: Page) => api(page, '/api/__mock__/socket/reconnect', { method: 'POST' }),
+  replay: (page: Page, slug: string, mode: 'duplicate' | 'stale') =>
+    api<{ delivered: number; version: number }>(page, '/api/__mock__/socket/replay', {
+      method: 'POST',
+      body: { slug, mode },
+    }),
   socketClients: async (page: Page) =>
     (await api<{ clients: number }>(page, '/api/__mock__/socket')).body.clients,
 }
