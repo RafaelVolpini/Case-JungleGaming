@@ -9,6 +9,7 @@ import { WALLET_TYPE_LABELS, type Wallet } from '@/contracts/wallet'
 import { connectWallet, disconnectWallet } from '@/features/wallets/api/wallets-api'
 import { errorMessage } from '@/lib/http/errors'
 import { shortAddress } from '@/lib/format/address'
+import { useRestoreFocus } from '@/lib/use-return-focus'
 
 type WalletConnectDialogProps = {
   open: boolean
@@ -34,6 +35,7 @@ export function WalletConnectDialog({
   const connect = useMutation({ mutationFn: () => connectWallet(wallet.id) })
   const disconnect = useMutation({ mutationFn: () => disconnectWallet(wallet.id) })
   const { mutate: startConnection, reset } = connect
+  const { onCloseAutoFocus } = useRestoreFocus(open)
 
   useEffect(() => {
     if (open) startConnection()
@@ -46,7 +48,7 @@ export function WalletConnectDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !placing && onOpenChange(next)}>
-      <DialogContent className="max-w-[420px]">
+      <DialogContent className="max-w-[420px]" onCloseAutoFocus={onCloseAutoFocus}>
         <DialogTitle className="text-cream text-xl font-bold">
           {connecting
             ? `Conectando ${typeLabel}…`
