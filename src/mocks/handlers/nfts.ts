@@ -72,10 +72,12 @@ export const nftHandlers = [
     simulated(() => {
       const counts = collectionCounts()
       return HttpResponse.json(
-        getDb().collections.map((collection) => ({
-          ...collection,
-          nftCount: counts[collection.id] ?? 0,
-        })),
+        [...getDb().collections]
+          .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+          .map((collection) => ({
+            ...collection,
+            nftCount: counts[collection.id] ?? 0,
+          })),
       )
     }),
   ),

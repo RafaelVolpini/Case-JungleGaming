@@ -1,5 +1,3 @@
-import { ChevronDown } from 'lucide-react'
-
 import {
   Select,
   SelectContent,
@@ -40,18 +38,19 @@ export function CatalogToolbar() {
         </TabsList>
       </Tabs>
 
-      <div className="text-cream flex shrink-0 items-center gap-0 pb-1.5 text-[15px] leading-[23px]">
-        <span id="sort-label">Ordenar por:</span>
+      <div className="flex shrink-0 items-center gap-2 pb-1.5 text-[15px] leading-[23px]">
+        <span id="sort-label" className="text-foreground">
+          Ordenar por:
+        </span>
         <Select
           value={query.sort}
           onValueChange={(value) => update({ sort: sortSchema.parse(value) })}
         >
           <SelectTrigger
             aria-labelledby="sort-label"
-            className="text-cream h-auto w-auto gap-0 border-0 p-0 text-[15px] leading-[23px] md:h-auto md:text-[15px]"
+            className="text-cream h-auto w-auto gap-1.5 border-0 p-0 text-[15px] leading-[23px] font-bold md:h-auto md:text-[15px]"
           >
             <SelectValue />
-            <ChevronDown className="hidden" />
           </SelectTrigger>
           <SelectContent align="end">
             {(Object.keys(SORT_LABELS) as Sort[]).map((value) => (

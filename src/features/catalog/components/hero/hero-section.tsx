@@ -67,7 +67,7 @@ export function HeroSection() {
           count={slides.length}
           active={active}
           onSelect={select}
-          className="lg:absolute lg:top-[399px] lg:left-[600px]"
+          className="lg:absolute lg:top-[482px] lg:right-0 lg:w-[450px] lg:justify-center"
         />
       )}
     </section>

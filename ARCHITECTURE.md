@@ -200,6 +200,29 @@ outros três. Para trocar por uma arte nativa basta substituir `assets/nft-sourc
 | Destaque da home no mobile | Abaixo de 390 px o banner escala proporcionalmente (todas as medidas do frame viram frações da largura), em vez de sobrepor texto e imagem |
 | Simulador de mercado | Painel de desenvolvimento/demonstração, oculto por padrão (`?simulador=1` ou `Ctrl+Alt+M`); não aparece no Figma e não altera nenhuma tela quando fechado (§5.4) |
 
+### 4.3 Revisão de design (comentários do Figma)
+
+Os 13 comentários deixados no arquivo do Figma por quem revisou o layout foram tratados um a um. Onde o comentário aponta
+um defeito do próprio layout, a implementação **se afasta do Figma de propósito** e o desvio fica registrado aqui. Cada
+correção tem um teste em `e2e/design-review.spec.ts` que falha no código anterior e passa no atual; o comentário sobre o
+ícone dos selects já estava atendido (medido: 0 px de desvio vertical) e ganhou apenas o teste de regressão.
+
+| # | Comentário | Correção | Onde |
+| --- | --- | --- | --- |
+| 1 | "As coleções estão fora de ordem alfabética" | As coleções passam a ser listadas em ordem alfabética (pt-BR: "Arte 3D", "Arte digital", "Assinaturas", "Colecionáveis", "Fotografia", "Generativa", "Jogos", "Música", "Utilidade"). A ordenação é feita pela API (`GET /collections`), então o painel lateral, o filtro do mobile e qualquer outro consumidor recebem a mesma ordem | `mocks/handlers/nfts.ts` |
+| 2 | "Selecionador de imagem tá muito próximo à imagem… para evitar que as animações cubram o seletor" | Os pontos do destaque saem do canto da imagem e ficam **abaixo** dela (32 px de folga), centralizados na largura da imagem, fora da área da transição entre slides | `hero/hero-section.tsx` |
+| 3 | "Falta de uniformidade" | O respiro entre a imagem e a moldura do card era de 4 px nas laterais e 25 px em cima e embaixo. Agora é **igual nos quatro lados** (16 px no desktop, 14 px nos carrosséis, 8 px no mobile), o que deixa cada card um bloco regular; os esqueletos usam as mesmas medidas, sem deslocamento de layout | `nft-card.tsx`, `nft-card-skeleton.tsx`, `mobile-nft-card*.tsx` |
+| 4 | "Faltando margin" (cartões promocionais) | O botão **Explorar** deixou de ser posicionado em absoluto, onde encostava na descrição e cortava o texto: agora é o último item do fluxo, com 16 px de folga acima, 24 px da borda direita e a mesma distância de baixo. O texto ganhou 16 px de distância da imagem, o limite de linhas foi removido (nada mais é cortado) e a imagem acompanha a altura do cartão | `promo-cards.tsx` |
+| 5 | "Texto muito próximo" (carrinho) | O cabeçalho da tabela (NFTs/Preço/Edições/Total) ficava a 4 px do caminho de navegação; agora há 24 px | `cart-page.tsx` |
+| 6 | "Falta centralizar o ícone" (lixeira do carrinho) | A lixeira ficava colada na borda direita da linha (0 px); agora é centralizada na sua coluna, com folga de 8 px, e já estava centralizada na vertical | `cart-row.tsx` |
+| 7 | "Falta centralizar esse ícone" (select de carteira) | Medido em todos os selects: o ícone já estava centralizado na vertical (0 px de desvio) e com folga igual à do texto; mantido e protegido por teste | `ui/select.tsx` |
+| 8 | "Faltou deixar os textos mais para a direita" (recibo) | Os rótulos **Taxa de rede**, **Desconto** e **Total** passam a alinhar à direita, colados na coluna de valores (grade de 2 colunas com a mesma largura da coluna Subtotal), em vez de flutuar a 169 px da borda esquerda | `order-fees.tsx` |
+| 9 | "Melhore a tipografia" ("Ordenar por:Listados recentemente") | Faltava espaço depois dos dois-pontos. O rótulo agora usa a cor secundária e o valor escolhido vai em negrito e na cor de destaque, com 8 px entre eles e o ícone do menu visível a 6 px do texto | `catalog-toolbar.tsx` |
+| 10 | "O ícone tá desproporcional ao botão" (Entrar) | O ícone era o de **sair** (`LogOut`) a 16 px num botão de 35 px. Trocado pelo de **entrar** (`LogIn`), com 14 px (40% da altura do botão), traço mais firme e 6 px do texto | `header/account-control.tsx` |
+| 11 | "Esta imagem não deveria estar aqui" (banner mobile) | A miniatura decorativa (arte "sage") que cobria a imagem em destaque foi **removida**: duas imagens sobrepostas não comunicavam nada e escondiam o NFT em destaque | `mobile-hero-banner.tsx` |
+| 12 | "Falta de margin" (abas no mobile) | As abas "Todos os NFTs / Novos lançamentos / Em alta" ganharam 24 px de distância do banner (eram 12 px) | `mobile-feed-tabs.tsx` |
+| 13 | "Não há espaço para o botão de excluir" (carrinho mobile) | A lixeira foi para o canto superior direito e o seletor de quantidade para o canto inferior direito, com mais de 8 px entre os dois e sem tocar no texto (o título ganha reserva à direita). O item cresce se houver nota de preço, sem sobrepor o valor | `mobile-cart-item.tsx` |
+
 ## 5. Camada de mocks
 
 ### 5.1 Base simulada
@@ -715,7 +738,7 @@ Senhas nunca trafegam de volta e são guardadas com hash e salt na base simulada
 | `GET` | `/nfts/:slug` | `200 NftDetail` | `404` |
 | `GET` | `/nfts/:slug/related` | `200 NftSummary[]` | `404` |
 | `GET` | `/featured` | `200 { hero, spotlight }` | — |
-| `GET` | `/collections` | `200 Collection[]` | — |
+| `GET` | `/collections` | `200 Collection[]` (em ordem alfabética, pt-BR) | — |
 | `GET` | `/networks` | `200 NetworkOption[]` | — |
 
 Parâmetros de `/nfts`, validados pelo mesmo `catalogQuerySchema` que valida os search params da rota:

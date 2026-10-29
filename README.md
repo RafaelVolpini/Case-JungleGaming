@@ -203,7 +203,7 @@ npx playwright show-trace test-results/<pasta-da-falha>/trace.zip   # trace de u
 | 11 | Teclado, foco de diálogos e validação | `keyboard-a11y`, `checkout-a11y`, `page-titles` |
 | 12 | Skeletons, falha e nova tentativa | `loading-states`, `load-recovery`, `skeleton-layout` |
 
-Complementares: `visual` (regressão visual de início, detalhe, carrinho e pagamento em 1440 e 390), `responsive` (sem overflow
+Complementares: `design-review` (os 13 comentários de revisão do Figma, um teste por correção), `visual` (regressão visual de início, detalhe, carrinho e pagamento em 1440 e 390), `responsive` (sem overflow
 horizontal em 320, 390, 768 e 1440), `hero`, `tab-bar`, `modal-fit`, `fixtures-revision`.
 
 ### 7.2 Regressão visual e baselines
@@ -232,14 +232,14 @@ os relatórios HTML e JSON de cada medição, o resumo `summary.json` e um índi
 `lighthouse/reports/`. A tabela abaixo é reescrita automaticamente ao fim de cada execução.
 
 <!-- lighthouse:start -->
-Gerado em 2026-10-28T08:52:26.055Z. Mediana de 3 medições por página e perfil.
+Gerado em 2026-10-29T12:18:12.316Z. Mediana de 3 medições por página e perfil.
 
 | Página | Perfil | Performance | Accessibility | Best Practices | SEO | LCP | CLS | TBT |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Início | mobile | **86** ⚠️ | 100 | 100 | 100 | 2.74 s | 0.000 | 419 ms |
-| Início | desktop | 100 | 97 | 100 | 100 | 0.59 s | 0.000 | 21 ms |
-| Detalhe do NFT | mobile | **83** ⚠️ | 100 | 100 | 100 | 2.81 s | 0.000 | 519 ms |
-| Detalhe do NFT | desktop | 100 | 100 | 100 | 100 | 0.56 s | 0.000 | 16 ms |
+| Início | mobile | 95 | 100 | 100 | 100 | 2.55 s | 0.000 | 135 ms |
+| Início | desktop | 100 | 97 | 100 | 100 | 0.60 s | 0.000 | 0 ms |
+| Detalhe do NFT | mobile | **83** ⚠️ | 100 | 100 | 100 | 2.75 s | 0.000 | 495 ms |
+| Detalhe do NFT | desktop | 100 | 100 | 100 | 100 | 0.63 s | 0.000 | 25 ms |
 
 Metas do enunciado: performance ≥ 90, accessibility ≥ 95, best-practices ≥ 95, seo ≥ 90. Valores abaixo da meta aparecem em negrito. As medições individuais, os relatórios HTML/JSON de cada execução e o resumo estão em [`lighthouse/reports/index.html`](lighthouse/reports/index.html).
 
@@ -248,7 +248,7 @@ Metas do enunciado: performance ≥ 90, accessibility ≥ 95, best-practices ≥
 - Lighthouse: 13.6.0
 - Servidor: HTTP/2 + Brotli (lighthouse/serve.mjs)
 - Navegador: Chromium do Playwright, headless
-- Índice de benchmark da CPU do host (Lighthouse): 1342 a 1616. Quanto menor, mais lenta a máquina e maior o TBT medido.
+- Índice de benchmark da CPU do host (Lighthouse): 988 a 2370. Quanto menor, mais lenta a máquina e maior o TBT medido.
 - Node: v24.21.0
 - Plataforma: win32 x64
 - Perfil mobile: emulação 390×844, DPR 2, throttling simulado do Lighthouse (4G lenta, CPU 4×)

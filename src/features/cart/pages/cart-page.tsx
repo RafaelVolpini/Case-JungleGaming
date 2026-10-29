@@ -27,7 +27,7 @@ function DesktopCartPage() {
         items={[{ label: 'Início', to: '/' }, { label: 'Mercado', to: '/' }, { label: 'Carrinho' }]}
       />
       <h1 className="sr-only">Carrinho de NFTs</h1>
-      <div className="mt-1">
+      <div className="mt-6">
         {isPending && <CartSkeleton />}
         {error && !cart && (
           <ErrorState

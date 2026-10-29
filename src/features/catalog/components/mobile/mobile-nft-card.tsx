@@ -21,7 +21,7 @@ export function MobileNftCard({ nft, priority = false }: MobileNftCardProps) {
         params={{ slug: nft.slug }}
         className="focus-visible:ring-ring block rounded-[20px] outline-none focus-visible:ring-2"
       >
-        <div className="bg-card relative rounded-[20px] px-1 pt-3 pb-5">
+        <div className="bg-card relative rounded-[20px] p-2">
           <NftImage
             image={nft.image}
             priority={priority}

@@ -1,6 +1,5 @@
 import { ArrowRight } from 'lucide-react'
 
-import { ArtImage } from '@/components/nft/art-image'
 import { HERO_COPY_MOBILE } from '@/content/home'
 
 import { useFeatured } from '../../hooks/use-catalog-queries'
@@ -47,12 +46,6 @@ export function MobileHeroBanner() {
           sizes="138px"
           className="absolute top-[calc(10.5*var(--u))] right-[calc(16*var(--u))] size-[calc(138*var(--u))] rounded-[calc(18*var(--u))]"
           {...hoverProps}
-        />
-        <ArtImage
-          art="sage"
-          alt=""
-          sizes="58px"
-          className="absolute top-[calc(98.5*var(--u))] left-[calc(226*var(--u))] size-[calc(58*var(--u))] rounded-[calc(12*var(--u))] object-cover"
         />
         {slides.length > 1 && (
           <HeroDots

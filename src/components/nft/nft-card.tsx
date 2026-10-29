@@ -34,8 +34,8 @@ export function NftCard({
       >
         <div
           className={cn(
-            'bg-card relative px-1 max-md:rounded-2xl max-md:p-1',
-            compact ? 'py-[22px]' : 'py-[25px]',
+            'bg-card relative max-md:rounded-2xl max-md:p-1',
+            compact ? 'p-3.5' : 'p-4',
           )}
         >
           <NftImage image={nft.image} priority={priority} className="rounded-[14px]" />

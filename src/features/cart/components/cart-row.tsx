@@ -56,7 +56,7 @@ export function CartRow({ item, busy, onQuantityChange, onRemove }: CartRowProps
         aria-label={`Remover ${item.name} do carrinho`}
         onClick={onRemove}
         disabled={busy}
-        className="text-foreground hover:text-primary-light focus-visible:ring-ring justify-self-end rounded outline-none transition-colors focus-visible:ring-2 disabled:opacity-50"
+        className="text-foreground hover:text-primary-light focus-visible:ring-ring justify-self-center rounded outline-none transition-colors focus-visible:ring-2 disabled:opacity-50"
       >
         <Trash className="size-5" aria-hidden="true" />
       </button>

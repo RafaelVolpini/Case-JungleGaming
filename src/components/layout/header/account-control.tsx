@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import { LogOut } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSession } from '@/features/auth/hooks/use-session'
@@ -17,9 +17,9 @@ export function AccountControl() {
     <Link
       to="/entrar"
       search={{ redirect: href }}
-      className="bg-primary text-primary-foreground hover:bg-primary-hover ml-2.5 flex h-[35px] w-[100px] items-center justify-center gap-1 rounded-md text-sm font-bold transition-colors"
+      className="bg-primary text-primary-foreground hover:bg-primary-hover ml-2.5 flex h-[35px] w-[100px] items-center justify-center gap-1.5 rounded-md text-sm font-bold transition-colors"
     >
-      <LogOut className="size-4" aria-hidden="true" />
+      <LogIn className="size-[14px]" strokeWidth={2.4} aria-hidden="true" />
       Entrar
     </Link>
   )

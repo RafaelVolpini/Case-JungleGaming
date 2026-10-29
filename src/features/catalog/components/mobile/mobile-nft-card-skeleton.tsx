@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export function MobileNftCardSkeleton() {
   return (
     <div aria-hidden="true">
-      <div className="bg-card rounded-[20px] px-1 pt-3 pb-5">
+      <div className="bg-card rounded-[20px] p-2">
         <Skeleton className="aspect-square w-full rounded-2xl bg-white/[0.04]" />
       </div>
       <div className="mt-[7px] px-2">

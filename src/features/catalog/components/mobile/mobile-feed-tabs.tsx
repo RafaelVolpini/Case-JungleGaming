@@ -12,7 +12,7 @@ export function MobileFeedTabs() {
 
   return (
     <Tabs value={query.feed} onValueChange={(value) => update({ feed: feedSchema.parse(value) })}>
-      <TabsList aria-label="Tipo de listagem" className="mt-3 gap-x-1.5 gap-y-1 border-b-0">
+      <TabsList aria-label="Tipo de listagem" className="mt-6 gap-x-1.5 gap-y-1 border-b-0">
         {FEED_TABS.map((tab) => (
           <TabsTrigger key={tab.value} value={tab.value} aria-controls={undefined} className={TAB}>
             {tab.label}
