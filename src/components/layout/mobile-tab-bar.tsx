@@ -32,11 +32,11 @@ export function MobileTabBar() {
         <ScanLine className="size-8" strokeWidth={1.75} aria-hidden="true" />
       </UnavailableAction>
       <div className="absolute inset-x-0 top-0 flex h-[100px] items-start pt-10">
-        <div className="ml-1 flex w-[168px]">
+        <div className="ml-1 flex w-[min(168px,calc(50%-27px))]">
           <Link
             to="/"
             aria-label="Início"
-            className={`${TAB} h-8 w-[84px]`}
+            className={`${TAB} h-8 flex-1`}
             activeProps={ACTIVE}
             activeOptions={{ exact: true }}
           >
@@ -45,17 +45,17 @@ export function MobileTabBar() {
           <Link
             to="/favoritos"
             aria-label="Lista de interesse"
-            className={`${TAB} h-8 w-[84px]`}
+            className={`${TAB} h-8 flex-1`}
             activeProps={ACTIVE}
           >
             <Heart className={ICON} aria-hidden="true" />
           </Link>
         </div>
-        <div className="mr-1 ml-auto flex w-[168px]">
+        <div className="mr-1 ml-auto flex w-[min(168px,calc(50%-27px))]">
           <Link
             to="/carrinho"
             aria-label={`Carrinho, ${count} itens`}
-            className={`${TAB} relative h-8 w-[84px]`}
+            className={`${TAB} relative h-8 flex-1`}
             activeProps={ACTIVE}
           >
             <ShoppingCart className="size-[22px]" aria-hidden="true" />
@@ -68,7 +68,7 @@ export function MobileTabBar() {
           <Link
             to="/perfil"
             aria-label="Perfil"
-            className={`${TAB} h-8 w-[84px]`}
+            className={`${TAB} h-8 flex-1`}
             activeProps={ACTIVE}
           >
             <UserRound className={ICON} aria-hidden="true" />
