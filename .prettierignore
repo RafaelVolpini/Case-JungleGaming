@@ -1,13 +1,11 @@
 dist
 node_modules
 src/routeTree.gen.ts
-src/mocks/fixtures/nfts.generated.ts
 package-lock.json
 public
 assets
 design
 lighthouse/reports
-lighthouse/RESULTS.md
 lighthouse/.tmp
 playwright-report
 test-results

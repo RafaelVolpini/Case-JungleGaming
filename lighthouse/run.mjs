@@ -15,12 +15,14 @@ const ONLY_PAGE = process.env.LH_PAGE
 const ONLY_PROFILE = process.env.LH_PROFILE
 const RUN_COUNT = Number(process.env.LH_RUNS ?? RUNS)
 const SERVER = process.env.LH_SERVER ?? 'h2'
-const BASE_URL = SERVERS[SERVER]
+const EXTERNAL_URL = process.env.LH_URL?.replace(/\/$/, '')
+const BASE_URL = EXTERNAL_URL ?? SERVERS[SERVER]
 
 const SERVER_LABELS = {
   h2: 'HTTP/2 + Brotli (lighthouse/serve.mjs)',
   preview: 'vite preview (HTTP/1.1)',
 }
+const SERVER_LABEL = EXTERNAL_URL ? `URL pública (${EXTERNAL_URL})` : SERVER_LABELS[SERVER]
 
 function launchChrome() {
   return chromeLauncher.launch({
@@ -48,7 +50,7 @@ async function environment() {
   return {
     lighthouse: pkg.version,
     chrome: 'Chromium do Playwright',
-    server: SERVER_LABELS[SERVER],
+    server: SERVER_LABEL,
     node: process.version,
     platform: `${process.platform} ${process.arch}`,
     targets: TARGETS,
@@ -57,7 +59,9 @@ async function environment() {
 
 async function main() {
   mkdirSync(REPORTS, { recursive: true })
-  const host = await startHost({ server: SERVER, baseUrl: BASE_URL, root: ROOT })
+  const host = EXTERNAL_URL
+    ? { kill: () => {} }
+    : await startHost({ server: SERVER, baseUrl: BASE_URL, root: ROOT })
   const summary = { generatedAt: new Date().toISOString(), runs: RUN_COUNT, results: [] }
 
   try {

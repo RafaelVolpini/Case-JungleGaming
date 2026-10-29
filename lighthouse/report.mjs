@@ -1,85 +1,108 @@
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import {
+  MEDIAN_HEADER,
+  RUN_HEADER,
+  environmentLines,
+  htmlTable,
+  markdownTable,
+  medianRows,
+  runRows,
+} from './report-format.mjs'
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const OUT = process.env.LH_OUT ?? 'reports'
-const summary = JSON.parse(readFileSync(join(ROOT, 'lighthouse', OUT, 'summary.json'), 'utf8'))
-const targets = summary.environment?.targets ?? {}
+const REPORTS = join(ROOT, 'lighthouse', OUT)
+const README = join(ROOT, 'README.md')
+const START = '<!-- lighthouse:start -->'
+const END = '<!-- lighthouse:end -->'
 
-const PAGE_LABELS = { inicio: 'Início', detalhe: 'Detalhe do NFT' }
-const CATEGORY_LABELS = {
-  performance: 'Performance',
-  accessibility: 'Accessibility',
-  'best-practices': 'Best Practices',
-  seo: 'SEO',
+const summary = JSON.parse(readFileSync(join(REPORTS, 'summary.json'), 'utf8'))
+const targets = summary.environment?.targets ?? {}
+const targetsLine = Object.entries(targets)
+  .map(([id, value]) => `${id} ≥ ${value}`)
+  .join(', ')
+const stamp = `Gerado em ${summary.generatedAt}. Mediana de ${summary.runs} medições por página e perfil.`
+
+function readmeBlock() {
+  const environment = environmentLines(summary)
+    .map((line) => `- ${line}`)
+    .join('\n')
+  return [
+    stamp,
+    '',
+    markdownTable(MEDIAN_HEADER, medianRows(summary, targets)),
+    '',
+    `Metas do enunciado: ${targetsLine}. Valores abaixo da meta aparecem em negrito. As medições individuais, os relatórios HTML/JSON de cada execução e o resumo estão em [\`lighthouse/reports/index.html\`](lighthouse/reports/index.html).`,
+    '',
+    '**Ambiente e condições de execução**',
+    '',
+    environment,
+  ].join('\n')
 }
 
-const seconds = (ms) => `${(ms / 1000).toFixed(2)} s`
-const mark = (id, value) => (value >= (targets[id] ?? 0) ? `${value}` : `**${value}** ⚠️`)
+function reportLinks() {
+  if (!existsSync(REPORTS)) return ''
+  const files = readdirSync(REPORTS)
+    .filter((name) => name.endsWith('.html') && name !== 'index.html')
+    .sort()
+  const items = files.map((name) => {
+    const base = name.replace('.html', '')
+    return `<li>${base}: <a href="${name}">HTML</a> · <a href="${base}.json">JSON</a></li>`
+  })
+  return `<ul>${items.join('\n')}</ul>`
+}
 
-const rows = summary.results.map((result) => {
-  const { scores, lcp, cls, tbt } = result.median
-  const columns = Object.keys(CATEGORY_LABELS).map((id) => mark(id, scores[id]))
-  return `| ${PAGE_LABELS[result.page]} | ${result.profile} | ${columns.join(' | ')} | ${seconds(lcp)} | ${cls.toFixed(3)} | ${Math.round(tbt)} ms |`
-})
-
-const runs = summary.results.flatMap((result) =>
-  result.runs.map(
-    (run, index) =>
-      `| ${PAGE_LABELS[result.page]} | ${result.profile} | ${index + 1} | ${Object.keys(
-        CATEGORY_LABELS,
-      )
-        .map((id) => run.scores[id])
-        .join(' | ')} | ${seconds(run.lcp)} | ${run.cls.toFixed(3)} | ${Math.round(run.tbt)} ms |`,
-  ),
-)
-
-const header = `| ${Object.values(CATEGORY_LABELS).join(' | ')} | LCP | CLS | TBT |`
-const separator = `| ${[...Object.values(CATEGORY_LABELS), 'LCP', 'CLS', 'TBT'].map(() => '---:').join(' | ')} |`
-const environment = summary.environment ?? {}
-const benchmarks = summary.results
-  .flatMap((result) => result.runs.map((run) => run.benchmark))
-  .filter(Boolean)
-const benchmarkLine = benchmarks.length
-  ? `- Índice de benchmark da CPU do host (Lighthouse): ${Math.min(...benchmarks)} a ${Math.max(...benchmarks)}. Quanto menor, mais lenta a máquina e maior o TBT medido.`
-  : ''
-
-const text = `# Resultados do Lighthouse
-
-Gerado em ${summary.generatedAt}. Mediana de ${summary.runs} medições por página e perfil.
-
-## Mediana por página e perfil
-
-| Página | Perfil ${header}
-| --- | --- ${separator}
-${rows.join('\n')}
-
-Metas: ${Object.entries(targets)
-  .map(([id, value]) => `${CATEGORY_LABELS[id]} ≥ ${value}`)
-  .join(', ')}. Valores abaixo da meta aparecem em negrito.
-
-## Medições individuais
-
-| Página | Perfil | Execução ${header}
-| --- | --- | ---: ${separator}
-${runs.join('\n')}
-
-## Ambiente
-
-- Lighthouse: ${environment.lighthouse}
-- Servidor: ${environment.server}
-- Navegador: Chromium do Playwright, headless
-${benchmarkLine}
-- Node: ${environment.node}
-- Plataforma: ${environment.platform}
-- Perfil mobile: emulação 390×844, DPR 2, throttling simulado do Lighthouse (4G lenta, CPU 4×)
-- Perfil desktop: emulação 1350×940, throttling simulado do Lighthouse (rede cabeada, CPU 1×)
-- Cenário dos mocks: padrão (latência \`fast\`, sem falhas), armazenamento limpo a cada execução
+function indexPage() {
+  const environment = environmentLines(summary)
+    .map((line) => `<li>${line.replaceAll('`', '')}</li>`)
+    .join('')
+  return `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lighthouse — Kurio</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:1000px;margin:2rem auto;padding:0 1rem;color:#222}
+table{border-collapse:collapse;width:100%;margin:1rem 0}
+th,td{border:1px solid #ccc;padding:.4rem .6rem;text-align:right}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+th{background:#f3f3f3}
+</style>
+</head>
+<body>
+<h1>Resultados do Lighthouse</h1>
+<p>${stamp}</p>
+<h2>Mediana por página e perfil</h2>
+${htmlTable(MEDIAN_HEADER, medianRows(summary, targets))}
+<p>Metas do enunciado: ${targetsLine}. ⚠ marca valores abaixo da meta.</p>
+<h2>Medições individuais</h2>
+${htmlTable(RUN_HEADER, runRows(summary))}
+<h2>Ambiente</h2>
+<ul>${environment}</ul>
+<h2>Relatórios completos</h2>
+${reportLinks()}
+</body>
+</html>
 `
+}
 
-writeFileSync(
-  join(ROOT, 'lighthouse', OUT === 'reports' ? 'RESULTS.md' : `${OUT}/RESULTS.md`),
-  text,
-)
-console.log('Relatório em lighthouse/RESULTS.md')
+function updateReadme() {
+  if (!existsSync(README) || OUT !== 'reports') return false
+  const text = readFileSync(README, 'utf8')
+  const from = text.indexOf(START)
+  const to = text.indexOf(END)
+  if (from < 0 || to < 0) return false
+  writeFileSync(
+    README,
+    `${text.slice(0, from + START.length)}\n${readmeBlock()}\n${text.slice(to)}`,
+  )
+  return true
+}
+
+writeFileSync(join(REPORTS, 'index.html'), indexPage())
+console.log(`Índice em lighthouse/${OUT}/index.html`)
+if (updateReadme()) console.log('Tabela de medianas atualizada no README.md')
