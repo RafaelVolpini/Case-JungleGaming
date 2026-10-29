@@ -132,7 +132,9 @@ test.describe('botões interativos', () => {
     page,
   }) => {
     await openApp(page)
-    const like = catalogCards(page).first().getByRole('button', { name: /favoritos/ })
+    const like = catalogCards(page)
+      .first()
+      .getByRole('button', { name: /favoritos/ })
     await expect(like).toHaveCSS('cursor', 'pointer')
     await like.click()
     await expect(page).toHaveURL(/\/entrar/)
