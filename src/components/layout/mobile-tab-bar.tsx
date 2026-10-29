@@ -27,7 +27,7 @@ export function MobileTabBar() {
       <UnavailableAction
         subject="O leitor de QR code"
         aria-label="Escanear QR code"
-        className="absolute top-0 left-1/2 grid size-[65px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-linear-to-b/srgb from-primary-glow/40 to-primary/95 text-white"
+        className="absolute top-0 left-1/2 z-10 grid size-[65px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-linear-to-b/srgb from-primary-glow/40 to-primary/95 text-white"
       >
         <ScanLine className="size-8" strokeWidth={1.75} aria-hidden="true" />
       </UnavailableAction>
