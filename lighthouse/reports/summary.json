@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T13:23:58.373Z",
+  "generatedAt": "2026-10-29T13:54:04.136Z",
   "runs": 3,
   "results": [
     {
@@ -7,60 +7,60 @@
       "profile": "mobile",
       "runs": [
         {
-          "benchmark": 1627,
+          "benchmark": 2119,
           "scores": {
-            "performance": 79,
+            "performance": 92,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
-          "lcp": 2733.252,
+          "lcp": 2836.023,
           "cls": 0,
-          "tbt": 689,
-          "fcp": 1083.252,
-          "si": 1668.8105679659402
+          "tbt": 221,
+          "fcp": 1055.0230000000001,
+          "si": 1383.0018059941053
         },
         {
-          "benchmark": 1221,
+          "benchmark": 2081,
           "scores": {
-            "performance": 76,
+            "performance": 94,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
-          "lcp": 2552.6195,
+          "lcp": 2551.2949,
           "cls": 0,
-          "tbt": 896.5,
-          "fcp": 902.6195,
-          "si": 1215.8434006859961
+          "tbt": 205.5,
+          "fcp": 901.2949,
+          "si": 901.2949
         },
         {
-          "benchmark": 1462,
+          "benchmark": 2296,
           "scores": {
-            "performance": 84,
+            "performance": 92,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
-          "lcp": 2551.9743,
+          "lcp": 2662.899,
           "cls": 0,
-          "tbt": 513,
-          "fcp": 901.9743,
-          "si": 1022.6489440447633
+          "tbt": 235,
+          "fcp": 901.399,
+          "si": 901.399
         }
       ],
       "median": {
         "scores": {
-          "performance": 79,
+          "performance": 92,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
-        "lcp": 2552.6195,
+        "lcp": 2662.899,
         "cls": 0,
-        "tbt": 689,
-        "fcp": 902.6195,
-        "si": 1215.8434006859961
+        "tbt": 221,
+        "fcp": 901.399,
+        "si": 901.399
       }
     },
     {
@@ -68,46 +68,46 @@
       "profile": "desktop",
       "runs": [
         {
-          "benchmark": 1048,
+          "benchmark": 2166,
           "scores": {
             "performance": 100,
             "accessibility": 97,
             "best-practices": 100,
             "seo": 100
           },
-          "lcp": 598.5821,
-          "cls": 0,
-          "tbt": 3,
-          "fcp": 242.0821,
-          "si": 568.3593207364329
-        },
-        {
-          "benchmark": 1689,
-          "scores": {
-            "performance": 100,
-            "accessibility": 97,
-            "best-practices": 100,
-            "seo": 100
-          },
-          "lcp": 607.1193000000001,
-          "cls": 0,
-          "tbt": 5,
-          "fcp": 241.6193,
-          "si": 589.6966286822528
-        },
-        {
-          "benchmark": 1884,
-          "scores": {
-            "performance": 100,
-            "accessibility": 97,
-            "best-practices": 100,
-            "seo": 100
-          },
-          "lcp": 609.6165,
+          "lcp": 667.8174,
           "cls": 0,
           "tbt": 0.5,
-          "fcp": 241.1165,
-          "si": 617.6583169181774
+          "fcp": 241.3174,
+          "si": 775.6606397278485
+        },
+        {
+          "benchmark": 1952,
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 592.4891,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 240.9891,
+          "si": 622.5440105157298
+        },
+        {
+          "benchmark": 2264,
+          "scores": {
+            "performance": 100,
+            "accessibility": 97,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 588.1935,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 241.6935,
+          "si": 570.0785404230277
         }
       ],
       "median": {
@@ -117,11 +117,11 @@
           "best-practices": 100,
           "seo": 100
         },
-        "lcp": 607.1193000000001,
+        "lcp": 592.4891,
         "cls": 0,
-        "tbt": 3,
-        "fcp": 241.6193,
-        "si": 589.6966286822528
+        "tbt": 0,
+        "fcp": 241.3174,
+        "si": 622.5440105157298
       }
     },
     {
@@ -129,60 +129,60 @@
       "profile": "mobile",
       "runs": [
         {
-          "benchmark": 1026,
+          "benchmark": 2265,
           "scores": {
-            "performance": 81,
+            "performance": 96,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
-          "lcp": 2701.0584,
+          "lcp": 2551.7735000000002,
           "cls": 0,
-          "tbt": 612.4999999999999,
-          "fcp": 903.0584,
-          "si": 1255.8876035933781
+          "tbt": 148,
+          "fcp": 901.7735,
+          "si": 1504.5212019623755
         },
         {
-          "benchmark": 975,
+          "benchmark": 2144,
           "scores": {
-            "performance": 81,
+            "performance": 94,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
-          "lcp": 2688.4105,
+          "lcp": 2562.0357,
           "cls": 0,
-          "tbt": 604.5,
-          "fcp": 901.4105,
-          "si": 1137.3089844441447
+          "tbt": 193,
+          "fcp": 901.0357,
+          "si": 1081.354653989105
         },
         {
-          "benchmark": 1348,
+          "benchmark": 2306,
           "scores": {
-            "performance": 82,
+            "performance": 94,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
-          "lcp": 2661.4649,
+          "lcp": 2560.0474,
           "cls": 0,
-          "tbt": 584.5,
-          "fcp": 901.4649,
-          "si": 1204.8219991020624
+          "tbt": 204,
+          "fcp": 901.0474,
+          "si": 1553.2467220055676
         }
       ],
       "median": {
         "scores": {
-          "performance": 81,
+          "performance": 94,
           "accessibility": 100,
           "best-practices": 100,
           "seo": 100
         },
-        "lcp": 2688.4105,
+        "lcp": 2560.0474,
         "cls": 0,
-        "tbt": 604.5,
-        "fcp": 901.4649,
-        "si": 1204.8219991020624
+        "tbt": 193,
+        "fcp": 901.0474,
+        "si": 1504.5212019623755
       }
     },
     {
@@ -190,46 +190,46 @@
       "profile": "desktop",
       "runs": [
         {
-          "benchmark": 1108,
+          "benchmark": 2328,
           "scores": {
             "performance": 100,
             "accessibility": 100,
             "best-practices": 100,
             "seo": 100
           },
-          "lcp": 582.6871,
-          "cls": 0,
-          "tbt": 37,
-          "fcp": 242.6871,
-          "si": 618.2015404143567
-        },
-        {
-          "benchmark": 1149,
-          "scores": {
-            "performance": 100,
-            "accessibility": 100,
-            "best-practices": 100,
-            "seo": 100
-          },
-          "lcp": 562.9065,
-          "cls": 0,
-          "tbt": 31,
-          "fcp": 241.9065,
-          "si": 537.2822872854848
-        },
-        {
-          "benchmark": 2180,
-          "scores": {
-            "performance": 100,
-            "accessibility": 100,
-            "best-practices": 100,
-            "seo": 100
-          },
-          "lcp": 534.4331,
+          "lcp": 584.6714,
           "cls": 0,
           "tbt": 0,
-          "fcp": 241.4331,
-          "si": 474.75938329590844
+          "fcp": 241.6714,
+          "si": 496.540610045524
+        },
+        {
+          "benchmark": 2386,
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 545.0624,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 241.0624,
+          "si": 460.24461604380616
+        },
+        {
+          "benchmark": 2077,
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 559.1253,
+          "cls": 0,
+          "tbt": 0,
+          "fcp": 241.1253,
+          "si": 481.3093049869164
         }
       ],
       "median": {
@@ -239,11 +239,11 @@
           "best-practices": 100,
           "seo": 100
         },
-        "lcp": 562.9065,
+        "lcp": 559.1253,
         "cls": 0,
-        "tbt": 31,
-        "fcp": 241.9065,
-        "si": 537.2822872854848
+        "tbt": 0,
+        "fcp": 241.1253,
+        "si": 481.3093049869164
       }
     }
   ],

@@ -232,14 +232,14 @@ os relatórios HTML e JSON de cada medição, o resumo `summary.json` e um índi
 `lighthouse/reports/`. A tabela abaixo é reescrita automaticamente ao fim de cada execução.
 
 <!-- lighthouse:start -->
-Gerado em 2026-10-29T13:23:58.373Z. Mediana de 3 medições por página e perfil.
+Gerado em 2026-10-29T13:54:04.136Z. Mediana de 3 medições por página e perfil.
 
 | Página | Perfil | Performance | Accessibility | Best Practices | SEO | LCP | CLS | TBT |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Início | mobile | **79** ⚠️ | 100 | 100 | 100 | 2.55 s | 0.000 | 689 ms |
-| Início | desktop | 100 | 97 | 100 | 100 | 0.61 s | 0.000 | 3 ms |
-| Detalhe do NFT | mobile | **81** ⚠️ | 100 | 100 | 100 | 2.69 s | 0.000 | 605 ms |
-| Detalhe do NFT | desktop | 100 | 100 | 100 | 100 | 0.56 s | 0.000 | 31 ms |
+| Início | mobile | 92 | 100 | 100 | 100 | 2.66 s | 0.000 | 221 ms |
+| Início | desktop | 100 | 97 | 100 | 100 | 0.59 s | 0.000 | 0 ms |
+| Detalhe do NFT | mobile | 94 | 100 | 100 | 100 | 2.56 s | 0.000 | 193 ms |
+| Detalhe do NFT | desktop | 100 | 100 | 100 | 100 | 0.56 s | 0.000 | 0 ms |
 
 Metas do enunciado: performance ≥ 90, accessibility ≥ 95, best-practices ≥ 95, seo ≥ 90. Valores abaixo da meta aparecem em negrito. As medições individuais, os relatórios HTML/JSON de cada execução e o resumo estão em [`lighthouse/reports/index.html`](lighthouse/reports/index.html).
 
@@ -248,7 +248,7 @@ Metas do enunciado: performance ≥ 90, accessibility ≥ 95, best-practices ≥
 - Lighthouse: 13.6.0
 - Servidor: HTTP/2 + Brotli (lighthouse/serve.mjs)
 - Navegador: Chromium do Playwright, headless
-- Índice de benchmark da CPU do host (Lighthouse): 975 a 2180. Quanto menor, mais lenta a máquina e maior o TBT medido.
+- Índice de benchmark da CPU do host (Lighthouse): 1952 a 2386. Quanto menor, mais lenta a máquina e maior o TBT medido.
 - Node: v24.21.0
 - Plataforma: win32 x64
 - Perfil mobile: emulação 390×844, DPR 2, throttling simulado do Lighthouse (4G lenta, CPU 4×)

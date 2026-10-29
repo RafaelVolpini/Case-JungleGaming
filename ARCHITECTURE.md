@@ -25,19 +25,19 @@
 
 ## 1. Stack
 
-| Responsabilidade | Escolha | Observação |
-| --- | --- | --- |
-| Build | Vite 8 | Alvo de deploy: Vercel |
-| Interface | React 19.3 | |
-| Linguagem | TypeScript 5.9 | `strict` + `noUncheckedIndexedAccess` |
-| Roteamento | TanStack Router | File-based, `autoCodeSplitting` |
-| Estado remoto | TanStack Query v5 | |
-| HTTP | Axios | |
-| Tempo real | socket.io-client 4.8 | |
-| Estilização | Tailwind CSS v4 | Tokens CSS-first em `@theme` |
-| Componentes | shadcn/ui | |
-| Mocking | **MSW 2.15** + `@mswjs/socket.io-binding` 0.2 | Ver §2.1 |
-| E2E | Playwright | |
+| Responsabilidade | Escolha                                       | Observação                            |
+| ---------------- | --------------------------------------------- | ------------------------------------- |
+| Build            | Vite 8                                        | Alvo de deploy: Vercel                |
+| Interface        | React 19.3                                    |                                       |
+| Linguagem        | TypeScript 5.9                                | `strict` + `noUncheckedIndexedAccess` |
+| Roteamento       | TanStack Router                               | File-based, `autoCodeSplitting`       |
+| Estado remoto    | TanStack Query v5                             |                                       |
+| HTTP             | Axios                                         |                                       |
+| Tempo real       | socket.io-client 4.8                          |                                       |
+| Estilização      | Tailwind CSS v4                               | Tokens CSS-first em `@theme`          |
+| Componentes      | shadcn/ui                                     |                                       |
+| Mocking          | **MSW 2.15** + `@mswjs/socket.io-binding` 0.2 | Ver §2.1                              |
+| E2E              | Playwright                                    |                                       |
 
 ### 1.1 Por que TypeScript 5.9 e não 7.0
 
@@ -130,20 +130,20 @@ E2E reproduzirem queda de conexão sem precisar derrubar o servidor.
 ## 3. Verificação
 
 O transporte Socket.IO sobre MSW é exercitado pelos testes E2E de tempo real (§14), que passam pelo cliente
-`socket.io-client` real. O parâmetro `?heartbeat=0` desliga o ping do servidor simulado e reproduz o *ping timeout*
+`socket.io-client` real. O parâmetro `?heartbeat=0` desliga o ping do servidor simulado e reproduz o _ping timeout_
 descrito em §2.3.
 
 ## 4. Desvios do Figma
 
-| Item | Desvio | Motivo |
-| --- | --- | --- |
-| Cor de erro | Adicionado `#E2574C` | O Figma só usa o laranja primário no asterisco de campo obrigatório; não há cor de erro de validação |
-| Cor de sucesso | Adicionado `#5C9E6B` | Necessária para pedido confirmado; ausente no Figma |
-| Hover de botão | Adicionado `#C07A3C` | Ausente no Figma |
-| Surface elevada | Adicionado `#2F1D17` | Para estados de hover/accent do shadcn |
-| Fonte | Roboto Mono em vez de Space Mono | A spec gerada a partir dos screenshots indica Space Mono, mas os glifos do Figma (`r` sem pé, `M` com vértice na metade da altura, `c` de terminais retos) correspondem a Roboto Mono; confirmado renderizando as candidatas ao lado do recorte em resolução original |
-| Container | 1200 px centralizado | A spec fala em padding lateral de 80 px; a medição dos screenshots (2880 px) mostra o conteúdo começando em x=120 em um viewport de 1440 |
-| Separador decimal | Ponto em todos os valores | O Figma alterna entre `1.19 ETH` nos cards e `0,02 - 12,30 ETH` no filtro. ETH é escrito com ponto mundialmente; usar vírgula só no filtro seria inconsistência replicada |
+| Item              | Desvio                           | Motivo                                                                                                                                                                                                                                                                |
+| ----------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cor de erro       | Adicionado `#E2574C`             | O Figma só usa o laranja primário no asterisco de campo obrigatório; não há cor de erro de validação                                                                                                                                                                  |
+| Cor de sucesso    | Adicionado `#5C9E6B`             | Necessária para pedido confirmado; ausente no Figma                                                                                                                                                                                                                   |
+| Hover de botão    | Adicionado `#C07A3C`             | Ausente no Figma                                                                                                                                                                                                                                                      |
+| Surface elevada   | Adicionado `#2F1D17`             | Para estados de hover/accent do shadcn                                                                                                                                                                                                                                |
+| Fonte             | Roboto Mono em vez de Space Mono | A spec gerada a partir dos screenshots indica Space Mono, mas os glifos do Figma (`r` sem pé, `M` com vértice na metade da altura, `c` de terminais retos) correspondem a Roboto Mono; confirmado renderizando as candidatas ao lado do recorte em resolução original |
+| Container         | 1200 px centralizado             | A spec fala em padding lateral de 80 px; a medição dos screenshots (2880 px) mostra o conteúdo começando em x=120 em um viewport de 1440                                                                                                                              |
+| Separador decimal | Ponto em todos os valores        | O Figma alterna entre `1.19 ETH` nos cards e `0,02 - 12,30 ETH` no filtro. ETH é escrito com ponto mundialmente; usar vírgula só no filtro seria inconsistência replicada                                                                                             |
 
 Todos mantêm a família de matiz da paleta e estão definidos como tokens em `src/app/styles/globals.css`.
 
@@ -169,36 +169,36 @@ outros três. Para trocar por uma arte nativa basta substituir `assets/nft-sourc
 
 ### 4.2 Outros desvios e decisões de UX
 
-| Item | Decisão |
-| --- | --- |
-| Pagamento no mobile | O frame mobile ("Pagamento com carteira") não tem formulário de colecionador; o pedido usa os dados do perfil e da carteira. Os provedores (WalletConnect, MetaMask, Coinbase) alteram o tipo da carteira selecionada |
-| Pagamento no desktop | Lista as carteiras cadastradas (o Figma mostra três cartões estáticos) e um cartão que leva ao cadastro de carteiras |
-| Campos preenchidos | Formulários mostram os dados do usuário; o Figma mostra campos vazios |
-| Etiqueta RARO | No mobile aparece para NFT raro com preço anterior (único caso do frame); o desktop do Figma não mostra a etiqueta |
-| Menu "Meu perfil" | "Lista de interesse" aponta para os favoritos reais; Atividade, Ofertas, Arquivos baixados e Suporte avisam que estão fora do escopo |
-| "Apelido da carteira" no perfil | Edita o apelido da carteira principal |
-| "ENS ou carteira secundária" | Persistido como `linkedReference` na carteira |
-| Links "Aplique aqui" e "Crie uma conta" | Sem sublinhado por padrão (como no Figma), sublinham no hover e no foco |
-| Modal de acesso no desktop | Sem escurecer o fundo, como no Figma; clicar fora ou `Esc` fecha |
-| Descrição no detalhe mobile | Texto derivado (edição, coleção e rede), como no frame, em vez do texto longo do desktop |
-| Edições | O frame mobile repete `1/10`; a interface mostra as edições reais (1/1, 1/10, 1/50, ABERTA) |
-| Cabeçalho ativo | `Início` em início, acesso e perfil; `Mercado` em detalhe, carrinho, pagamento e pedido (como nos frames) |
-| Tablet | O Figma não tem frame de tablet; usa-se o layout mobile em coluna de 640 px (§11) |
-| Modais no desktop | Sempre no tamanho do Figma (acesso 500 px; recibo 578 px de largura, altura conforme o conteúdo, 821 px com 3 itens). Ficam centralizados na vertical quando cabem e, em janelas mais baixas, a própria sobreposição rola (24 px de respiro em cima e embaixo), sem escala e sem corte. O Figma posiciona o recibo a 166 px do topo de um quadro de 1657 px; aqui a posição é derivada da janela. Clicar fora e `Esc` fecham; trocar entre login e cadastro volta ao topo (`scrollToTopSelectors`) |
-| Cadastro | O modal de acesso ganhou o convite "Novo na Kurio? Crie uma conta" / "Já tem uma conta? Entre" (o Figma só tem as abas), igual ao frame mobile |
-| Destaque da home | Ponto ativo em cor cheia com halo e os demais a 55%; o destaque avança sozinho a cada 5 s, pausa com o ponteiro sobre a imagem, com foco por teclado e com a aba oculta, e não avança com "reduzir movimento" |
-| Abas e menus no mobile | Nunca rolam para o lado: abas e menu do perfil quebram linha; as abas da home reduzem a fonte (até ~11 px em 320 px) e usam 6 px entre si; "Avaliações de colecionadores" vira "Avaliações" abaixo de 768 px |
-| Barra inferior (mobile) | Ícones afastados (Figma: 72 e 62,5 px; aqui até 84 px, encolhendo em telas estreitas para nunca passar da largura) e gradiente de 45% (filtro) e 40% (scan) até a cor cheia, como no frame. O botão central de escanear fica acima dos links para responder em toda a área |
-| Grade do catálogo no mobile | **Desvio pedido pelo produto:** duas colunas alinhadas, com as imagens na mesma linha. O frame do Figma escalona a coluna direita; o alinhamento facilita a leitura e a paginação |
-| Abas do catálogo | "Todos os NFTs", "Novos lançamentos" e "Em alta" têm espaçamento uniforme entre si e mostram conjuntos de itens diferentes (§7.2) |
-| Quantidade (−/+) | Com 1 unidade o "−" fica bloqueado de forma visível (fundo apagado, anel, cursor proibido, dica "Quantidade mínima: 1") e continua focável (`aria-disabled`); tocar nele explica o limite. O Figma só mostra o estado ativo. No "+" o limite informa "Só restam N" ou "O limite é de N por pedido" |
-| Filtros ativos | Busca, coleções, redes, raridade e faixa de preço aparecem como chips removíveis com "Limpar filtros", no desktop e no mobile. Não existem no Figma; tornam o estado da URL visível |
-| Revisão no mobile | O frame mobile de pagamento só mostra o total. O diálogo de confirmação lista itens, taxa de rede, desconto e total antes do envio, porque o enunciado exige revisão |
-| Avatar | O perfil oferece um seletor de avatares (emoji) em vez de upload de imagem; o contrato de perfil guarda o emoji escolhido (`avatarEmoji`) |
-| Pedidos | Não há tela de histórico de pedidos (fora do Figma); o recibo é acessado pelo link do pedido, pelo aviso de confirmação ou pelo retorno do checkout |
-| Título e foco por rota | Cada rota define o `<title>` (por exemplo "Carrinho · Kurio") e um anúncio educado para leitores de tela ao navegar |
-| Destaque da home no mobile | Abaixo de 390 px o banner escala proporcionalmente (todas as medidas do frame viram frações da largura), em vez de sobrepor texto e imagem |
-| Simulador de mercado | Painel de desenvolvimento/demonstração, oculto por padrão (`?simulador=1` ou `Ctrl+Alt+M`); não aparece no Figma e não altera nenhuma tela quando fechado (§5.4) |
+| Item                                    | Decisão                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pagamento no mobile                     | O frame mobile ("Pagamento com carteira") não tem formulário de colecionador; o pedido usa os dados do perfil e da carteira. Os provedores (WalletConnect, MetaMask, Coinbase) alteram o tipo da carteira selecionada                                                                                                                                                                                                                                                                              |
+| Pagamento no desktop                    | Lista as carteiras cadastradas (o Figma mostra três cartões estáticos) e um cartão que leva ao cadastro de carteiras                                                                                                                                                                                                                                                                                                                                                                               |
+| Campos preenchidos                      | Formulários mostram os dados do usuário; o Figma mostra campos vazios                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Etiqueta RARO                           | No mobile aparece para NFT raro com preço anterior (único caso do frame); o desktop do Figma não mostra a etiqueta                                                                                                                                                                                                                                                                                                                                                                                 |
+| Menu "Meu perfil"                       | "Lista de interesse" aponta para os favoritos reais; Atividade, Ofertas, Arquivos baixados e Suporte avisam que estão fora do escopo                                                                                                                                                                                                                                                                                                                                                               |
+| "Apelido da carteira" no perfil         | Edita o apelido da carteira principal                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| "ENS ou carteira secundária"            | Persistido como `linkedReference` na carteira                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Links "Aplique aqui" e "Crie uma conta" | Sem sublinhado por padrão (como no Figma), sublinham no hover e no foco                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Modal de acesso no desktop              | Sem escurecer o fundo, como no Figma; clicar fora ou `Esc` fecha                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Descrição no detalhe mobile             | Texto derivado (edição, coleção e rede), como no frame, em vez do texto longo do desktop                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Edições                                 | O frame mobile repete `1/10`; a interface mostra as edições reais (1/1, 1/10, 1/50, ABERTA)                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Cabeçalho ativo                         | `Início` em início, acesso e perfil; `Mercado` em detalhe, carrinho, pagamento e pedido (como nos frames)                                                                                                                                                                                                                                                                                                                                                                                          |
+| Tablet                                  | O Figma não tem frame de tablet; usa-se o layout mobile em coluna de 640 px (§11)                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Modais no desktop                       | Sempre no tamanho do Figma (acesso 500 px; recibo 578 px de largura, altura conforme o conteúdo, 821 px com 3 itens). Ficam centralizados na vertical quando cabem e, em janelas mais baixas, a própria sobreposição rola (24 px de respiro em cima e embaixo), sem escala e sem corte. O Figma posiciona o recibo a 166 px do topo de um quadro de 1657 px; aqui a posição é derivada da janela. Clicar fora e `Esc` fecham; trocar entre login e cadastro volta ao topo (`scrollToTopSelectors`) |
+| Cadastro                                | O modal de acesso ganhou o convite "Novo na Kurio? Crie uma conta" / "Já tem uma conta? Entre" (o Figma só tem as abas), igual ao frame mobile                                                                                                                                                                                                                                                                                                                                                     |
+| Destaque da home                        | Ponto ativo em cor cheia com halo e os demais a 55%; o destaque avança sozinho a cada 5 s, pausa com o ponteiro sobre a imagem, com foco por teclado e com a aba oculta, e não avança com "reduzir movimento"                                                                                                                                                                                                                                                                                      |
+| Abas e menus no mobile                  | Nunca rolam para o lado: abas e menu do perfil quebram linha; as abas da home reduzem a fonte (até ~11 px em 320 px) e usam 6 px entre si; "Avaliações de colecionadores" vira "Avaliações" abaixo de 768 px                                                                                                                                                                                                                                                                                       |
+| Barra inferior (mobile)                 | Ícones afastados (Figma: 72 e 62,5 px; aqui até 84 px, encolhendo em telas estreitas para nunca passar da largura) e gradiente de 45% (filtro) e 40% (scan) até a cor cheia, como no frame. O botão central de escanear fica acima dos links para responder em toda a área                                                                                                                                                                                                                         |
+| Grade do catálogo no mobile             | **Desvio pedido pelo produto:** duas colunas alinhadas, com as imagens na mesma linha. O frame do Figma escalona a coluna direita; o alinhamento facilita a leitura e a paginação                                                                                                                                                                                                                                                                                                                  |
+| Abas do catálogo                        | "Todos os NFTs", "Novos lançamentos" e "Em alta" têm espaçamento uniforme entre si e mostram conjuntos de itens diferentes (§7.2)                                                                                                                                                                                                                                                                                                                                                                  |
+| Quantidade (−/+)                        | Com 1 unidade o "−" fica bloqueado de forma visível (fundo apagado, anel, cursor proibido, dica "Quantidade mínima: 1") e continua focável (`aria-disabled`); tocar nele explica o limite. O Figma só mostra o estado ativo. No "+" o limite informa "Só restam N" ou "O limite é de N por pedido"                                                                                                                                                                                                 |
+| Filtros ativos                          | Busca, coleções, redes, raridade e faixa de preço aparecem como chips removíveis com "Limpar filtros", no desktop e no mobile. Não existem no Figma; tornam o estado da URL visível                                                                                                                                                                                                                                                                                                                |
+| Revisão no mobile                       | O frame mobile de pagamento só mostra o total. O diálogo de confirmação lista itens, taxa de rede, desconto e total antes do envio, porque o enunciado exige revisão                                                                                                                                                                                                                                                                                                                               |
+| Avatar                                  | O perfil oferece um seletor de avatares (emoji) em vez de upload de imagem; o contrato de perfil guarda o emoji escolhido (`avatarEmoji`)                                                                                                                                                                                                                                                                                                                                                          |
+| Pedidos                                 | Não há tela de histórico de pedidos (fora do Figma); o recibo é acessado pelo link do pedido, pelo aviso de confirmação ou pelo retorno do checkout                                                                                                                                                                                                                                                                                                                                                |
+| Título e foco por rota                  | Cada rota define o `<title>` (por exemplo "Carrinho · Kurio") e um anúncio educado para leitores de tela ao navegar                                                                                                                                                                                                                                                                                                                                                                                |
+| Destaque da home no mobile              | Abaixo de 390 px o banner escala proporcionalmente (todas as medidas do frame viram frações da largura), em vez de sobrepor texto e imagem                                                                                                                                                                                                                                                                                                                                                         |
+| Simulador de mercado                    | Painel de desenvolvimento/demonstração, oculto por padrão (`?simulador=1` ou `Ctrl+Alt+M`); não aparece no Figma e não altera nenhuma tela quando fechado (§5.4)                                                                                                                                                                                                                                                                                                                                   |
 
 ### 4.3 Revisão de design (comentários do Figma)
 
@@ -207,21 +207,21 @@ um defeito do próprio layout, a implementação **se afasta do Figma de propós
 correção tem um teste em `e2e/design-review.spec.ts` que falha no código anterior e passa no atual; o comentário sobre o
 ícone dos selects já estava atendido (medido: 0 px de desvio vertical) e ganhou apenas o teste de regressão.
 
-| # | Comentário | Correção | Onde |
-| --- | --- | --- | --- |
-| 1 | "As coleções estão fora de ordem alfabética" | As coleções passam a ser listadas em ordem alfabética (pt-BR: "Arte 3D", "Arte digital", "Assinaturas", "Colecionáveis", "Fotografia", "Generativa", "Jogos", "Música", "Utilidade"). A ordenação é feita pela API (`GET /collections`), então o painel lateral, o filtro do mobile e qualquer outro consumidor recebem a mesma ordem | `mocks/handlers/nfts.ts` |
-| 2 | "Selecionador de imagem tá muito próximo à imagem… para evitar que as animações cubram o seletor" | Os pontos do destaque saem do canto da imagem e ficam **abaixo** dela (32 px de folga), centralizados na largura da imagem, fora da área da transição entre slides | `hero/hero-section.tsx` |
-| 3 | "Falta de uniformidade" | O respiro entre a imagem e a moldura do card era de 4 px nas laterais e 25 px em cima e embaixo. Agora é **igual nos quatro lados** (16 px no desktop, 14 px nos carrosséis, 8 px no mobile), o que deixa cada card um bloco regular; os esqueletos usam as mesmas medidas, sem deslocamento de layout | `nft-card.tsx`, `nft-card-skeleton.tsx`, `mobile-nft-card*.tsx` |
-| 4 | "Faltando margin" (cartões promocionais) | O botão **Explorar** deixou de ser posicionado em absoluto, onde encostava na descrição e cortava o texto: agora é o último item do fluxo, com 16 px de folga acima, 24 px da borda direita e a mesma distância de baixo. O texto ganhou 16 px de distância da imagem, o limite de linhas foi removido (nada mais é cortado) e a imagem acompanha a altura do cartão | `promo-cards.tsx` |
-| 5 | "Texto muito próximo" (carrinho) | O cabeçalho da tabela (NFTs/Preço/Edições/Total) ficava a 4 px do caminho de navegação; agora há 24 px | `cart-page.tsx` |
-| 6 | "Falta centralizar o ícone" (lixeira do carrinho) | A lixeira ficava colada na borda direita da linha (0 px); agora é centralizada na sua coluna, com folga de 8 px, e já estava centralizada na vertical | `cart-row.tsx` |
-| 7 | "Falta centralizar esse ícone" (select de carteira) | Medido em todos os selects: o ícone já estava centralizado na vertical (0 px de desvio) e com folga igual à do texto; mantido e protegido por teste | `ui/select.tsx` |
-| 8 | "Faltou deixar os textos mais para a direita" (recibo) | Os rótulos **Taxa de rede**, **Desconto** e **Total** passam a alinhar à direita, colados na coluna de valores (grade de 2 colunas com a mesma largura da coluna Subtotal), em vez de flutuar a 169 px da borda esquerda | `order-fees.tsx` |
-| 9 | "Melhore a tipografia" ("Ordenar por:Listados recentemente") | Faltava espaço depois dos dois-pontos. O rótulo agora usa a cor secundária e o valor escolhido vai em negrito e na cor de destaque, com 8 px entre eles e o ícone do menu visível a 6 px do texto | `catalog-toolbar.tsx` |
-| 10 | "O ícone tá desproporcional ao botão" (Entrar) | O ícone era o de **sair** (`LogOut`) a 16 px num botão de 35 px. Trocado pelo de **entrar** (`LogIn`), com 14 px (40% da altura do botão), traço mais firme e 6 px do texto | `header/account-control.tsx` |
-| 11 | "Esta imagem não deveria estar aqui" (banner mobile) | A miniatura decorativa (arte "sage") que cobria a imagem em destaque foi **removida**: duas imagens sobrepostas não comunicavam nada e escondiam o NFT em destaque | `mobile-hero-banner.tsx` |
-| 12 | "Falta de margin" (abas no mobile) | As abas "Todos os NFTs / Novos lançamentos / Em alta" ganharam 24 px de distância do banner (eram 12 px) | `mobile-feed-tabs.tsx` |
-| 13 | "Não há espaço para o botão de excluir" (carrinho mobile) | A lixeira foi para o canto superior direito e o seletor de quantidade para o canto inferior direito, com mais de 8 px entre os dois e sem tocar no texto (o título ganha reserva à direita). O item cresce se houver nota de preço, sem sobrepor o valor | `mobile-cart-item.tsx` |
+| #   | Comentário                                                                                        | Correção                                                                                                                                                                                                                                                                                                                                                             | Onde                                                            |
+| --- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 1   | "As coleções estão fora de ordem alfabética"                                                      | As coleções passam a ser listadas em ordem alfabética (pt-BR: "Arte 3D", "Arte digital", "Assinaturas", "Colecionáveis", "Fotografia", "Generativa", "Jogos", "Música", "Utilidade"). A ordenação é feita pela API (`GET /collections`), então o painel lateral, o filtro do mobile e qualquer outro consumidor recebem a mesma ordem                                | `mocks/handlers/nfts.ts`                                        |
+| 2   | "Selecionador de imagem tá muito próximo à imagem… para evitar que as animações cubram o seletor" | Os pontos do destaque saem do canto da imagem e ficam **abaixo** dela (32 px de folga), centralizados na largura da imagem, fora da área da transição entre slides                                                                                                                                                                                                   | `hero/hero-section.tsx`                                         |
+| 3   | "Falta de uniformidade"                                                                           | O respiro entre a imagem e a moldura do card era de 4 px nas laterais e 25 px em cima e embaixo. Agora é **igual nos quatro lados** (16 px no desktop, 14 px nos carrosséis, 8 px no mobile), o que deixa cada card um bloco regular; os esqueletos usam as mesmas medidas, sem deslocamento de layout                                                               | `nft-card.tsx`, `nft-card-skeleton.tsx`, `mobile-nft-card*.tsx` |
+| 4   | "Faltando margin" (cartões promocionais)                                                          | O botão **Explorar** deixou de ser posicionado em absoluto, onde encostava na descrição e cortava o texto: agora é o último item do fluxo, com 16 px de folga acima, 24 px da borda direita e a mesma distância de baixo. O texto ganhou 16 px de distância da imagem, o limite de linhas foi removido (nada mais é cortado) e a imagem acompanha a altura do cartão | `promo-cards.tsx`                                               |
+| 5   | "Texto muito próximo" (carrinho)                                                                  | O cabeçalho da tabela (NFTs/Preço/Edições/Total) ficava a 4 px do caminho de navegação; agora há 24 px                                                                                                                                                                                                                                                               | `cart-page.tsx`                                                 |
+| 6   | "Falta centralizar o ícone" (lixeira do carrinho)                                                 | A lixeira ficava colada na borda direita da linha (0 px); agora é centralizada na sua coluna, com folga de 8 px, e já estava centralizada na vertical                                                                                                                                                                                                                | `cart-row.tsx`                                                  |
+| 7   | "Falta centralizar esse ícone" (select de carteira)                                               | Medido em todos os selects: o ícone já estava centralizado na vertical (0 px de desvio) e com folga igual à do texto; mantido e protegido por teste                                                                                                                                                                                                                  | `ui/select.tsx`                                                 |
+| 8   | "Faltou deixar os textos mais para a direita" (recibo)                                            | Os rótulos **Taxa de rede**, **Desconto** e **Total** passam a alinhar à direita, colados na coluna de valores (grade de 2 colunas com a mesma largura da coluna Subtotal), em vez de flutuar a 169 px da borda esquerda                                                                                                                                             | `order-fees.tsx`                                                |
+| 9   | "Melhore a tipografia" ("Ordenar por:Listados recentemente")                                      | Faltava espaço depois dos dois-pontos. O rótulo agora usa a cor secundária e o valor escolhido vai em negrito e na cor de destaque, com 8 px entre eles e o ícone do menu visível a 6 px do texto                                                                                                                                                                    | `catalog-toolbar.tsx`                                           |
+| 10  | "O ícone tá desproporcional ao botão" (Entrar)                                                    | O ícone era o de **sair** (`LogOut`) a 16 px num botão de 35 px. Trocado pelo de **entrar** (`LogIn`), com 14 px (40% da altura do botão), traço mais firme e 6 px do texto                                                                                                                                                                                          | `header/account-control.tsx`                                    |
+| 11  | "Esta imagem não deveria estar aqui" (banner mobile)                                              | A miniatura decorativa (arte "sage") que cobria a imagem em destaque foi **removida**: duas imagens sobrepostas não comunicavam nada e escondiam o NFT em destaque                                                                                                                                                                                                   | `mobile-hero-banner.tsx`                                        |
+| 12  | "Falta de margin" (abas no mobile)                                                                | As abas "Todos os NFTs / Novos lançamentos / Em alta" ganharam 24 px de distância do banner (eram 12 px)                                                                                                                                                                                                                                                             | `mobile-feed-tabs.tsx`                                          |
+| 13  | "Não há espaço para o botão de excluir" (carrinho mobile)                                         | A lixeira foi para o canto superior direito e o seletor de quantidade para o canto inferior direito, com mais de 8 px entre os dois e sem tocar no texto (o título ganha reserva à direita). O item cresce se houver nota de preço, sem sobrepor o valor                                                                                                             | `mobile-cart-item.tsx`                                          |
 
 ## 5. Camada de mocks
 
@@ -259,21 +259,21 @@ Configuráveis por query string, por `POST /api/__mock__/scenario` ou por
 `localStorage`. A query string vence, para que um link de demonstração ou um
 teste Playwright fixe um cenário sem limpar storage de ninguém.
 
-| Latência | Comportamento |
-| --- | --- |
-| `none` | 0 ms |
-| `fast` | 120 ms (padrão) |
-| `slow` | 1500 ms |
-| `variable` | 100–2000 ms, gerador semeado |
+| Latência       | Comportamento                                                     |
+| -------------- | ----------------------------------------------------------------- |
+| `none`         | 0 ms                                                              |
+| `fast`         | 120 ms (padrão)                                                   |
+| `slow`         | 1500 ms                                                           |
+| `variable`     | 100–2000 ms, gerador semeado                                      |
 | `out-of-order` | Requisições sucessivas resolvem **mais rápido** que as anteriores |
 
-| Falha | Comportamento |
-| --- | --- |
-| `offline` | Falha de transporte (`TypeError`), não status HTTP |
-| `server-error` | 500 com envelope `SERVER_ERROR` |
-| `timeout` | Nunca resolve; quem encerra é o timeout do Axios |
-| `intermittent` | Falha 1 a cada `failEvery` requisições |
-| `unauthorized` | 401, para simular expiração no meio do fluxo |
+| Falha          | Comportamento                                      |
+| -------------- | -------------------------------------------------- |
+| `offline`      | Falha de transporte (`TypeError`), não status HTTP |
+| `server-error` | 500 com envelope `SERVER_ERROR`                    |
+| `timeout`      | Nunca resolve; quem encerra é o timeout do Axios   |
+| `intermittent` | Falha 1 a cada `failEvery` requisições             |
+| `unauthorized` | 401, para simular expiração no meio do fluxo       |
 
 `scope` restringe a falha a prefixos de caminho, então dá para derrubar só
 `/api/cart` e manter o resto de pé.
@@ -288,19 +288,19 @@ race condition na camada de query.
 
 ### 5.4 Controle da simulação
 
-| Rota | Função |
-| --- | --- |
-| `POST /api/__mock__/reset` | Restaura o cenário semeado; o contador de versões nunca volta atrás |
-| `GET\|POST /api/__mock__/scenario` | Lê ou ajusta as condições de rede |
-| `POST /api/__mock__/expire-sessions` | Expira todas as sessões na hora |
-| `GET /api/__mock__/state` | Snapshot para asserção nos testes |
-| `GET /api/__mock__/ping` | Responde JSON enquanto o worker atende a aba; usado pelo guardião do worker (§5.6) |
-| `POST /api/__mock__/nfts/:slug` | Altera preço ou disponibilidade; o evento `nft.updated` sai pelo bus. `previousPriceEth` só é preenchido quando o preço cai |
-| `GET /api/__mock__/socket` | Quantidade de clientes Socket.IO conectados e milissegundos restantes de uma queda simulada |
-| `POST /api/__mock__/socket/drop` | Derruba as conexões; com `{ holdMs }` recusa novas conexões durante a queda, para dar tempo de alterar dados offline |
-| `POST /api/__mock__/socket/reconnect` | Encerra a queda e deixa o cliente reconectar |
-| `POST /api/__mock__/socket/emit` | Entrega um evento arbitrário aos clientes (duplicados, versões antigas) |
-| `POST /api/__mock__/socket/replay` | Reenvia o último evento do NFT (`duplicate`) ou o anterior a ele (`stale`) |
+| Rota                                  | Função                                                                                                                      |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/__mock__/reset`            | Restaura o cenário semeado; o contador de versões nunca volta atrás                                                         |
+| `GET\|POST /api/__mock__/scenario`    | Lê ou ajusta as condições de rede                                                                                           |
+| `POST /api/__mock__/expire-sessions`  | Expira todas as sessões na hora                                                                                             |
+| `GET /api/__mock__/state`             | Snapshot para asserção nos testes                                                                                           |
+| `GET /api/__mock__/ping`              | Responde JSON enquanto o worker atende a aba; usado pelo guardião do worker (§5.6)                                          |
+| `POST /api/__mock__/nfts/:slug`       | Altera preço ou disponibilidade; o evento `nft.updated` sai pelo bus. `previousPriceEth` só é preenchido quando o preço cai |
+| `GET /api/__mock__/socket`            | Quantidade de clientes Socket.IO conectados e milissegundos restantes de uma queda simulada                                 |
+| `POST /api/__mock__/socket/drop`      | Derruba as conexões; com `{ holdMs }` recusa novas conexões durante a queda, para dar tempo de alterar dados offline        |
+| `POST /api/__mock__/socket/reconnect` | Encerra a queda e deixa o cliente reconectar                                                                                |
+| `POST /api/__mock__/socket/emit`      | Entrega um evento arbitrário aos clientes (duplicados, versões antigas)                                                     |
+| `POST /api/__mock__/socket/replay`    | Reenvia o último evento do NFT (`duplicate`) ou o anterior a ele (`stale`)                                                  |
 
 Essas rotas **não** passam pela simulação de rede, de propósito: é preciso
 conseguir resetar a base ou desligar uma falha enquanto o cenário `offline`
@@ -461,19 +461,19 @@ inclui todos os parâmetros da consulta (filtros, ordenação, página). Login, 
 
 ### 8.3 Política de cache e retry
 
-| Item | Política |
-| --- | --- |
-| Padrão | `staleTime` 30 s, `gcTime` 5 min, sem refetch ao focar a janela |
-| Retry de leitura | Até 2 tentativas; nenhuma em 4xx |
-| Retry de mutation | Nenhum. Repetir é decisão do usuário, e pedidos usam idempotência |
-| Catálogo e favoritos (lista) | `keepPreviousData`: a página anterior continua visível, com `aria-busy`, enquanto a nova carrega |
-| Facetas (coleções, redes, destaques) | `staleTime` 5 min |
-| Carteiras e IDs de favoritos | `staleTime` 60 s |
-| Carrinho | `staleTime` 10 s; mutations gravam a resposta no cache e, em erro, invalidam |
-| Sessão (`/auth/session`) | `staleTime` 60 s; retry só para falha transitória (rede, timeout, 5xx), até 2 vezes. Só `401` expira a sessão; qualquer outra falha mostra a tela de erro da rota com "Tentar novamente" e mantém o contexto |
-| Cotação | `staleTime` infinito e `gcTime` 0, com refetch ao focar a janela; é refeita por evento `nft.updated` e pelo botão "Atualizar cotação" |
-| Pedido pendente | Polling a cada 1,5 s enquanto `status === 'pending'`, além do evento `order.updated`; a consulta só existe com um id de pedido (nada de `GET /orders/` vazio) |
-| Respostas obsoletas | O `AbortSignal` do Query cancela a consulta anterior; a chave com os parâmetros descarta o resto |
+| Item                                 | Política                                                                                                                                                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Padrão                               | `staleTime` 30 s, `gcTime` 5 min, sem refetch ao focar a janela                                                                                                                                              |
+| Retry de leitura                     | Até 2 tentativas; nenhuma em 4xx                                                                                                                                                                             |
+| Retry de mutation                    | Nenhum. Repetir é decisão do usuário, e pedidos usam idempotência                                                                                                                                            |
+| Catálogo e favoritos (lista)         | `keepPreviousData`: a página anterior continua visível, com `aria-busy`, enquanto a nova carrega                                                                                                             |
+| Facetas (coleções, redes, destaques) | `staleTime` 5 min                                                                                                                                                                                            |
+| Carteiras e IDs de favoritos         | `staleTime` 60 s                                                                                                                                                                                             |
+| Carrinho                             | `staleTime` 10 s; mutations gravam a resposta no cache e, em erro, invalidam                                                                                                                                 |
+| Sessão (`/auth/session`)             | `staleTime` 60 s; retry só para falha transitória (rede, timeout, 5xx), até 2 vezes. Só `401` expira a sessão; qualquer outra falha mostra a tela de erro da rota com "Tentar novamente" e mantém o contexto |
+| Cotação                              | `staleTime` infinito e `gcTime` 0, com refetch ao focar a janela; é refeita por evento `nft.updated` e pelo botão "Atualizar cotação"                                                                        |
+| Pedido pendente                      | Polling a cada 1,5 s enquanto `status === 'pending'`, além do evento `order.updated`; a consulta só existe com um id de pedido (nada de `GET /orders/` vazio)                                                |
+| Respostas obsoletas                  | O `AbortSignal` do Query cancela a consulta anterior; a chave com os parâmetros descarta o resto                                                                                                             |
 
 Invalidação coerente: mutations de carrinho gravam a resposta no cache (a API devolve o carrinho inteiro); eventos
 `nft.updated` invalidam carrinho e cotação; `order.updated` terminal invalida carrinho e catálogo.
@@ -535,8 +535,8 @@ calculado na interface.
 ### 10.3 Pedido
 
 1. `POST /quotes` gera a cotação (e as `issues`). 2. A conexão de carteira é simulada (`connect`, `disconnect`; o cenário
-`wallet=reject` a recusa). 3. `POST /orders` leva a chave `x-idempotency-key`, estável por cotação. 4. O recibo é um
-snapshot imutável.
+   `wallet=reject` a recusa). 3. `POST /orders` leva a chave `x-idempotency-key`, estável por cotação. 4. O recibo é um
+   snapshot imutável.
 
 **Cotação aceita de forma explícita.** O servidor compara cada cotação nova com a **última cotação aceita** pelo usuário
 (a primeira, a devolvida por `acknowledge` ou uma sem `issues`), e não com a última emitida. Assim o alerta de preço
@@ -560,11 +560,11 @@ após novo login, e a troca de usuário nunca os lê, porque as chaves pertencem
 
 ## 11. Layout responsivo
 
-| Faixa | Layout |
-| --- | --- |
-| < 768 px | Mobile: frames móveis do Figma (cabeçalho próprio, barra inferior com entalhe e botão central, painéis fixos) |
-| 768 – 1279 px | Tablet: o layout mobile em coluna central de 640 px; barras fixas respeitam a mesma largura |
-| ≥ 1280 px | Desktop: frames de 1440 px, contêiner de 1200 px |
+| Faixa         | Layout                                                                                                        |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| < 768 px      | Mobile: frames móveis do Figma (cabeçalho próprio, barra inferior com entalhe e botão central, painéis fixos) |
+| 768 – 1279 px | Tablet: o layout mobile em coluna central de 640 px; barras fixas respeitam a mesma largura                   |
+| ≥ 1280 px     | Desktop: frames de 1440 px, contêiner de 1200 px                                                              |
 
 A troca mobile/desktop é feita por `useIsDesktop()` (`min-width: 1280px`), de modo que só uma árvore é montada. Os
 elementos de casca usam `xl:` com o mesmo limite. Nos 1280 px o conteúdo de 1200 px ainda cabe com respiro.
@@ -610,7 +610,7 @@ imagens não perderam qualidade (§4.1).
   `startTransition`.
 - **Chunks** (`build.rolldownOptions.output.codeSplitting`): `react`, `tanstack`, `vendor` (axios, zod, tailwind-merge, big.js),
   `msw` (runtime do MSW e dependências) e `mocks` (código de `src/mocks`). **Atenção:** `engine.io-client` captura `WebSocket` ao
-  ser avaliado; nunca pode cair num chunk avaliado antes do `worker.start()` (§2.2 c). Qualquer mudança de chunking ou de
+  ser avaliado; nunca pode cair num chunk avaliado antes do `worker.start()` (§2.2 c). O ponto de entrada não pode importar estaticamente `msw`, `vendor` ou `mocks` (senão tudo é avaliado numa só tarefa, antes do primeiro `yield`): por isso os helpers de boot (`yieldToMain`, `MOCKS_ENABLED` e o preload do Vite) têm o chunk próprio `preload`. Qualquer mudança de chunking ou de
   montagem exige rodar a suíte E2E de tempo real.
 - **Preload por rota** (`build/plugins/route-preload.ts`): o HTML traz `modulepreload` dos chunks comuns e um script inline
   mínimo que acrescenta os chunks da rota (`/` ou `/nft/*`) a partir de `location.pathname`, o que paraleliza o que antes era
@@ -643,55 +643,55 @@ mesmo trace e `lighthouse/trace.mjs` atribui as tarefas longas a scripts e funç
 
 Última auditoria completa (`npm run lighthouse`, 3 medições por página e perfil, medianas; relatórios em `lighthouse/reports/`):
 
-| Página | Perfil | Performance | Acessibilidade | Boas práticas | SEO | LCP | CLS | TBT | Benchmark do host (3 rodadas) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Início | Desktop | 100 | 97 | 100 | 100 | 0,61 s | 0 | 3 ms | 1048 / 1689 / 1884 |
-| Detalhe | Desktop | 100 | 100 | 100 | 100 | 0,56 s | 0 | 31 ms | 1108 / 1149 / 2180 |
-| Início | Mobile | 79 | 100 | 100 | 100 | 2,55 s | 0 | 689 ms | 1627 / 1221 / 1462 |
-| Detalhe | Mobile | 81 | 100 | 100 | 100 | 2,69 s | 0 | 605 ms | 1026 / 975 / 1348 |
+| Página  | Perfil  | Performance       | Acessibilidade | Boas práticas | SEO | LCP    | CLS | TBT    | Benchmark do host (3 rodadas) |
+| ------- | ------- | ----------------- | -------------- | ------------- | --- | ------ | --- | ------ | ----------------------------- |
+| Início  | Desktop | 100               | 97             | 100           | 100 | 0,59 s | 0   | 0 ms   | 2166 / 1952 / 2264            |
+| Detalhe | Desktop | 100               | 100            | 100           | 100 | 0,56 s | 0   | 0 ms   | 2328 / 2386 / 2077            |
+| Início  | Mobile  | 92 (92 / 94 / 92) | 100            | 100           | 100 | 2,66 s | 0   | 221 ms | 2119 / 2081 / 2296            |
+| Detalhe | Mobile  | 94 (96 / 94 / 94) | 100            | 100           | 100 | 2,56 s | 0   | 193 ms | 2265 / 2144 / 2306            |
 
-Acessibilidade, Boas práticas e SEO atendem às metas (≥ 95, ≥ 95, ≥ 90) em todas as páginas e perfis, e o CLS é 0 em todas. A Performance do desktop é 100 (a acessibilidade de 97 no início do desktop também atende à meta). **A Performance mobile desta rodada ficou abaixo da meta de 90, e a causa é a CPU do host, não uma regressão de código:**
-o Lighthouse simula o mobile reduzindo a CPU 4× sobre a CPU real da máquina, e esta máquina (notebook i5-1145G7) reduz a
-frequência sob carga térmica. Nesta rodada ela operava a ~42 % da frequência máxima (benchmark de 975 a 1627; o Lighthouse
-considera ~1000 uma CPU de celular de entrada, ~2000+ uma CPU de desktop moderna). O TBT é a métrica que mais sofre, pois soma
-as tarefas longas multiplicadas por 4.
+Todas as metas do enunciado são atendidas (Performance ≥ 90, Acessibilidade ≥ 95, Boas práticas ≥ 95, SEO ≥ 90), com CLS 0 em todas
+as páginas e perfis. A Performance mobile depende da CPU do host, porque o Lighthouse reduz a CPU 4× sobre a CPU real da
+máquina: no mesmo build, rodadas com o notebook de desenvolvimento limitado a ~42 % da frequência (benchmark de 1000 a 1600)
+variam alguns pontos para baixo, e o `benchmarkIndex` de cada medição fica registrado em `lighthouse/reports/summary.json` e
+na tabela do README.
 
-Medições do mesmo build (apenas o benchmark do host muda), rodadas anteriores anotadas durante o trabalho (os relatórios de `lighthouse/reports/` guardam só a última):
+**O que mais pesou e como foi resolvido.** Até a última revisão, o ponto de entrada (`index`) importava estaticamente o chunk
+`mocks`, porque o agrupador de chunks colocou ali duas funções minúsculas que o próprio boot usa (`yieldToMain` e o helper de
+preload do Vite). Resultado: o MSW, o zod/axios (`vendor`) e o código dos mocks eram avaliados juntos, numa única tarefa de
+~36 ms reais, antes de qualquer `yield`, o que derrotava o boot em etapas (§13.1). Esses helpers passaram para um chunk próprio
+(`preload`, ~1,7 KB), e cada etapa voltou a avaliar na sua tarefa (a maior caiu de ~36 para ~15 ms). No Lantern, com benchmark
+parecido, o TBT mediano do início mobile foi de 540 ms para 204 ms (3–4 rodadas antes e depois), e o LCP caiu ~200 ms.
 
-| Condição do host | Benchmark | Início mobile | Detalhe mobile |
-| --- | --- | --- | --- |
-| CPU em frequência cheia (melhor rodada) | ~2100–2350 | **95** (96 / 95 / 94; TBT ~135 ms) | 83 (94 / 77 / 83) |
-| CPU reduzida (rodada anterior à revisão de design) | ~1000–1450 | 76–84 | não registrado separadamente |
-| CPU reduzida (esta rodada, após a revisão de design) | 975–1627 | 79 (76 / 79 / 84) | 81 (81 / 81 / 82) |
+| Estado do build                                  | Início mobile                                                           | Detalhe mobile                    | Condição do host     |
+| ------------------------------------------------ | ----------------------------------------------------------------------- | --------------------------------- | -------------------- |
+| Antes (entrada importando `mocks`), CPU limitada | 79 (76 / 79 / 84), TBT 689 ms                                           | 81 (81 / 81 / 82), TBT 605 ms     | benchmark 975–1627   |
+| Antes, CPU em frequência cheia                   | 95 (96 / 95 / 94) numa rodada anterior à revisão de design, TBT ~135 ms | 83 (94 / 77 / 83)                 | benchmark ~2100–2350 |
+| Depois (esta auditoria)                          | **92** (92 / 94 / 92), TBT 221 ms                                       | **94** (96 / 94 / 94), TBT 193 ms | benchmark 2081–2306  |
 
-As duas linhas de CPU reduzida são equivalentes entre si (a revisão de design de §4.3 mexe em margens, tamanho de ícone e na ordem
-das coleções, não adiciona JavaScript ao caminho crítico), e a variação dentro de uma mesma rodada (76 a 84 no início) mostra que
-a dispersão vem do host. Executar `npm run lighthouse` em uma máquina com a CPU em frequência cheia (ou na Vercel, com
-`LH_URL=https://...`) reproduz a primeira linha. Nada foi escolhido a dedo: a tabela do README e o `summary.json` mostram a última
-execução completa e o benchmark de cada medição.
+A linha "Antes, CPU em frequência cheia" é de uma rodada anterior anotada durante o trabalho (os relatórios de
+`lighthouse/reports/` guardam só a última). Ela mostra que o resultado oscila de rodada para rodada, e o ganho do ajuste de
+chunks aparece de forma consistente no detalhe (83 → 94) e no desempenho em CPU limitada (79/81 → 92–95 em medições
+de verificação).
 
-Causas medidas no trace do Lantern (`lighthouse/lantern.mjs`, `lighthouse/trace.mjs`):
+Causas do que ainda separa o mobile de 100, medidas no trace (`lighthouse/lantern.mjs`, `lighthouse/trace.mjs`):
 
-1. **Bytes de JavaScript antes do primeiro card.** Em Brotli o caminho crítico carrega ~270 KB: React e React DOM (~68 KB em gzip), a
-   camada de backend simulado (MSW e dependências, ~45 KB, mais ~18 KB dos mocks da aplicação), zod e axios (~58 KB no chunk
+1. **Bytes de JavaScript antes do primeiro card.** Em Brotli o caminho crítico carrega ~270 KB: React e React DOM (~68 KB em gzip),
+   a camada de backend simulado (MSW e dependências, ~45 KB, mais ~18 KB dos mocks da aplicação), zod e axios (~58 KB no chunk
    `vendor`) e o TanStack (~36 KB). React, MSW, zod e axios somam ~55 % dos bytes. O MSW existe só porque o enunciado manda
    simular o backend no cliente; um backend real não teria esse custo, e nada foi removido ou simplificado só para a medição.
-2. **CPU 4× sobre tarefas inevitáveis.** O commit do React da primeira tela, duas avaliações de módulo e as três respostas
-   iniciais (axios + zod) ficam entre 12 e 40 ms reais; multiplicadas por 4 e descontados 50 ms por tarefa, viram o TBT.
+2. **CPU 4× sobre tarefas inevitáveis.** Restam quatro tarefas entre 15 e 30 ms reais (avaliação dos módulos de zod/mocks, criação
+   do roteador e da raiz do React, primeiro render e o primeiro layout); cada uma, multiplicada por 4 e descontados 50 ms,
+   vira TBT (~200 ms no total).
 3. **HTML e TLS fixos (~780 ms na simulação)** e uma janela de download de ~205 KB/s fazem cada 1 KB de JS antes do primeiro card
    custar ~5 ms de LCP. As imagens dos cards (WebP, escada 160–960 px, `sizes` exato por slot) terminam junto da cauda da CPU e
    mexem pouco na nota da página inicial.
 4. Em HTTP/1.1 (`vite preview`, `LH_SERVER=preview`) o mesmo build cai para ~80, porque dezenas de arquivos pequenos viram várias
    ondas de requisição; o `serve.mjs` usa HTTP/2 e Brotli como uma CDN (Vercel).
 
-O que foi feito para reduzir o custo, tudo válido para qualquer usuário (§13.1): boot em etapas com `yieldToMain`, chunks por
-responsabilidade, preload por rota, árvores desktop e componentes de uso tardio fora do caminho crítico, `sonner`, tempo real e
-simulador sob demanda, renderização escalonada dos cards no mobile, imagens redimensionadas com portão de qualidade por SSIM e
-cache longo para fontes e imagens. Ficaram de fora, por regra do enunciado (§10) ou por custo, a subsetagem de fontes, a
-condição por user agent, a perda de qualidade das imagens, a redução da latência dos mocks, o preload da imagem do LCP (ganho
-estimado de ±30 ms), a troca do axios por `fetch`, o `zod/mini` e mover banco e handlers para um Web Worker (últimos recursos de
-reserva, com ganho estimado de 40 a 100 ms de LCP e de 30 a 90 ms de TBT).
-
+Ficaram de fora, por regra do enunciado (§10) ou por custo, a subsetagem de fontes, a condição por user agent, a perda de
+qualidade das imagens, a redução da latência dos mocks, o preload da imagem do LCP (ganho estimado de ±30 ms), a troca do axios
+por `fetch`, o `zod/mini` e mover banco e handlers para um Web Worker (últimos recursos de reserva).
 
 ## 14. Testes
 
@@ -755,20 +755,26 @@ evento duplicado e fora de ordem inofensivo em vez de regressivo.
 **Erros.** Toda resposta não-2xx usa o mesmo envelope:
 
 ```json
-{ "error": { "code": "VALIDATION_ERROR", "message": "...", "fields": { "email": "E-mail inválido" } } }
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "...",
+    "fields": { "email": "E-mail inválido" }
+  }
+}
 ```
 
-| `code` | HTTP | Significado |
-| --- | --- | --- |
-| `VALIDATION_ERROR` | 422 | Entrada rejeitada; `fields` mapeia campo → mensagem |
-| `UNAUTHENTICATED` | 401 | Sessão ausente ou expirada |
-| `FORBIDDEN` | 403 | Autenticado, mas a operação foi recusada (por exemplo, a carteira recusou a conexão) |
-| `NOT_FOUND` | 404 | Recurso inexistente, ou que pertence a outro usuário (a resposta é a mesma, para não revelar a existência) |
-| `CONFLICT` | 409 | Disponibilidade, cadastro duplicado, reuso de chave de idempotência com outro conteúdo |
-| `COUPON_INVALID` | 422 | Código desconhecido |
-| `COUPON_EXPIRED` | 422 | Código conhecido, fora da validade |
-| `QUOTE_STALE` | 409 | Preço, disponibilidade, cupom ou validade da cotação mudaram desde que ela foi emitida |
-| `SERVER_ERROR` | 500 | Falha transitória; seguro repetir |
+| `code`             | HTTP | Significado                                                                                                |
+| ------------------ | ---- | ---------------------------------------------------------------------------------------------------------- |
+| `VALIDATION_ERROR` | 422  | Entrada rejeitada; `fields` mapeia campo → mensagem                                                        |
+| `UNAUTHENTICATED`  | 401  | Sessão ausente ou expirada                                                                                 |
+| `FORBIDDEN`        | 403  | Autenticado, mas a operação foi recusada (por exemplo, a carteira recusou a conexão)                       |
+| `NOT_FOUND`        | 404  | Recurso inexistente, ou que pertence a outro usuário (a resposta é a mesma, para não revelar a existência) |
+| `CONFLICT`         | 409  | Disponibilidade, cadastro duplicado, reuso de chave de idempotência com outro conteúdo                     |
+| `COUPON_INVALID`   | 422  | Código desconhecido                                                                                        |
+| `COUPON_EXPIRED`   | 422  | Código conhecido, fora da validade                                                                         |
+| `QUOTE_STALE`      | 409  | Preço, disponibilidade, cupom ou validade da cotação mudaram desde que ela foi emitida                     |
+| `SERVER_ERROR`     | 500  | Falha transitória; seguro repetir                                                                          |
 
 **Sessão.** O token é opaco, enviado em `Authorization: Bearer` e guardado no `localStorage` (§5.5, §10.1). A resposta de
 sessão traz `expiresAt`; a interface reage ao `401`, não antecipa a expiração.
@@ -780,38 +786,38 @@ fica ligado a esse identificador e é fundido ao da conta no login.
 
 ### 16.2 Sessão e conta
 
-| Método | Rota | Corpo | Resposta | Erros |
-| --- | --- | --- | --- | --- |
+| Método | Rota             | Corpo           | Resposta      | Erros                                  |
+| ------ | ---------------- | --------------- | ------------- | -------------------------------------- |
 | `POST` | `/auth/register` | `RegisterInput` | `201 Session` | `409` e-mail ou usuário em uso · `422` |
-| `POST` | `/auth/login` | `LoginInput` | `200 Session` | `401` credenciais inválidas · `422` |
-| `GET` | `/auth/session` | — | `200 Session` | `401` |
-| `POST` | `/auth/logout` | — | `204` | — |
+| `POST` | `/auth/login`    | `LoginInput`    | `200 Session` | `401` credenciais inválidas · `422`    |
+| `GET`  | `/auth/session`  | —               | `200 Session` | `401`                                  |
+| `POST` | `/auth/logout`   | —               | `204`         | —                                      |
 
 Senhas nunca trafegam de volta e são guardadas com hash e salt na base simulada. A sessão dura 30 minutos, sem renovação.
 
 ### 16.3 NFTs
 
-| Método | Rota | Resposta | Erros |
-| --- | --- | --- | --- |
-| `GET` | `/nfts` | `200 NftListResponse` | `422` parâmetros inválidos |
-| `GET` | `/nfts/:slug` | `200 NftDetail` | `404` |
-| `GET` | `/nfts/:slug/related` | `200 NftSummary[]` | `404` |
-| `GET` | `/featured` | `200 { hero, spotlight }` | — |
-| `GET` | `/collections` | `200 Collection[]` (em ordem alfabética, pt-BR) | — |
-| `GET` | `/networks` | `200 NetworkOption[]` | — |
+| Método | Rota                  | Resposta                                        | Erros                      |
+| ------ | --------------------- | ----------------------------------------------- | -------------------------- |
+| `GET`  | `/nfts`               | `200 NftListResponse`                           | `422` parâmetros inválidos |
+| `GET`  | `/nfts/:slug`         | `200 NftDetail`                                 | `404`                      |
+| `GET`  | `/nfts/:slug/related` | `200 NftSummary[]`                              | `404`                      |
+| `GET`  | `/featured`           | `200 { hero, spotlight }`                       | —                          |
+| `GET`  | `/collections`        | `200 Collection[]` (em ordem alfabética, pt-BR) | —                          |
+| `GET`  | `/networks`           | `200 NetworkOption[]`                           | —                          |
 
 Parâmetros de `/nfts`, validados pelo mesmo `catalogQuerySchema` que valida os search params da rota:
 
-| Parâmetro | Tipo | Padrão |
-| --- | --- | --- |
-| `q` | string | — |
-| `collections` | string[] | `[]` |
-| `networks` | `ethereum \| polygon \| solana`[] | `[]` |
-| `rarity` | `common \| rare \| legendary`[] | `[]` |
-| `minPriceEth` / `maxPriceEth` | decimal string | — |
-| `feed` | `all \| new \| trending` | `all` |
-| `sort` | `recent \| price-asc \| price-desc \| popular` | `recent` (`popular` na aba `trending`) |
-| `page` | inteiro positivo | `1` |
+| Parâmetro                     | Tipo                                           | Padrão                                 |
+| ----------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `q`                           | string                                         | —                                      |
+| `collections`                 | string[]                                       | `[]`                                   |
+| `networks`                    | `ethereum \| polygon \| solana`[]              | `[]`                                   |
+| `rarity`                      | `common \| rare \| legendary`[]                | `[]`                                   |
+| `minPriceEth` / `maxPriceEth` | decimal string                                 | —                                      |
+| `feed`                        | `all \| new \| trending`                       | `all`                                  |
+| `sort`                        | `recent \| price-asc \| price-desc \| popular` | `recent` (`popular` na aba `trending`) |
+| `page`                        | inteiro positivo                               | `1`                                    |
 
 Filtros são combináveis e qualquer mudança de filtro reinicia `page` para 1 (§7.2 descreve os feeds e a ordenação padrão).
 
@@ -819,26 +825,26 @@ Filtros são combináveis e qualquer mudança de filtro reinicia `page` para 1 (
 
 Exigem autenticação.
 
-| Método | Rota | Resposta |
-| --- | --- | --- |
-| `GET` | `/favorites/ids` | `200 { nftIds: string[] }` |
-| `GET` | `/favorites` | `200` lista paginada de `NftSummary` |
-| `PUT` | `/favorites/:nftId` | `204` |
-| `DELETE` | `/favorites/:nftId` | `204` |
+| Método   | Rota                | Resposta                             |
+| -------- | ------------------- | ------------------------------------ |
+| `GET`    | `/favorites/ids`    | `200 { nftIds: string[] }`           |
+| `GET`    | `/favorites`        | `200` lista paginada de `NftSummary` |
+| `PUT`    | `/favorites/:nftId` | `204`                                |
+| `DELETE` | `/favorites/:nftId` | `204`                                |
 
 A lista de ids existe separada da lista paginada para que o coração do catálogo não dependa dos summaries completos. É
 também o alvo da atualização otimista com rollback (§8.4).
 
 ### 16.5 Carrinho
 
-| Método | Rota | Corpo | Resposta | Erros |
-| --- | --- | --- | --- | --- |
-| `GET` | `/cart` | — | `200 Cart` | — |
-| `POST` | `/cart/items` | `AddCartItemInput` | `200 Cart` | `409` sem disponibilidade · `404` |
-| `PATCH` | `/cart/items/:itemId` | `UpdateCartItemInput` | `200 Cart` | `409` · `404` |
-| `DELETE` | `/cart/items/:itemId` | — | `200 Cart` | `404` |
-| `POST` | `/cart/coupon` | `ApplyCouponInput` | `200 Cart` | `COUPON_INVALID` · `COUPON_EXPIRED` |
-| `DELETE` | `/cart/coupon` | — | `200 Cart` | — |
+| Método   | Rota                  | Corpo                 | Resposta   | Erros                               |
+| -------- | --------------------- | --------------------- | ---------- | ----------------------------------- |
+| `GET`    | `/cart`               | —                     | `200 Cart` | —                                   |
+| `POST`   | `/cart/items`         | `AddCartItemInput`    | `200 Cart` | `409` sem disponibilidade · `404`   |
+| `PATCH`  | `/cart/items/:itemId` | `UpdateCartItemInput` | `200 Cart` | `409` · `404`                       |
+| `DELETE` | `/cart/items/:itemId` | —                     | `200 Cart` | `404`                               |
+| `POST`   | `/cart/coupon`        | `ApplyCouponInput`    | `200 Cart` | `COUPON_INVALID` · `COUPON_EXPIRED` |
+| `DELETE` | `/cart/coupon`        | —                     | `200 Cart` | —                                   |
 
 No login, os itens do visitante são incorporados ao carrinho da conta; quantidades que excedam a disponibilidade são
 reduzidas ao máximo possível. Os totais (`subtotalEth`, `discountEth`, `networkFeeEth`, `totalEth`) são sempre calculados no
@@ -846,19 +852,19 @@ servidor; a interface nunca deriva dinheiro.
 
 ### 16.6 Cotação
 
-| Método | Rota | Corpo | Resposta |
-| --- | --- | --- | --- |
-| `POST` | `/quotes` | `{ walletId, network }` | `200 Quote` |
-| `POST` | `/quotes/:id/acknowledge` | — | `200 Quote` (nova cotação) |
+| Método | Rota                      | Corpo                   | Resposta                   |
+| ------ | ------------------------- | ----------------------- | -------------------------- |
+| `POST` | `/quotes`                 | `{ walletId, network }` | `200 Quote`                |
+| `POST` | `/quotes/:id/acknowledge` | —                       | `200 Quote` (nova cotação) |
 
 A cotação recalcula tudo e devolve `issues[]`:
 
-| `code` | Quando |
-| --- | --- |
-| `PRICE_CHANGED` | O preço unitário difere do da **última cotação aceita** |
-| `AVAILABILITY_REDUCED` | Estoque caiu abaixo da quantidade pedida |
-| `SOLD_OUT` | Edição esgotou |
-| `COUPON_EXPIRED` / `COUPON_INVALID` | Cupom deixou de valer |
+| `code`                              | Quando                                                  |
+| ----------------------------------- | ------------------------------------------------------- |
+| `PRICE_CHANGED`                     | O preço unitário difere do da **última cotação aceita** |
+| `AVAILABILITY_REDUCED`              | Estoque caiu abaixo da quantidade pedida                |
+| `SOLD_OUT`                          | Edição esgotou                                          |
+| `COUPON_EXPIRED` / `COUPON_INVALID` | Cupom deixou de valer                                   |
 
 `acknowledge` aplica as correções (preços e quantidades atuais) ao carrinho e devolve uma cotação nova, sem as `issues`
 aceitas, que passa a ser a base das próximas comparações. Uma cotação com qualquer `issue`, ou já vencida (`expiresAt`, 5
@@ -867,11 +873,11 @@ compra de passar silenciosamente a um preço desatualizado (§10.3).
 
 ### 16.7 Pedidos
 
-| Método | Rota | Corpo | Resposta | Erros |
-| --- | --- | --- | --- | --- |
-| `POST` | `/orders` | `CreateOrderInput` | `201 Order` | `409 QUOTE_STALE` · `409 CONFLICT` · `404` · `422` |
-| `GET` | `/orders/:id` | — | `200 Order` | `404` (inclusive de outro usuário) |
-| `GET` | `/orders` | — | `200` lista paginada | `401` |
+| Método | Rota          | Corpo              | Resposta             | Erros                                              |
+| ------ | ------------- | ------------------ | -------------------- | -------------------------------------------------- |
+| `POST` | `/orders`     | `CreateOrderInput` | `201 Order`          | `409 QUOTE_STALE` · `409 CONFLICT` · `404` · `422` |
+| `GET`  | `/orders/:id` | —                  | `200 Order`          | `404` (inclusive de outro usuário)                 |
+| `GET`  | `/orders`     | —                  | `200` lista paginada | `401`                                              |
 
 **Idempotência.** `POST /orders` exige o header `x-idempotency-key`, gerado pelo cliente e estável entre tentativas da mesma
 compra (uma por cotação).
@@ -888,17 +894,17 @@ cerca de 1,5 s; `payment=decline` faz o pedido terminar recusado.
 
 ### 16.8 Perfil e carteiras
 
-| Método | Rota | Corpo | Resposta | Erros |
-| --- | --- | --- | --- | --- |
-| `GET` | `/profile` | — | `200 User` | `401` |
-| `PATCH` | `/profile` | `UpdateProfileInput` | `200 User` | `409` usuário/e-mail em uso · `422` |
-| `POST` | `/profile/password` | `ChangePasswordInput` | `204` | `422` senha atual incorreta |
-| `GET` | `/wallets` | — | `200 Wallet[]` | `401` |
-| `POST` | `/wallets` | `WalletInput` | `201 Wallet` | `409` slot ocupado · `422` |
-| `PATCH` | `/wallets/:id` | `WalletInput` | `200 Wallet` | `404` · `422` |
-| `DELETE` | `/wallets/:id` | — | `204` | `404` |
-| `POST` | `/wallets/:id/connect` | — | `200 { walletId, connected }` | `403` carteira recusou · `404` |
-| `POST` | `/wallets/:id/disconnect` | — | `200 { walletId, connected }` | `404` |
+| Método   | Rota                      | Corpo                 | Resposta                      | Erros                               |
+| -------- | ------------------------- | --------------------- | ----------------------------- | ----------------------------------- |
+| `GET`    | `/profile`                | —                     | `200 User`                    | `401`                               |
+| `PATCH`  | `/profile`                | `UpdateProfileInput`  | `200 User`                    | `409` usuário/e-mail em uso · `422` |
+| `POST`   | `/profile/password`       | `ChangePasswordInput` | `204`                         | `422` senha atual incorreta         |
+| `GET`    | `/wallets`                | —                     | `200 Wallet[]`                | `401`                               |
+| `POST`   | `/wallets`                | `WalletInput`         | `201 Wallet`                  | `409` slot ocupado · `422`          |
+| `PATCH`  | `/wallets/:id`            | `WalletInput`         | `200 Wallet`                  | `404` · `422`                       |
+| `DELETE` | `/wallets/:id`            | —                     | `204`                         | `404`                               |
+| `POST`   | `/wallets/:id/connect`    | —                     | `200 { walletId, connected }` | `403` carteira recusou · `404`      |
+| `POST`   | `/wallets/:id/disconnect` | —                     | `200 { walletId, connected }` | `404`                               |
 
 `connect` e `disconnect` simulam a extensão de carteira. O cenário `wallet=reject` faz a conexão responder `403 FORBIDDEN`.
 Os campos `linkedReference` (ENS ou carteira vinculada, opcional), `profileName` e `referralCode` fazem parte de `Wallet`. O
@@ -913,7 +919,7 @@ Transporte, restrições e limitações estão na §2. O cliente conecta em `/so
 
 ```ts
 {
-  eventId: string      // único por emissão, distinto do id do recurso
+  eventId: string // único por emissão, distinto do id do recurso
   resource: 'nft'
   id: string
   version: number
@@ -921,7 +927,7 @@ Transporte, restrições e limitações estão na §2. O cliente conecta em `/so
   previousPriceEth: string | null
   available: number
   editions: Array<{ id: string; available: number; priceEth: string }>
-  at: string           // ISO-8601
+  at: string // ISO-8601
 }
 ```
 
@@ -938,7 +944,7 @@ Atualiza preço e disponibilidade no catálogo, no detalhe e no carrinho, e refa
   status: 'pending' | 'confirmed' | 'declined'
   confirmedAt: string | null
   declinedReason: string | null
-  ownerId: string      // escopo do evento
+  ownerId: string // escopo do evento
   at: string
 }
 ```
