@@ -1,7 +1,7 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useCallback, useMemo } from 'react'
 
-import type { CatalogQuery } from '@/contracts/nft'
+import { DEFAULT_SORT_BY_FEED, type CatalogQuery } from '@/contracts/nft'
 
 import { resolveCatalogQuery, stripCatalogDefaults, type CatalogSearch } from '../search'
 
@@ -12,7 +12,10 @@ export function useCatalogFilters() {
 
   const update = useCallback(
     (patch: Partial<CatalogQuery>) => {
-      const next: CatalogQuery = { ...query, page: 1, ...patch }
+      const feed = patch.feed ?? query.feed
+      const followsFeedDefault = query.sort === DEFAULT_SORT_BY_FEED[query.feed]
+      const sort = patch.sort ?? (followsFeedDefault ? DEFAULT_SORT_BY_FEED[feed] : query.sort)
+      const next: CatalogQuery = { ...query, page: 1, ...patch, sort }
       void navigate({ search: stripCatalogDefaults(next), resetScroll: false })
     },
     [navigate, query],

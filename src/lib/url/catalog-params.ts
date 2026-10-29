@@ -1,4 +1,9 @@
-import { catalogQuerySchema, type CatalogQuery, type CatalogQueryInput } from '@/contracts/nft'
+import {
+  catalogQuerySchema,
+  DEFAULT_SORT_BY_FEED,
+  type CatalogQuery,
+  type CatalogQueryInput,
+} from '@/contracts/nft'
 
 function list(value: string | null): string[] {
   return value ? value.split(',').filter(Boolean) : []
@@ -31,7 +36,9 @@ export function serializeCatalogParams(query: Partial<CatalogQuery>): URLSearchP
   if (query.minPriceEth) params.set('minPriceEth', query.minPriceEth)
   if (query.maxPriceEth) params.set('maxPriceEth', query.maxPriceEth)
   if (query.feed && query.feed !== 'all') params.set('feed', query.feed)
-  if (query.sort && query.sort !== 'recent') params.set('sort', query.sort)
+  if (query.sort && query.sort !== DEFAULT_SORT_BY_FEED[query.feed ?? 'all']) {
+    params.set('sort', query.sort)
+  }
   if (query.page && query.page > 1) params.set('page', String(query.page))
 
   return params

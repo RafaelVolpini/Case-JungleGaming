@@ -64,6 +64,7 @@ export function createSeed(): MockDb {
     contractAddress: seed.contractAddress,
     maxPerOrder: seed.maxPerOrder,
     listedAt: seed.listedAt,
+    launchedAt: seed.launchedAt,
     favoritesCount: seed.favoritesCount,
     version: nextVersion(),
   }))

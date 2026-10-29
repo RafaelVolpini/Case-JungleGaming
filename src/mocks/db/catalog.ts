@@ -7,6 +7,7 @@ import { getDb } from './store'
 import type { NftRecord } from './types'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
+const TRENDING_MIN_FAVORITES = 150
 const CATALOG_NOW = new Date('2026-10-01T00:00:00.000Z').getTime()
 
 function matchesSearch(nft: NftRecord, term: string): boolean {
@@ -19,9 +20,9 @@ function matchesFeed(nft: NftRecord, feed: CatalogQuery['feed']): boolean {
     case 'all':
       return true
     case 'new':
-      return CATALOG_NOW - new Date(nft.listedAt).getTime() <= FOURTEEN_DAYS_MS
+      return CATALOG_NOW - new Date(nft.launchedAt).getTime() <= FOURTEEN_DAYS_MS
     case 'trending':
-      return nft.favoritesCount >= 100
+      return nft.favoritesCount >= TRENDING_MIN_FAVORITES
   }
 }
 

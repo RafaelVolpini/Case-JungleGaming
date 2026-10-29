@@ -189,6 +189,10 @@ const FIGMA_NFTS: Spec[] = [
 const SOLD_OUT = new Set([13, 41, 97, 150])
 const LISTED_AT_BASE = Date.UTC(2026, 8, 30, 12)
 const HOUR_MS = 36e5
+const DAY_MS = 24 * HOUR_MS
+const LAUNCH_EVERY = 4
+const RECENT_LAUNCH_STEP_HOURS = 2
+const OLD_LAUNCH_AGE_DAYS = 30
 
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0
@@ -198,6 +202,14 @@ function mulberry32(seed: number): () => number {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296
   }
+}
+
+function launchedAtFor(index: number): string {
+  const recent = index % LAUNCH_EVERY === 1
+  const age = recent
+    ? index * RECENT_LAUNCH_STEP_HOURS * HOUR_MS
+    : OLD_LAUNCH_AGE_DAYS * DAY_MS + index * HOUR_MS
+  return new Date(LISTED_AT_BASE - age).toISOString()
 }
 
 function slugify(text: string): string {
@@ -330,6 +342,7 @@ export function generateNftSeeds(): NftSeed[] {
         '0x' + Array.from({ length: 40 }, () => '0123456789abcdef'[int(0, 15)]).join(''),
       maxPerOrder: isFigma ? 10 : pick([3, 5, 10]),
       listedAt: new Date(LISTED_AT_BASE - i * HOUR_MS * 7).toISOString(),
+      launchedAt: launchedAtFor(i),
       favoritesCount: spec.favorites,
     })
   }

@@ -96,7 +96,13 @@ export const SORT_LABELS: Record<Sort, string> = {
 
 export const CATALOG_PER_PAGE = 9
 
-export const catalogQuerySchema = z.object({
+export const DEFAULT_SORT_BY_FEED: Record<Feed, Sort> = {
+  all: 'recent',
+  new: 'recent',
+  trending: 'popular',
+}
+
+const catalogQueryShape = z.object({
   q: z.string().trim().min(1).optional(),
   collections: z.array(z.string()).default([]),
   networks: z.array(networkSchema).default([]),
@@ -104,9 +110,14 @@ export const catalogQuerySchema = z.object({
   minPriceEth: ethAmountSchema.optional(),
   maxPriceEth: ethAmountSchema.optional(),
   feed: feedSchema.default('all'),
-  sort: sortSchema.default('recent'),
+  sort: sortSchema.optional(),
   page: z.number().int().positive().default(1),
 })
+
+export const catalogQuerySchema = catalogQueryShape.transform((query) => ({
+  ...query,
+  sort: query.sort ?? DEFAULT_SORT_BY_FEED[query.feed],
+}))
 
 export type CatalogQuery = z.infer<typeof catalogQuerySchema>
 export type CatalogQueryInput = z.input<typeof catalogQuerySchema>

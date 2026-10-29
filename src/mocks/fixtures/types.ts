@@ -27,5 +27,6 @@ export type NftSeed = {
   contractAddress: string
   maxPerOrder: number
   listedAt: string
+  launchedAt: string
   favoritesCount: number
 }

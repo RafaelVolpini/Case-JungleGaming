@@ -32,6 +32,7 @@ export type NftRecord = {
   contractAddress: string
   maxPerOrder: number
   listedAt: string
+  launchedAt: string
   favoritesCount: number
   version: number
 }
