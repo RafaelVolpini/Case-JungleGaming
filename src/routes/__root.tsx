@@ -2,6 +2,7 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 
 import type { RouterContext } from '@/app/router-context'
+import { RouteAnnouncer } from '@/components/layout/route-announcer'
 import { Toaster } from '@/components/ui/sonner'
 import { useSessionExpiry } from '@/features/auth/hooks/use-session-expiry'
 
@@ -20,6 +21,7 @@ function RootLayout() {
   return (
     <>
       <Outlet />
+      <RouteAnnouncer />
       <Toaster position="bottom-right" />
       <Suspense fallback={null}>
         <RealtimeBridge />

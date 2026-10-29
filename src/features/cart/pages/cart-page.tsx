@@ -9,8 +9,10 @@ import { CartTable } from '../components/cart-table'
 import { OrderSummary } from '../components/order-summary'
 import { useCart } from '../hooks/use-cart'
 import { MobileCartPage } from './mobile-cart-page'
+import { usePageTitle } from '@/lib/use-page-title'
 
 export function CartPage() {
+  usePageTitle('Carrinho')
   const isDesktop = useIsDesktop()
   return isDesktop ? <DesktopCartPage /> : <MobileCartPage />
 }

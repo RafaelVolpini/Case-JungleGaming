@@ -1,4 +1,4 @@
-import { Field } from '@/components/ui/field'
+import { controlAria, Field } from '@/components/ui/field'
 import {
   Select,
   SelectContent,
@@ -26,7 +26,7 @@ export function LockedSelectField<T extends string>({
     <Field label={label} required>
       {(field) => (
         <Select value={value} disabled>
-          <SelectTrigger id={field.id} className="disabled:opacity-100">
+          <SelectTrigger id={field.id} {...controlAria(field)} className="disabled:opacity-100">
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>

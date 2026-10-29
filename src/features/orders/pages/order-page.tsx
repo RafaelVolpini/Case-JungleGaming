@@ -13,8 +13,10 @@ import { OrderModal } from '../components/order-modal'
 import { OrderSkeleton } from '../components/order-skeleton'
 import { useOrder } from '../hooks/use-order'
 import { clearPendingOrderId } from '../lib/pending-order'
+import { usePageTitle } from '@/lib/use-page-title'
 
 export function OrderPage({ orderId }: { orderId: string }) {
+  usePageTitle('Pedido')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { scope } = useSession()

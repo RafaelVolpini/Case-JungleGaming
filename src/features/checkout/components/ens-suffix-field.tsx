@@ -1,6 +1,6 @@
 import { Controller, type Control } from 'react-hook-form'
 
-import { Field } from '@/components/ui/field'
+import { controlAria, Field } from '@/components/ui/field'
 import {
   Select,
   SelectContent,
@@ -25,7 +25,7 @@ export function EnsSuffixField({ control, error }: EnsSuffixFieldProps) {
           name="ensSuffix"
           render={({ field: { value, onChange } }) => (
             <Select value={value} onValueChange={onChange}>
-              <SelectTrigger id={field.id} className="w-[77px] px-2.5">
+              <SelectTrigger id={field.id} {...controlAria(field)} className="w-[77px] px-2.5">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

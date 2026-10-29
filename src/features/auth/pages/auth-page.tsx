@@ -13,6 +13,7 @@ import { AuthTabs } from '../components/auth-tabs'
 import { LoginForm } from '../components/login-form'
 import { RegisterForm } from '../components/register-form'
 import { useSession } from '../hooks/use-session'
+import { usePageTitle } from '@/lib/use-page-title'
 
 type AuthPageProps = {
   mode: 'login' | 'register'
@@ -34,6 +35,7 @@ const COPY = {
 }
 
 export function AuthPage({ mode, redirect, expired = false }: AuthPageProps) {
+  usePageTitle(mode === 'login' ? 'Entrar' : 'Criar conta')
   const router = useRouter()
   const isDesktop = useIsDesktop()
   const { isAuthenticated } = useSession()

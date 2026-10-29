@@ -1,7 +1,7 @@
 import { Controller, type UseFormReturn } from 'react-hook-form'
 
 import { EnsNameField } from '@/components/shared/ens-name-field'
-import { Field } from '@/components/ui/field'
+import { controlAria, Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -41,7 +41,7 @@ export function WalletFields({ form, user }: WalletFieldsProps) {
             name="network"
             render={({ field: { value, onChange } }) => (
               <Select value={value ?? ''} onValueChange={onChange}>
-                <SelectTrigger id={field.id} aria-invalid={field['aria-invalid']}>
+                <SelectTrigger id={field.id} {...controlAria(field)}>
                   <SelectValue placeholder="Selecione uma rede" />
                 </SelectTrigger>
                 <SelectContent>
@@ -91,7 +91,7 @@ export function WalletFields({ form, user }: WalletFieldsProps) {
             name="walletType"
             render={({ field: { value, onChange } }) => (
               <Select value={value ?? ''} onValueChange={onChange}>
-                <SelectTrigger id={field.id} aria-invalid={field['aria-invalid']}>
+                <SelectTrigger id={field.id} {...controlAria(field)}>
                   <SelectValue placeholder="Selecione uma carteira" />
                 </SelectTrigger>
                 <SelectContent>

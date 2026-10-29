@@ -17,8 +17,10 @@ import { MobileCheckoutHeader } from '../components/mobile/mobile-checkout-heade
 import { useOrderAttempt } from '../hooks/use-order-attempt'
 import { CheckoutSkeleton } from '../components/checkout-skeleton'
 import { useQuote } from '../hooks/use-quote'
+import { usePageTitle } from '@/lib/use-page-title'
 
 export function CheckoutPage() {
+  usePageTitle('Pagamento')
   const isDesktop = useIsDesktop()
   const { user } = useSession()
   const wallets = useWallets()

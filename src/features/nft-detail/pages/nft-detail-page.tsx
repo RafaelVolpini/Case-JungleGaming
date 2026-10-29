@@ -1,6 +1,7 @@
 import { ErrorState } from '@/components/feedback/error-state'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { useNftDetail } from '@/features/catalog/hooks/use-catalog-queries'
+import { usePageTitle } from '@/lib/use-page-title'
 import { ApiRequestError } from '@/lib/http/errors'
 import { useIsDesktop } from '@/lib/use-media-query'
 
@@ -11,6 +12,8 @@ import { MobileDetailPage } from './mobile-detail-page'
 
 export function NftDetailPage({ slug }: { slug: string }) {
   const isDesktop = useIsDesktop()
+  const { data } = useNftDetail(slug)
+  usePageTitle(data?.name ?? 'NFT')
   return isDesktop ? <DesktopDetailPage slug={slug} /> : <MobileDetailPage slug={slug} />
 }
 

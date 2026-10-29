@@ -4,8 +4,10 @@ import { useSession } from '@/features/auth/hooks/use-session'
 
 import { WalletSection } from '../components/wallet-section'
 import { useWallets } from '../hooks/use-wallets'
+import { usePageTitle } from '@/lib/use-page-title'
 
 export function WalletsPage() {
+  usePageTitle('Carteiras')
   const { user } = useSession()
   const wallets = useWallets()
 

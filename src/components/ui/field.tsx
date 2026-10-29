@@ -7,6 +7,15 @@ export type FieldControlProps = {
   id: string
   'aria-invalid': true | undefined
   'aria-describedby': string | undefined
+  'aria-required': true | undefined
+}
+
+export function controlAria(control: FieldControlProps) {
+  return {
+    'aria-invalid': control['aria-invalid'],
+    'aria-describedby': control['aria-describedby'],
+    'aria-required': control['aria-required'],
+  }
 }
 
 type FieldProps = {
@@ -45,6 +54,7 @@ export function Field({
           id,
           'aria-invalid': error ? true : undefined,
           'aria-describedby': describedBy || undefined,
+          'aria-required': required ? true : undefined,
         })}
       </div>
       {hint && !error && (

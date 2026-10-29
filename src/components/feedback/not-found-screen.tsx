@@ -2,8 +2,10 @@ import { Link } from '@tanstack/react-router'
 
 import { SiteShell } from '@/components/layout/site-shell'
 import { buttonVariants } from '@/components/ui/button'
+import { usePageTitle } from '@/lib/use-page-title'
 
 export function NotFoundContent() {
+  usePageTitle('Página não encontrada')
   return (
     <section className="page-container flex flex-col items-center py-24 text-center">
       <p className="text-primary text-sm font-bold tracking-wider uppercase">Erro 404</p>

@@ -12,10 +12,12 @@ import { MobileNftColumns } from '@/features/catalog/components/mobile/mobile-nf
 import { useIsDesktop } from '@/lib/use-media-query'
 
 import { useFavoriteList } from '../hooks/use-favorites'
+import { usePageTitle } from '@/lib/use-page-title'
 
 const GRID = 'grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 md:gap-x-[34px] md:gap-y-[48px]'
 
 export function FavoritesPage() {
+  usePageTitle('Lista de interesse')
   const isDesktop = useIsDesktop()
   const [page, setPage] = useState(1)
   const { data, error, isPending, isPlaceholderData, refetch } = useFavoriteList(page)

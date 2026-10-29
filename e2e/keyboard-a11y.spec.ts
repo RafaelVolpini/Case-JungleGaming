@@ -78,6 +78,26 @@ test.describe('teclado, foco e formulários', () => {
     await expect(page.locator(`[id="${describedBy}"]`)).toContainText('Mínimo de 3 caracteres')
   })
 
+  test('selects obrigatórios expõem obrigatoriedade e o erro associado @mobile', async ({
+    page,
+  }) => {
+    await openApp(page, '/criar-conta?redirect=/perfil/carteiras')
+    await page.getByRole('textbox', { name: 'Nome de usuário' }).fill('nova-pessoa')
+    await page.getByRole('textbox', { name: 'E-mail' }).fill('nova.pessoa@kurio.test')
+    await page.getByLabel('Senha', { exact: true }).fill('senha-segura-1')
+    await page.getByLabel('Confirmar senha').fill('senha-segura-1')
+    await page.getByRole('button', { name: /Criar (conta|perfil)/ }).click()
+    await expect(page).toHaveURL(/\/perfil\/carteiras$/)
+    await page.getByRole('button', { name: 'Salvar carteira' }).first().click()
+
+    const network = page.getByRole('combobox', { name: 'Rede' })
+    await expect(network).toHaveAttribute('aria-required', 'true')
+    await expect(network).toHaveAttribute('aria-invalid', 'true')
+    const describedBy = await network.getAttribute('aria-describedby')
+    expect(describedBy).toBeTruthy()
+    await expect(page.locator(`[id="${describedBy}"]`)).toBeVisible()
+  })
+
   test('painel de filtros do mobile prende o foco e fecha com Esc @mobile', async ({
     page,
     isMobile,

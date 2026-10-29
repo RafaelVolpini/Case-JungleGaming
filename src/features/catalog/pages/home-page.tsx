@@ -9,8 +9,10 @@ import { PromoCards } from '../components/promo-cards'
 import { FilterSidebar } from '../components/sidebar/filter-sidebar'
 import { Spotlight } from '../components/spotlight'
 import { MobileHomePage } from './mobile-home-page'
+import { usePageTitle } from '@/lib/use-page-title'
 
 export function HomePage() {
+  usePageTitle()
   const isDesktop = useIsDesktop()
   if (!isDesktop) return <MobileHomePage />
 
