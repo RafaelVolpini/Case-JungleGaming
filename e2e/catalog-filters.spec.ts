@@ -1,18 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { catalogCards, catalogSettled, openApp, searchParams } from './support/app'
-
-async function searchFor(page: Page, term: string, isMobile: boolean) {
-  if (isMobile) {
-    await page.getByRole('searchbox', { name: 'Buscar NFTs' }).fill(term)
-  } else {
-    await page.getByRole('button', { name: 'Buscar NFTs' }).click()
-    await page.getByRole('textbox', { name: 'Buscar NFTs' }).fill(term)
-  }
-  await page.keyboard.press('Enter')
-  await expect.poll(() => searchParams(page).get('q')).toBe(term)
-  await catalogSettled(page)
-}
+import { searchFor } from './support/catalog'
 
 test.describe('filtros ativos do catálogo', () => {
   test('a busca vira um filtro removível e a caixa acompanha a URL @mobile', async ({
